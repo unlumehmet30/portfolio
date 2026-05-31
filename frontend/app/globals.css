@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 12% 97%;
+  --foreground: 210 18% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 18% 10%;
+  --border: 210 11% 85%;
+  --muted: 210 13% 92%;
+  --muted-foreground: 210 8% 38%;
+  --accent: 148 41% 34%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 148 41% 34%;
+}
+
+.dark {
+  --background: 150 5% 7%;
+  --foreground: 60 8% 94%;
+  --card: 150 5% 10%;
+  --card-foreground: 60 8% 94%;
+  --border: 150 6% 21%;
+  --muted: 150 5% 15%;
+  --muted-foreground: 60 6% 68%;
+  --accent: 145 38% 58%;
+  --accent-foreground: 150 12% 7%;
+  --ring: 145 38% 58%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  letter-spacing: 0;
+}
+
+::selection {
+  background: rgba(74, 124, 89, 0.28);
+}
+
+.surface-border {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.light .surface-border {
+  border-color: rgba(24, 24, 27, 0.1);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.technical-grid {
+  background-image:
+    linear-gradient(hsl(var(--foreground) / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.subtle-rule {
+  background-image: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.12), transparent);
+}

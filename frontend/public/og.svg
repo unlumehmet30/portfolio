@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#101311"/>
+  <g opacity="0.38">
+    <path d="M0 120H1200M0 220H1200M0 320H1200M0 420H1200M0 520H1200" stroke="white" stroke-opacity="0.08"/>
+    <path d="M120 0V630M240 0V630M360 0V630M480 0V630M600 0V630M720 0V630M840 0V630M960 0V630M1080 0V630" stroke="white" stroke-opacity="0.08"/>
+  </g>
+  <rect x="80" y="88" width="1040" height="454" rx="18" fill="#171B18" stroke="white" stroke-opacity="0.1"/>
+  <text x="120" y="182" fill="#F5F5F5" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="700">Mehmet Ünlü</text>
+  <text x="122" y="236" fill="#7BB68A" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="600">ITU Engineering Student</text>
+  <text x="122" y="302" fill="#B8BBB6" font-family="Inter, Arial, sans-serif" font-size="28">Forecasting, computer vision, optimization,</text>
+  <text x="122" y="342" fill="#B8BBB6" font-family="Inter, Arial, sans-serif" font-size="28">speech workflows, and Flutter projects.</text>
+  <g transform="translate(760 166)">
+    <rect width="280" height="72" rx="12" fill="#101311" stroke="#7BB68A" stroke-opacity="0.35"/>
+    <text x="24" y="43" fill="#F5F5F5" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700">Build Notes</text>
+    <path d="M140 92V122H48V152" stroke="#7BB68A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M140 92V122H232V152" stroke="#C9A96A" stroke-width="3" stroke-linecap="round"/>
+    <rect x="-24" y="152" width="128" height="64" rx="10" fill="#101311" stroke="#7BB68A" stroke-opacity="0.35"/>
+    <rect x="176" y="152" width="128" height="64" rx="10" fill="#101311" stroke="#C9A96A" stroke-opacity="0.35"/>
+    <text x="-2" y="191" fill="#F5F5F5" font-family="Inter, Arial, sans-serif" font-size="18">20K+</text>
+    <text x="202" y="191" fill="#F5F5F5" font-family="Inter, Arial, sans-serif" font-size="18">40m→4m</text>
+  </g>
+  <path d="M122 448C206 388 284 492 358 422C432 352 496 414 574 374C652 334 714 398 786 348C858 298 916 336 990 284" stroke="#7BB68A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M122 492C250 452 378 472 498 426C618 380 746 402 990 334" stroke="#C9A96A" stroke-width="4" stroke-dasharray="12 14" stroke-linecap="round"/>
+</svg>

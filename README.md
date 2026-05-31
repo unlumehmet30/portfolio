@@ -1,0 +1,235 @@
+# Personal Website Monorepo
+
+Professional portfolio for Mehmet Ünlü, built as a split frontend/backend monorepo.
+
+## Architecture
+
+```txt
+personal-website/
+├── frontend/          # Next.js App Router, TypeScript, Tailwind, Framer Motion
+├── backend/           # Express REST API, TypeScript, Prisma, SQLite
+├── docker-compose.yml
+├── package.json
+├── README.md
+└── .gitignore
+```
+
+## Stack
+
+- Frontend: Next.js 15, App Router, TypeScript, Tailwind CSS, Framer Motion, next-themes, Lucide icons
+- Backend: Node.js, Express, TypeScript, Prisma ORM
+- Database: SQLite for development, Prisma-compatible path to PostgreSQL later
+- Content: Prisma seed data with a lightweight JSON/Markdown content-management path in `backend/content`
+
+## Environment Variables
+
+Create local env files from the examples:
+
+```bash
+cp frontend/.env.example frontend/.env.local
+cp backend/.env.example backend/.env
+```
+
+Frontend:
+
+```env
+NEXT_PUBLIC_API_URL="http://localhost:8080/api"
+NEXT_PUBLIC_SITE_URL="http://localhost:3001"
+```
+
+Backend:
+
+```env
+NODE_ENV="development"
+DATABASE_URL="file:./dev.db"
+PORT=8080
+TRUST_PROXY=false
+CORS_ORIGIN="http://localhost:3001"
+CONTACT_NOTIFICATION_EMAIL=""
+CONTACT_EMAIL_FROM="Mehmet Portfolio <onboarding@resend.dev>"
+RESEND_API_KEY=""
+CONTACT_RATE_LIMIT_WINDOW_MINUTES=15
+CONTACT_RATE_LIMIT_MAX=6
+ADMIN_LOGIN_RATE_LIMIT_WINDOW_MINUTES=15
+ADMIN_LOGIN_RATE_LIMIT_MAX=6
+ADMIN_API_RATE_LIMIT_WINDOW_MINUTES=5
+ADMIN_API_RATE_LIMIT_MAX=180
+CONTACT_MIN_FILL_SECONDS=2
+CONTACT_REMINDER_DAYS=7
+CONTACT_REMINDER_INTERVAL_MINUTES=60
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="change-this-password"
+ADMIN_SESSION_SECRET="change-this-session-secret"
+```
+
+## Install
+
+```bash
+npm install
+```
+
+## Database
+
+Generate Prisma Client and create the SQLite database:
+
+```bash
+npm run db:migrate --workspace backend
+npm run db:seed --workspace backend
+```
+
+For a quick local reset without creating migration files:
+
+```bash
+npm run db:push --workspace backend
+npm run db:seed --workspace backend
+```
+
+## Development
+
+Run the backend:
+
+```bash
+npm run dev:backend
+```
+
+Run the frontend in another terminal:
+
+```bash
+npm run dev:frontend
+```
+
+Open:
+
+- Frontend: `http://localhost:3001`
+- Backend health: `http://localhost:8080/api/health`
+- Admin panel: `http://localhost:3001/admin`
+
+Local admin login uses the values in `backend/.env`. For development you can use:
+
+```env
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="local-dev-only-password"
+```
+
+Change these before deploying.
+
+## Production Build
+
+```bash
+npm run build
+npm run start --workspace backend
+npm run start --workspace frontend
+```
+
+## Docker
+
+```bash
+docker compose up --build
+```
+
+The backend container runs `prisma db push`, seeds content, and starts the API. The frontend expects the backend at `http://localhost:8080/api`.
+
+For production-style compose runs, set these variables in your shell or `.env` first:
+
+```env
+CORS_ORIGIN="https://your-domain.com"
+NEXT_PUBLIC_SITE_URL="https://your-domain.com"
+ADMIN_PASSWORD="<strong-random-password>"
+ADMIN_SESSION_SECRET="<at-least-32-char-random-secret>"
+```
+
+`ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` are required in compose to prevent accidental weak defaults.
+
+## API Documentation
+
+All responses use a standard envelope.
+
+Success:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Error:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "string",
+    "code": "string"
+  }
+}
+```
+
+Endpoints:
+
+| Method | Route | Description |
+| --- | --- | --- |
+| GET | `/api/health` | Service health check |
+| GET | `/api/profile` | Profile metadata |
+| GET | `/api/projects` | Project list |
+| GET | `/api/projects/:slug` | Project case study |
+| GET | `/api/posts` | Published notes |
+| GET | `/api/posts/:slug` | Note detail |
+| GET | `/api/resume` | Resume data |
+| POST | `/api/contact` | Validate and store contact form submission, then send an optional email notification |
+| POST | `/api/admin/login` | Admin login, returns bearer token |
+| GET | `/api/admin/me` | Validate current admin session |
+| GET / PUT | `/api/admin/profile` | Read/update profile |
+| GET / POST | `/api/admin/projects` | List/create projects |
+| PUT / DELETE | `/api/admin/projects/:id` | Update/delete project |
+| GET / POST | `/api/admin/posts` | List/create notes |
+| PUT / DELETE | `/api/admin/posts/:id` | Update/delete note |
+| GET | `/api/admin/contact-messages` | List contact messages |
+| PATCH | `/api/admin/contact-messages/:id/handled` | Mark contact message as handled and archive it |
+| DELETE | `/api/admin/contact-messages/:id` | Delete contact message |
+| GET / PUT | `/api/admin/resume` | Read/update resume JSON |
+
+Contact request body:
+
+```json
+{
+  "name": "string",
+  "email": "string",
+  "subject": "string",
+  "message": "string"
+}
+```
+
+Validation:
+
+- `name` is required
+- `email` must be valid
+- `subject` is required
+- `message` must be at least 10 characters
+
+Email notification:
+
+- Contact messages are always stored in the database first.
+- If `CONTACT_NOTIFICATION_EMAIL` and `RESEND_API_KEY` are configured, the backend sends a notification email through Resend.
+- `CONTACT_EMAIL_FROM` must be a Resend-allowed sender. The default `onboarding@resend.dev` is useful for local testing; production should use a verified domain sender.
+- If the email provider fails, the contact request still succeeds after the message is saved, and the backend logs the email error.
+- Admin users can mark a message as handled from `/admin`; this archives the message and stops reminders.
+- Unhandled, unarchived messages trigger reminder emails after `CONTACT_REMINDER_DAYS` days. The backend checks this on `CONTACT_REMINDER_INTERVAL_MINUTES`.
+- Contact and admin login endpoints are rate-limited by IP to reduce spam and brute-force attempts.
+- Contact form submissions include a hidden honeypot field and minimum fill-time check to filter simple bots.
+- Docker reads mail, reminder, and rate-limit env vars from the host environment with local development defaults.
+
+Admin requests, except login, require:
+
+```txt
+Authorization: Bearer <token>
+```
+
+## Deployment Notes
+
+- Deploy the frontend to Vercel or any Node-compatible Next.js host.
+- Deploy the backend to Render, Fly.io, Railway, or a VPS.
+- SQLite is fine for the MVP. For production contact data and admin editing, switch Prisma to PostgreSQL.
+- Set `NEXT_PUBLIC_API_URL` to the deployed backend URL.
+- Set `CORS_ORIGIN` to the deployed frontend URL.
+- Replace `frontend/public/resume.pdf` with the final CV PDF when available.

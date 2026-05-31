@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      NODE_ENV: "production"
+      DATABASE_URL: "file:/app/prisma/prod.db"
+      PORT: 8080
+      TRUST_PROXY: "${TRUST_PROXY:-true}"
+      CORS_ORIGIN: "${CORS_ORIGIN:-https://portfolio.example.com}"
+      CONTACT_NOTIFICATION_EMAIL: "${CONTACT_NOTIFICATION_EMAIL:-unlu.mehmett1@gmail.com}"
+      CONTACT_EMAIL_FROM: "${CONTACT_EMAIL_FROM:-Mehmet Portfolio <onboarding@resend.dev>}"
+      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      CONTACT_RATE_LIMIT_WINDOW_MINUTES: "${CONTACT_RATE_LIMIT_WINDOW_MINUTES:-15}"
+      CONTACT_RATE_LIMIT_MAX: "${CONTACT_RATE_LIMIT_MAX:-6}"
+      ADMIN_LOGIN_RATE_LIMIT_WINDOW_MINUTES: "${ADMIN_LOGIN_RATE_LIMIT_WINDOW_MINUTES:-15}"
+      ADMIN_LOGIN_RATE_LIMIT_MAX: "${ADMIN_LOGIN_RATE_LIMIT_MAX:-6}"
+      ADMIN_API_RATE_LIMIT_WINDOW_MINUTES: "${ADMIN_API_RATE_LIMIT_WINDOW_MINUTES:-5}"
+      ADMIN_API_RATE_LIMIT_MAX: "${ADMIN_API_RATE_LIMIT_MAX:-180}"
+      CONTACT_MIN_FILL_SECONDS: "${CONTACT_MIN_FILL_SECONDS:-2}"
+      CONTACT_REMINDER_DAYS: "${CONTACT_REMINDER_DAYS:-7}"
+      CONTACT_REMINDER_INTERVAL_MINUTES: "${CONTACT_REMINDER_INTERVAL_MINUTES:-60}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in your environment}"
+      ADMIN_SESSION_SECRET: "${ADMIN_SESSION_SECRET:?Set ADMIN_SESSION_SECRET in your environment}"
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_sqlite:/app/prisma
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:8080/api"
+      NEXT_PUBLIC_SITE_URL: "${NEXT_PUBLIC_SITE_URL:-https://portfolio.example.com}"
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+
+volumes:
+  backend_sqlite:
