@@ -1,9 +1,10 @@
-import type { Post } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { HttpError } from "../utils/http-error.js";
 import { parseJsonField } from "../utils/json.js";
 
-function serializePost(post: Post) {
+type PostRecord = Awaited<ReturnType<typeof prisma.post.findFirst>>;
+
+function serializePost(post: NonNullable<PostRecord>) {
   return {
     ...post,
     tags: parseJsonField<string[]>(post.tags, [])

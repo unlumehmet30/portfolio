@@ -1,4 +1,3 @@
-import type { Project } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { caseStudyDetails } from "../data/case-studies.js";
 import { parseJsonField } from "../utils/json.js";
@@ -10,7 +9,9 @@ type Metric = {
   context: string;
 };
 
-function serializeProject(project: Project) {
+type ProjectRecord = Awaited<ReturnType<typeof prisma.project.findFirst>>;
+
+function serializeProject(project: NonNullable<ProjectRecord>) {
   return {
     ...project,
     tags: parseJsonField<string[]>(project.tags, []),
