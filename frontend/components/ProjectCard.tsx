@@ -5,9 +5,21 @@ import { ArrowUpRight, Github } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { localizePath, type Locale } from "@/lib/locale";
+import { getUiCopy } from "@/lib/ui-copy";
 import type { Project } from "@/types/content";
 
-export function ProjectCard({ project, priority = false }: { project: Project; priority?: boolean }) {
+export function ProjectCard({
+  project,
+  priority = false,
+  locale = "en"
+}: {
+  project: Project;
+  priority?: boolean;
+  locale?: Locale;
+}) {
+  const copy = getUiCopy(locale).projectCard;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }}
@@ -17,7 +29,7 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
       transition={{ duration: 0.35 }}
     >
       <Card className="group h-full overflow-hidden bg-card/92 shadow-soft-card">
-        <Link href={`/projects/${project.slug}`} className="block h-full p-5">
+        <Link href={localizePath(locale, `/projects/${project.slug}`)} className="block h-full p-5">
           <div className="mb-5 flex min-h-28 items-end rounded-lg border border-border bg-muted/45 p-4">
             <div className="grid w-full grid-cols-3 gap-2">
               {project.metrics.slice(0, 3).map((metric) => (
@@ -33,7 +45,7 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="mb-3 flex flex-wrap gap-2">
-                {priority ? <Badge className="border-accent/30 bg-accent/10 text-accent">Featured</Badge> : null}
+                {priority ? <Badge className="border-accent/30 bg-accent/10 text-accent">{copy.featured}</Badge> : null}
                 {project.tags.slice(0, 3).map((tag) => (
                   <Badge key={tag}>{tag}</Badge>
                 ))}
@@ -44,11 +56,11 @@ export function ProjectCard({ project, priority = false }: { project: Project; p
           </div>
           <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted-foreground">{project.summary}</p>
           <div className="mt-5 flex items-center justify-between text-sm text-muted-foreground">
-            <span>Case study</span>
+            <span>{copy.caseStudy}</span>
             {project.githubUrl ? (
               <span className="inline-flex items-center gap-1">
                 <Github size={14} />
-                Source
+                {copy.source}
               </span>
             ) : null}
           </div>

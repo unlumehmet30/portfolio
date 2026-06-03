@@ -1,24 +1,33 @@
 "use client";
 
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { Languages, Menu, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { navigation } from "@/lib/site";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { getLocaleFromPath, switchLocalePath } from "@/lib/locale";
+import { getNavigation } from "@/lib/site";
+import { getUiCopy } from "@/lib/ui-copy";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
+  const locale = getLocaleFromPath(pathname);
+  const copy = getUiCopy(locale);
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+  const languageTarget = switchLocalePath(pathname, locale === "en" ? "tr" : "en");
+  const localeRootPath = locale === "tr" ? "/tr" : "/";
 
   useEffect(() => setMounted(true), []);
 
-  const navItems = navigation.map((item) => {
-    const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+  const navItems = getNavigation(locale).map((item) => {
+    const active =
+      pathname === item.href ||
+      (item.href !== localeRootPath && pathname.startsWith(item.href));
 
     return (
       <Link
@@ -38,7 +47,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/82 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-3" aria-label="Mehmet Ünlü home">
+        <Link href={locale === "tr" ? "/tr" : "/"} className="flex items-center gap-3" aria-label={copy.navbar.brandHomeAria}>
           <span className="grid h-8 w-8 place-items-center rounded-md border border-accent/30 bg-accent/10 font-mono text-sm font-semibold text-accent">
             M
           </span>
@@ -48,11 +57,22 @@ export function Navbar() {
         <div className="hidden items-center gap-1 md:flex">{navItems}</div>
 
         <div className="flex items-center gap-2">
+          {!isAdminRoute ? (
+            <ButtonLink
+              href={languageTarget}
+              variant="outline"
+              size="sm"
+              aria-label={copy.navbar.switchLanguageAria}
+            >
+              <Languages size={15} />
+              {copy.navbar.languageSwitchLabel}
+            </ButtonLink>
+          ) : null}
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Toggle color theme"
+            aria-label={copy.navbar.toggleThemeAria}
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           >
             {mounted && resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
@@ -61,7 +81,7 @@ export function Navbar() {
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Open navigation menu"
+            aria-label={copy.navbar.openMenuAria}
             className="md:hidden"
             onClick={() => setOpen((value) => !value)}
           >

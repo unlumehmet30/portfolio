@@ -5,17 +5,18 @@ import { SkillBadge } from "@/components/SkillBadge";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getResume } from "@/lib/api";
+import { getUiCopy } from "@/lib/ui-copy";
 import type { Resume } from "@/types/content";
 
+const copy = getUiCopy("en").resume;
+
 export const metadata: Metadata = {
-  title: "Resume",
-  description:
-    "Resume of Mehmet Ünlü: ITU engineering student working on forecasting, computer vision, optimization, speech processing, and Flutter projects."
+  title: copy.metadataTitle,
+  description: copy.metadataDescription
 };
 
 const fallbackResume: Resume = {
-  summary:
-    "ITU engineering student working on forecasting, computer vision, optimization, speech processing, and Flutter projects.",
+  summary: copy.fallbackSummary,
   experience: [],
   projects: [],
   education: [],
@@ -45,17 +46,17 @@ export default async function ResumePage() {
     <div className="mx-auto max-w-[920px] px-4 py-16 sm:px-6 md:py-24">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <SectionHeader
-          eyebrow="Resume"
-          title="Resume and project background."
+          eyebrow={copy.eyebrow}
+          title={copy.title}
           description={resume.summary}
         />
         <ButtonLink href="/resume.pdf" variant="secondary">
           <Download size={17} />
-          Download PDF
+          {copy.downloadPdf}
         </ButtonLink>
       </div>
 
-      <ResumeSection title="Experience">
+      <ResumeSection title={copy.sectionTitles.experience}>
         {resume.experience.length ? (
           <div className="space-y-6">
             {resume.experience.map((item) => (
@@ -74,11 +75,11 @@ export default async function ResumePage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">Experience entries will load from the backend API.</p>
+          <p className="text-muted-foreground">{copy.emptyExperience}</p>
         )}
       </ResumeSection>
 
-      <ResumeSection title="Projects">
+      <ResumeSection title={copy.sectionTitles.projects}>
         <div className="grid gap-3 sm:grid-cols-2">
           {resume.projects.map((project) => (
             <div key={project} className="rounded-lg border border-border bg-card p-4">
@@ -88,7 +89,7 @@ export default async function ResumePage() {
         </div>
       </ResumeSection>
 
-      <ResumeSection title="Education">
+      <ResumeSection title={copy.sectionTitles.education}>
         {resume.education.map((item) => (
           <div key={item.degree}>
             <h3 className="text-xl font-semibold">{item.degree}</h3>
@@ -99,7 +100,7 @@ export default async function ResumePage() {
         ))}
       </ResumeSection>
 
-      <ResumeSection title="Skills">
+      <ResumeSection title={copy.sectionTitles.skills}>
         <div className="flex flex-wrap gap-2">
           {resume.skills.map((skill) => (
             <SkillBadge key={skill} label={skill} />
@@ -107,7 +108,7 @@ export default async function ResumePage() {
         </div>
       </ResumeSection>
 
-      <ResumeSection title="Tools">
+      <ResumeSection title={copy.sectionTitles.tools}>
         <div className="flex flex-wrap gap-2">
           {resume.tools.map((tool) => (
             <SkillBadge key={tool} label={tool} />
@@ -116,7 +117,7 @@ export default async function ResumePage() {
       </ResumeSection>
 
       {resume.researchInterests?.length ? (
-        <ResumeSection title="Research Interests">
+        <ResumeSection title={copy.sectionTitles.researchInterests}>
           <div className="flex flex-wrap gap-2">
             {resume.researchInterests.map((interest) => (
               <SkillBadge key={interest} label={interest} />
@@ -126,7 +127,7 @@ export default async function ResumePage() {
       ) : null}
 
       {resume.certifications?.length ? (
-        <ResumeSection title="Certifications">
+        <ResumeSection title={copy.sectionTitles.certifications}>
           <div className="grid gap-3 sm:grid-cols-2">
             {resume.certifications.map((certification) => (
               <div key={certification} className="rounded-lg border border-border bg-card p-4">
@@ -137,19 +138,19 @@ export default async function ResumePage() {
         </ResumeSection>
       ) : null}
 
-      <ResumeSection title="Contact">
+      <ResumeSection title={copy.sectionTitles.contact}>
         <div className="flex flex-wrap gap-3">
           <ButtonLink href={`mailto:${resume.contact.email}`} variant="outline">
             <Mail size={17} />
-            Email
+            {copy.links.email}
           </ButtonLink>
           <ButtonLink href={resume.contact.githubUrl} variant="outline">
             <Github size={17} />
-            GitHub
+            {copy.links.github}
           </ButtonLink>
           <ButtonLink href={resume.contact.linkedinUrl} variant="outline">
             <Linkedin size={17} />
-            LinkedIn
+            {copy.links.linkedin}
           </ButtonLink>
         </div>
       </ResumeSection>

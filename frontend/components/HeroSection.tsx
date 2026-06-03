@@ -3,21 +3,14 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Download, Github, Linkedin, Mail, MoveRight } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
+import { localizePath, type Locale } from "@/lib/locale";
+import { getUiCopy } from "@/lib/ui-copy";
 import type { Profile, Project } from "@/types/content";
 
-function WorkbenchVisual({ featuredProject }: { featuredProject?: Project }) {
-  const metrics = featuredProject?.metrics ?? [
-    { label: "Products", value: "20K+", context: "Sparse daily series" },
-    { label: "Rows", value: "3M+", context: "Feature workload" },
-    { label: "Runtime", value: "40m -> 4m", context: "Pipeline cleanup" },
-    { label: "Drone footage", value: "7.5 FPS", context: "VO experiments" }
-  ];
-
-  const notes = [
-    "Keep validation close to the way the project would actually run.",
-    "Measure the boring parts: runtime, memory, leakage, and failure cases.",
-    "Write case studies so the tradeoffs are visible, not hidden."
-  ];
+function WorkbenchVisual({ featuredProject, locale }: { featuredProject?: Project; locale: Locale }) {
+  const copy = getUiCopy(locale).hero.workbench;
+  const metrics = featuredProject?.metrics ?? copy.defaultMetrics;
+  const notes = copy.notes;
 
   return (
     <motion.div
@@ -30,16 +23,14 @@ function WorkbenchVisual({ featuredProject }: { featuredProject?: Project }) {
       <div className="relative z-10 grid gap-4">
         <div className="rounded-lg border border-border bg-background/80 p-4 backdrop-blur">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Current desk</p>
-            <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">Istanbul / ITU</span>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{copy.cardTitle}</p>
+            <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">{copy.location}</span>
           </div>
           <h2 className="text-2xl font-semibold tracking-normal">
-            Forecasting, computer vision, and making slow data code less painful.
+            {copy.title}
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            The strongest projects here come from real constraints: many zero-demand rows,
-            drone footage that needs careful motion estimates, and pipelines that must be fast
-            enough to iterate on.
+            {copy.description}
           </p>
         </div>
 
@@ -60,7 +51,7 @@ function WorkbenchVisual({ featuredProject }: { featuredProject?: Project }) {
         </div>
 
         <div className="rounded-lg border border-border bg-background/78 p-4 backdrop-blur">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Build notes</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.buildNotesTitle}</p>
           <div className="mt-4 space-y-3">
             {notes.map((note) => (
               <div key={note} className="flex gap-3 text-sm leading-6 text-muted-foreground">
@@ -75,7 +66,17 @@ function WorkbenchVisual({ featuredProject }: { featuredProject?: Project }) {
   );
 }
 
-export function HeroSection({ profile, featuredProject }: { profile: Profile; featuredProject?: Project }) {
+export function HeroSection({
+  profile,
+  featuredProject,
+  locale = "en"
+}: {
+  profile: Profile;
+  featuredProject?: Project;
+  locale?: Locale;
+}) {
+  const copy = getUiCopy(locale).hero;
+
   return (
     <section className="mx-auto grid max-w-[1200px] items-center gap-12 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[0.95fr_1.05fr]">
       <motion.div
@@ -83,45 +84,41 @@ export function HeroSection({ profile, featuredProject }: { profile: Profile; fe
         animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55 }}
     >
-        <p className="mb-5 inline-flex rounded-md border border-accent/30 bg-accent/10 px-3 py-1 text-sm text-accent">
-          ITU Electronics and Communication Engineering
-        </p>
+        <p className="mb-5 inline-flex rounded-md border border-accent/30 bg-accent/10 px-3 py-1 text-sm text-accent">{copy.badge}</p>
         <h1 className="text-balance text-5xl font-semibold tracking-normal md:text-7xl">
           {profile.name}
         </h1>
         <p className="mt-5 text-2xl text-muted-foreground md:text-3xl">{profile.title}</p>
         <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-          I work on forecasting, computer vision, and practical tooling around data and models through hands-on
-          projects and early product work.
+          {copy.introPrimary}
         </p>
         <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-          I like problems where the model is only part of the story: messy data, validation
-          decisions, runtime limits, and the small engineering choices that make an experiment usable.
+          {copy.introSecondary}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <ButtonLink href="/projects">
-            View Projects
+          <ButtonLink href={localizePath(locale, "/projects")}>
+            {copy.actions.projects}
             <MoveRight size={17} />
           </ButtonLink>
           <ButtonLink href={profile.resumeUrl} variant="secondary">
             <Download size={17} />
-            Download CV
+            {copy.actions.downloadCv}
           </ButtonLink>
           <ButtonLink href={profile.githubUrl} variant="outline">
             <Github size={17} />
-            GitHub
+            {copy.actions.github}
           </ButtonLink>
           <ButtonLink href={profile.linkedinUrl} variant="outline">
             <Linkedin size={17} />
-            LinkedIn
+            {copy.actions.linkedin}
           </ButtonLink>
-          <ButtonLink href="/contact" variant="ghost">
+          <ButtonLink href={localizePath(locale, "/contact")} variant="ghost">
             <Mail size={17} />
-            Contact
+            {copy.actions.contact}
           </ButtonLink>
         </div>
       </motion.div>
-      <WorkbenchVisual featuredProject={featuredProject} />
+      <WorkbenchVisual featuredProject={featuredProject} locale={locale} />
     </section>
   );
 }

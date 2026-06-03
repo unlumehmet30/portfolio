@@ -21,6 +21,13 @@ personal-website/
 - Database: SQLite for development, Prisma-compatible path to PostgreSQL later
 - Content: Prisma seed data with a lightweight JSON/Markdown content-management path in `backend/content`
 
+## Localization (Zero Cost)
+
+- The website supports both English and Turkish routes.
+- English pages: `/`, `/about`, `/projects`, `/notes`, `/resume`, `/contact`
+- Turkish pages: `/tr`, `/tr/about`, `/tr/projects`, `/tr/notes`, `/tr/resume`, `/tr/contact`
+- Language switching is handled in-app with no paid translation API.
+
 ## Environment Variables
 
 Create local env files from the examples:
@@ -210,6 +217,7 @@ Validation:
 Email notification:
 
 - Contact messages are always stored in the database first.
+- Zero-cost mode: leave `CONTACT_NOTIFICATION_EMAIL` and `RESEND_API_KEY` empty to keep everything inside the admin panel without sending external email.
 - If `CONTACT_NOTIFICATION_EMAIL` and `RESEND_API_KEY` are configured, the backend sends a notification email through Resend.
 - `CONTACT_EMAIL_FROM` must be a Resend-allowed sender. The default `onboarding@resend.dev` is useful for local testing; production should use a verified domain sender.
 - If the email provider fails, the contact request still succeeds after the message is saved, and the backend logs the email error.

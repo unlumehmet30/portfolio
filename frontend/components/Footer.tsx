@@ -1,9 +1,19 @@
+"use client";
+
 import { Github, Linkedin, Mail } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { Profile } from "@/types/content";
-import { defaultProfile, navigation } from "@/lib/site";
+import { getLocaleFromPath } from "@/lib/locale";
+import { defaultProfile, getNavigation } from "@/lib/site";
+import { getUiCopy } from "@/lib/ui-copy";
 
 export function Footer({ profile = defaultProfile }: { profile?: Profile }) {
+  const pathname = usePathname() ?? "/";
+  const locale = getLocaleFromPath(pathname);
+  const navigation = getNavigation(locale);
+  const copy = getUiCopy(locale);
+
   return (
     <footer className="border-t border-border py-10">
       <div className="mx-auto grid max-w-[1200px] gap-8 px-4 sm:px-6 md:grid-cols-[1.2fr_0.8fr]">
@@ -20,13 +30,13 @@ export function Footer({ profile = defaultProfile }: { profile?: Profile }) {
             ))}
           </div>
           <div className="flex gap-2">
-            <a className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground" href={profile.githubUrl} target="_blank" rel="noreferrer" aria-label="GitHub">
+            <a className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground" href={profile.githubUrl} target="_blank" rel="noreferrer" aria-label={copy.footer.githubAria}>
               <Github size={18} />
             </a>
-            <a className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground" href={profile.linkedinUrl} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+            <a className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground" href={profile.linkedinUrl} target="_blank" rel="noreferrer" aria-label={copy.footer.linkedinAria}>
               <Linkedin size={18} />
             </a>
-            <a className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground" href={`mailto:${profile.email}`} aria-label="Email">
+            <a className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground" href={`mailto:${profile.email}`} aria-label={copy.footer.emailAria}>
               <Mail size={18} />
             </a>
           </div>

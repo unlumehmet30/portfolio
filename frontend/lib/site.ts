@@ -1,4 +1,5 @@
 import type { Profile } from "@/types/content";
+import { localizePath, type Locale } from "@/lib/locale";
 
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
 
@@ -14,11 +15,18 @@ export const defaultProfile: Profile = {
   resumeUrl: "/resume.pdf"
 };
 
-export const navigation = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/projects", label: "Projects" },
-  { href: "/notes", label: "Notes" },
-  { href: "/resume", label: "Resume" },
-  { href: "/contact", label: "Contact" }
-];
+const navigation = [
+  { href: "/", label: { en: "Home", tr: "Ana Sayfa" } },
+  { href: "/about", label: { en: "About", tr: "Hakkında" } },
+  { href: "/projects", label: { en: "Projects", tr: "Projeler" } },
+  { href: "/notes", label: { en: "Notes", tr: "Notlar" } },
+  { href: "/resume", label: { en: "Resume", tr: "CV" } },
+  { href: "/contact", label: { en: "Contact", tr: "İletişim" } }
+] as const;
+
+export function getNavigation(locale: Locale) {
+  return navigation.map((item) => ({
+    href: localizePath(locale, item.href),
+    label: item.label[locale]
+  }));
+}

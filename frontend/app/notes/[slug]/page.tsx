@@ -4,7 +4,10 @@ import { MarkdownContent } from "@/components/MarkdownContent";
 import { Badge } from "@/components/ui/badge";
 import { getPost, getPosts } from "@/lib/api";
 import { siteUrl } from "@/lib/site";
+import { getUiCopy } from "@/lib/ui-copy";
 import type { Post } from "@/types/content";
+
+const copy = getUiCopy("en").notes;
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -33,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!post) {
     return {
-      title: "Note"
+      title: copy.fallbackDetailTitle
     };
   }
 

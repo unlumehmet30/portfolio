@@ -56,5 +56,5 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <CaseStudyLayout project={project} />;
+  return <CaseStudyLayout project={project} locale="en" />;
 }

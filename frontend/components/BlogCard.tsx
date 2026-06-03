@@ -2,12 +2,13 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { localizePath, type Locale } from "@/lib/locale";
 import type { Post } from "@/types/content";
 
-export function BlogCard({ post }: { post: Post }) {
+export function BlogCard({ post, locale = "en" }: { post: Post; locale?: Locale }) {
   return (
     <Card className="group h-full p-5 transition hover:-translate-y-1 hover:bg-muted/35">
-      <Link href={`/notes/${post.slug}`} className="block h-full">
+      <Link href={localizePath(locale, `/notes/${post.slug}`)} className="block h-full">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             {post.tags.slice(0, 3).map((tag) => (

@@ -6,7 +6,9 @@ import { SkillBadge } from "@/components/SkillBadge";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getPosts, getProfile, getProjects } from "@/lib/api";
+import { localizePath } from "@/lib/locale";
 import { defaultProfile } from "@/lib/site";
+import { getUiCopy } from "@/lib/ui-copy";
 import type { Post, Profile, Project } from "@/types/content";
 
 async function safe<T>(promise: Promise<T>, fallback: T): Promise<T> {
@@ -17,51 +19,32 @@ async function safe<T>(promise: Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-const systems = [
-  {
-    icon: BrainCircuit,
-    title: "Forecasting",
-    description: "Sparse demand, rolling validation, and recursive predictions without peeking into the future."
-  },
-  {
-    icon: ShieldCheck,
-    title: "Validation",
-    description: "Checking whether the setup is fair before trusting the score."
-  },
-  {
-    icon: Gauge,
-    title: "Speed",
-    description: "Replacing slow loops and repeated work with cleaner, faster data transforms."
-  },
-  {
-    icon: DatabaseZap,
-    title: "Pipelines",
-    description: "Small backend and data workflows that keep projects usable end to end."
-  },
-  {
-    icon: GitBranch,
-    title: "Experiments",
-    description: "Computer vision, speech processing, and mobile ideas tested as working prototypes."
-  }
-];
+const icons = [BrainCircuit, ShieldCheck, Gauge, DatabaseZap, GitBranch] as const;
 
 export default async function HomePage() {
+  const locale = "en" as const;
+  const copy = getUiCopy(locale).home;
+
   const [profile, projects, posts] = await Promise.all([
     safe<Profile>(getProfile(), defaultProfile),
     safe<Project[]>(getProjects(), []),
     safe<Post[]>(getPosts(), [])
   ]);
   const featured = projects.filter((project) => project.featured);
+  const systems = copy.workOn.systems.map((item, index) => ({
+    ...item,
+    icon: icons[index]
+  }));
 
   return (
     <>
-      <HeroSection profile={profile} featuredProject={featured[0]} />
+      <HeroSection profile={profile} featuredProject={featured[0]} locale={locale} />
 
       <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 md:py-20">
         <SectionHeader
-          eyebrow="What I Work On"
-          title="I care about models that survive contact with real data."
-          description="Most of my work starts with an awkward constraint: too many zeros, slow feature code, noisy motion, or a validation setup that needs to be treated carefully."
+          eyebrow={copy.workOn.eyebrow}
+          title={copy.workOn.title}
+          description={copy.workOn.description}
         />
         <div className="mt-10 grid gap-4 md:grid-cols-5">
           {systems.map((item) => {
@@ -80,29 +63,29 @@ export default async function HomePage() {
       <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 md:py-20">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <SectionHeader
-            eyebrow="Selected Work"
-            title="Projects written with the tradeoffs left in."
-            description="Each case study explains the problem, what I tried, what I measured, and where the constraints shaped the implementation."
+            eyebrow={copy.selectedWork.eyebrow}
+            title={copy.selectedWork.title}
+            description={copy.selectedWork.description}
           />
-          <ButtonLink href="/projects" variant="outline">All projects</ButtonLink>
+          <ButtonLink href={localizePath(locale, "/projects")} variant="outline">{copy.selectedWork.allProjects}</ButtonLink>
         </div>
         {featured.length ? (
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
             {featured.map((project, index) => (
-              <ProjectCard key={project.slug} project={project} priority={index === 0} />
+              <ProjectCard key={project.slug} project={project} priority={index === 0} locale={locale} />
             ))}
           </div>
         ) : (
           <div className="mt-10 rounded-lg border border-border bg-card p-6 text-muted-foreground">
-            Start the backend and seed the database to load featured projects.
+            {copy.selectedWork.empty}
           </div>
         )}
       </section>
 
       <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 md:py-20">
         <SectionHeader
-          eyebrow="Tools"
-          title="Tools I reach for when the problem calls for them."
+          eyebrow={copy.tools.eyebrow}
+          title={copy.tools.title}
         />
         <div className="mt-8 flex flex-wrap gap-2">
           {[
@@ -128,20 +111,20 @@ export default async function HomePage() {
       <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 md:py-20">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <SectionHeader
-            eyebrow="Notes"
-            title="Short notes from the build log."
+            eyebrow={copy.notes.eyebrow}
+            title={copy.notes.title}
           />
-          <ButtonLink href="/notes" variant="outline">Read notes</ButtonLink>
+          <ButtonLink href={localizePath(locale, "/notes")} variant="outline">{copy.notes.readNotes}</ButtonLink>
         </div>
         {posts.length ? (
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {posts.slice(0, 3).map((post) => (
-              <BlogCard key={post.slug} post={post} />
+              <BlogCard key={post.slug} post={post} locale={locale} />
             ))}
           </div>
         ) : (
           <div className="mt-10 rounded-lg border border-border bg-card p-6 text-muted-foreground">
-            Notes will appear here after the backend is running.
+            {copy.notes.empty}
           </div>
         )}
       </section>

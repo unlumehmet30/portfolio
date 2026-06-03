@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { submitContact } from "@/lib/api";
+import { type Locale } from "@/lib/locale";
+import { getUiCopy } from "@/lib/ui-copy";
 
 const initialState = {
   name: "",
@@ -14,7 +16,8 @@ const initialState = {
   message: ""
 };
 
-export function ContactForm() {
+export function ContactForm({ locale = "en" }: { locale?: Locale }) {
+  const copy = getUiCopy(locale).contactForm;
   const [form, setForm] = useState(initialState);
   const [formStartedAt] = useState(() => Date.now());
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -25,19 +28,19 @@ export function ContactForm() {
 
     if (!form.name.trim()) {
       setStatus("error");
-      setFeedback("Name is required.");
+      setFeedback(copy.nameRequired);
       return;
     }
 
     if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       setStatus("error");
-      setFeedback("Please enter a valid email address.");
+      setFeedback(copy.invalidEmail);
       return;
     }
 
     if (form.message.trim().length < 10) {
       setStatus("error");
-      setFeedback("Message must be at least 10 characters.");
+      setFeedback(copy.minMessage);
       return;
     }
 
@@ -55,7 +58,7 @@ export function ContactForm() {
       setForm(initialState);
     } catch (error) {
       setStatus("error");
-      setFeedback(error instanceof Error ? error.message : "Could not send your message.");
+      setFeedback(error instanceof Error ? error.message : copy.sendError);
     }
   }
 
@@ -63,7 +66,7 @@ export function ContactForm() {
     <form onSubmit={onSubmit} className="rounded-lg border border-border bg-card p-5 shadow-soft-card">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-2 text-sm">
-          <span className="text-muted-foreground">Name</span>
+          <span className="text-muted-foreground">{copy.name}</span>
           <Input
             value={form.name}
             onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -72,7 +75,7 @@ export function ContactForm() {
           />
         </label>
         <label className="space-y-2 text-sm">
-          <span className="text-muted-foreground">Email</span>
+          <span className="text-muted-foreground">{copy.email}</span>
           <Input
             value={form.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
@@ -93,7 +96,7 @@ export function ContactForm() {
         aria-hidden="true"
       />
       <label className="mt-4 block space-y-2 text-sm">
-        <span className="text-muted-foreground">Subject</span>
+        <span className="text-muted-foreground">{copy.subject}</span>
         <Input
           value={form.subject}
           onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
@@ -101,7 +104,7 @@ export function ContactForm() {
         />
       </label>
       <label className="mt-4 block space-y-2 text-sm">
-        <span className="text-muted-foreground">Message</span>
+        <span className="text-muted-foreground">{copy.message}</span>
         <Textarea
           value={form.message}
           onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
@@ -119,11 +122,11 @@ export function ContactForm() {
           }
           role="status"
         >
-          {feedback || "I usually reply from email after seeing the message here."}
+          {feedback || copy.idleText}
         </p>
         <Button type="submit" disabled={status === "loading"}>
           {status === "loading" ? <Loader2 className="animate-spin" size={17} /> : <Send size={17} />}
-          Send message
+          {copy.send}
         </Button>
       </div>
     </form>

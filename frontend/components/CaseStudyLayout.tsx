@@ -4,6 +4,8 @@ import { MetricCard } from "@/components/MetricCard";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
+import { type Locale } from "@/lib/locale";
+import { getUiCopy } from "@/lib/ui-copy";
 import type { Project } from "@/types/content";
 
 function ListBlock({ title, items }: { title: string; items: string[] }) {
@@ -22,7 +24,8 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-export function CaseStudyLayout({ project }: { project: Project }) {
+export function CaseStudyLayout({ project, locale = "en" }: { project: Project; locale?: Locale }) {
+  const copy = getUiCopy(locale).caseStudy;
   const details = project.caseStudy;
 
   return (
@@ -48,7 +51,7 @@ export function CaseStudyLayout({ project }: { project: Project }) {
             {project.demoUrl ? (
               <ButtonLink href={project.demoUrl} variant="outline">
                 <ExternalLink size={17} />
-                Demo
+                {copy.demo}
               </ButtonLink>
             ) : null}
           </div>
@@ -62,19 +65,19 @@ export function CaseStudyLayout({ project }: { project: Project }) {
 
       <div className="mt-16 grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Problem</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.problem}</h2>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.problem}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Challenge</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.challenge}</h2>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.challenge}</p>
         </div>
       </div>
 
       <section className="mt-16">
         <SectionHeader
-          eyebrow="Architecture"
-          title="How the pieces fit together."
+          eyebrow={copy.architectureEyebrow}
+          title={copy.architectureTitle}
           description={project.architecture}
         />
         <div className="mt-8">{details ? <ArchitectureDiagram type={details.diagram} /> : null}</div>
@@ -82,12 +85,12 @@ export function CaseStudyLayout({ project }: { project: Project }) {
 
       {details ? (
         <section className="mt-16 grid gap-4 lg:grid-cols-2">
-          <ListBlock title="Dataset / Inputs" items={[details.dataset]} />
-          <ListBlock title="Technical Decisions" items={details.technicalDecisions} />
-          <ListBlock title="Implementation Details" items={details.implementationDetails} />
-          <ListBlock title="Metrics / Results" items={[project.results]} />
-          <ListBlock title="Lessons Learned" items={details.lessonsLearned} />
-          <ListBlock title="Future Improvements" items={details.futureImprovements} />
+          <ListBlock title={copy.datasetInputs} items={[details.dataset]} />
+          <ListBlock title={copy.technicalDecisions} items={details.technicalDecisions} />
+          <ListBlock title={copy.implementationDetails} items={details.implementationDetails} />
+          <ListBlock title={copy.metricsResults} items={[project.results]} />
+          <ListBlock title={copy.lessonsLearned} items={details.lessonsLearned} />
+          <ListBlock title={copy.futureImprovements} items={details.futureImprovements} />
         </section>
       ) : null}
     </article>
