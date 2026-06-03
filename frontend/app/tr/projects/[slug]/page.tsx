@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CaseStudyLayout } from "@/components/CaseStudyLayout";
 import { getProject, getProjects } from "@/lib/api";
+import { localizeProject } from "@/lib/content-localization";
 import { siteUrl } from "@/lib/site";
 import type { Project } from "@/types/content";
 
@@ -28,7 +29,8 @@ async function loadProject(slug: string): Promise<Project | null> {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = await loadProject(slug);
+  const projectData = await loadProject(slug);
+  const project = projectData ? localizeProject(projectData, "tr") : null;
 
   if (!project) {
     return {
@@ -50,7 +52,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TurkishProjectDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const project = await loadProject(slug);
+  const projectData = await loadProject(slug);
+  const project = projectData ? localizeProject(projectData, "tr") : null;
 
   if (!project) {
     notFound();

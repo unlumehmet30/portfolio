@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ProjectCard } from "@/components/ProjectCard";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getProjects } from "@/lib/api";
+import { localizeProjects } from "@/lib/content-localization";
 import { getUiCopy } from "@/lib/ui-copy";
 import type { Project } from "@/types/content";
 
@@ -21,7 +22,7 @@ async function loadProjects(): Promise<Project[]> {
 }
 
 export default async function TurkishProjectsPage() {
-  const projects = await loadProjects();
+  const projects = localizeProjects(await loadProjects(), "tr");
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 md:py-24">

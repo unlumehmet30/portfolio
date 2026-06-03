@@ -5,6 +5,7 @@ import { SkillBadge } from "@/components/SkillBadge";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getResume } from "@/lib/api";
+import { localizeResume } from "@/lib/content-localization";
 import { getUiCopy } from "@/lib/ui-copy";
 import type { Resume } from "@/types/content";
 
@@ -40,7 +41,7 @@ async function loadResume() {
 }
 
 export default async function TurkishResumePage() {
-  const resume = await loadResume();
+  const resume = localizeResume(await loadResume(), "tr");
 
   return (
     <div className="mx-auto max-w-[920px] px-4 py-16 sm:px-6 md:py-24">

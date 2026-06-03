@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BrainCircuit, DatabaseZap, Gauge, GitBranch, ShieldCheck } from "lucide-react";
 import { BlogCard } from "@/components/BlogCard";
 import { HeroSection } from "@/components/HeroSection";
@@ -6,10 +7,34 @@ import { SkillBadge } from "@/components/SkillBadge";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getPosts, getProfile, getProjects } from "@/lib/api";
+import { localizePosts, localizeProfile, localizeProjects } from "@/lib/content-localization";
 import { localizePath } from "@/lib/locale";
 import { defaultProfile } from "@/lib/site";
 import { getUiCopy } from "@/lib/ui-copy";
 import type { Post, Profile, Project } from "@/types/content";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Mehmet Ünlü | Portfolyo"
+  },
+  description:
+    "Mehmet Ünlü'nün tahminleme, bilgisayarlı görü, optimizasyon, konuşma işleme ve Flutter projelerini içeren portfolyosu.",
+  openGraph: {
+    title: "Mehmet Ünlü | Portfolyo",
+    description:
+      "Tahminleme, bilgisayarlı görü, optimizasyon, konuşma işleme ve Flutter projeleri.",
+    locale: "tr_TR",
+    url: "/tr",
+    images: ["/og.svg"]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mehmet Ünlü | Portfolyo",
+    description:
+      "Tahminleme, bilgisayarlı görü, optimizasyon, konuşma işleme ve Flutter projeleri.",
+    images: ["/og.svg"]
+  }
+};
 
 async function safe<T>(promise: Promise<T>, fallback: T): Promise<T> {
   try {
@@ -25,11 +50,14 @@ export default async function TurkishHomePage() {
   const locale = "tr" as const;
   const copy = getUiCopy(locale).home;
 
-  const [profile, projects, posts] = await Promise.all([
+  const [profileData, projectData, postData] = await Promise.all([
     safe<Profile>(getProfile(), defaultProfile),
     safe<Project[]>(getProjects(), []),
     safe<Post[]>(getPosts(), [])
   ]);
+  const profile = localizeProfile(profileData, locale);
+  const projects = localizeProjects(projectData, locale);
+  const posts = localizePosts(postData, locale);
   const featured = projects.filter((project) => project.featured);
   const systems = copy.workOn.systems.map((item, index) => ({
     ...item,

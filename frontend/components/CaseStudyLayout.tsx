@@ -80,7 +80,7 @@ export function CaseStudyLayout({ project, locale = "en" }: { project: Project; 
           title={copy.architectureTitle}
           description={project.architecture}
         />
-        <div className="mt-8">{details ? <ArchitectureDiagram type={details.diagram} /> : null}</div>
+        <div className="mt-8">{details ? <ArchitectureDiagram type={details.diagram} locale={locale} /> : null}</div>
       </section>
 
       {details ? (

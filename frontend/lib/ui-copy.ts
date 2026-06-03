@@ -427,7 +427,7 @@ const uiCopy: Record<Locale, UiCopy> = {
         systems: [
           {
             title: "Tahminleme",
-            description: "Seyrek talep, kayan pencere doğrulama ve geleceğe bakmadan recursive tahmin."
+            description: "Seyrek talep, kayan pencere doğrulama ve geleceğe bakmadan özyinelemeli tahmin."
           },
           {
             title: "Doğrulama",
@@ -475,8 +475,8 @@ const uiCopy: Record<Locale, UiCopy> = {
       description:
         "İstanbul Teknik Üniversitesi Elektronik ve Haberleşme Mühendisliği öğrencisiyim. Çalışmalarım ağırlıklı olarak tahminleme, bilgisayarlı görü, konuşma işleme ve ML süreçlerini daha hızlı ve sürdürülebilir hale getirme üzerine.",
       paragraphs: [
-        "İlgimi çeken projelerde zor kısım yalnızca model seçimi olmuyor. Örneğin seyrek talep tahmininde doğrulama kurgusu, sıfır ağırlıklı hedefler, recursive tahmin ve tahmin anında gerçekten mevcut olacak özellikler kritik hale geliyor.",
-        "Bilgisayarlı görü tarafında drone görüntülerinde visual odometry denemeleri yapıyorum. Ürün tarafında ise Flutter, Firebase ve konuşma/hikaye üretimi akışlarıyla çalıştım. Araştırma ile ürün geliştirme arasında, sonucu ölçülebilir tutan bir çizgi izlemeye çalışıyorum.",
+        "İlgimi çeken projelerde zor kısım yalnızca model seçimi olmuyor. Örneğin seyrek talep tahmininde doğrulama kurgusu, sıfır ağırlıklı hedefler, özyinelemeli tahmin ve tahmin anında gerçekten mevcut olacak özellikler kritik hale geliyor.",
+        "Bilgisayarlı görü tarafında drone görüntülerinde görsel odometri denemeleri yapıyorum. Ürün tarafında ise Flutter, Firebase ve konuşma/hikaye üretimi akışlarıyla çalıştım. Araştırma ile ürün geliştirme arasında, sonucu ölçülebilir tutan bir çizgi izlemeye çalışıyorum.",
         "Süreç boyunca iz bırakmayı önemsiyorum: ne değişti, ne iyileşti, ne çalışmadı ve bir sonraki adımda neyi farklı yapardım. Bu yüzden projeleri yalnızca görsel ve etiketlerle değil, vaka analizi formatında paylaşıyorum."
       ],
       focusAreasTitle: "Odak Alanları",
@@ -491,7 +491,7 @@ const uiCopy: Record<Locale, UiCopy> = {
     projects: {
       metadataTitle: "Projeler",
       metadataDescription:
-        "Mehmet Ünlü projeleri: tahminleme, veri hattı optimizasyonu, visual odometry, konuşma işleme ve Flutter ürün çalışmaları.",
+        "Mehmet Ünlü projeleri: tahminleme, veri hattı optimizasyonu, görsel odometri, konuşma işleme ve Flutter ürün çalışmaları.",
       eyebrow: "Projeler",
       title: "Vaka analizi formatında seçili çalışmalar.",
       description:
@@ -501,11 +501,11 @@ const uiCopy: Record<Locale, UiCopy> = {
     notes: {
       metadataTitle: "Notlar",
       metadataDescription:
-        "Mehmet Ünlü'den tahminleme, doğrulama, optimizasyon, visual odometry ve konuşma iş akışları üzerine teknik notlar.",
+        "Mehmet Ünlü'den tahminleme, doğrulama, optimizasyon, görsel odometri ve konuşma iş akışları üzerine teknik notlar.",
       eyebrow: "Notlar",
       title: "Çalışma masasından kısa yazılar.",
       description:
-        "Doğrulama stratejileri, metrikler, optimizasyon, visual odometry ve konuşma işleme akışları üzerine kısa teknik notlar.",
+        "Doğrulama stratejileri, metrikler, optimizasyon, görsel odometri ve konuşma işleme akışları üzerine kısa teknik notlar.",
       empty: "Henüz not yok. Backend'i çalıştırıp veritabanını seed et.",
       fallbackDetailTitle: "Not"
     },

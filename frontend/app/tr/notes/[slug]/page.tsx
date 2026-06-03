@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import { Badge } from "@/components/ui/badge";
 import { getPost, getPosts } from "@/lib/api";
+import { localizePost } from "@/lib/content-localization";
 import { siteUrl } from "@/lib/site";
 import { getUiCopy } from "@/lib/ui-copy";
 import type { Post } from "@/types/content";
@@ -32,7 +33,8 @@ async function loadPost(slug: string): Promise<Post | null> {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await loadPost(slug);
+  const postData = await loadPost(slug);
+  const post = postData ? localizePost(postData, "tr") : null;
 
   if (!post) {
     return {
@@ -54,7 +56,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TurkishNoteDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await loadPost(slug);
+  const postData = await loadPost(slug);
+  const post = postData ? localizePost(postData, "tr") : null;
 
   if (!post) {
     notFound();

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BlogCard } from "@/components/BlogCard";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getPosts } from "@/lib/api";
+import { localizePosts } from "@/lib/content-localization";
 import { getUiCopy } from "@/lib/ui-copy";
 import type { Post } from "@/types/content";
 
@@ -21,7 +22,7 @@ async function loadPosts(): Promise<Post[]> {
 }
 
 export default async function TurkishNotesPage() {
-  const posts = await loadPosts();
+  const posts = localizePosts(await loadPosts(), "tr");
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 md:py-24">
