@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.userProfile.upsert({
     where: { id: 1 },
-    update: profile,
+    update: {},
     create: {
       id: 1,
       ...profile
@@ -17,11 +17,7 @@ async function main() {
   for (const project of projects) {
     await prisma.project.upsert({
       where: { slug: project.slug },
-      update: {
-        ...project,
-        tags: JSON.stringify(project.tags),
-        metrics: JSON.stringify(project.metrics)
-      },
+      update: {},
       create: {
         ...project,
         tags: JSON.stringify(project.tags),
@@ -33,10 +29,7 @@ async function main() {
   for (const post of posts) {
     await prisma.post.upsert({
       where: { slug: post.slug },
-      update: {
-        ...post,
-        tags: JSON.stringify(post.tags)
-      },
+      update: {},
       create: {
         ...post,
         tags: JSON.stringify(post.tags)
@@ -46,9 +39,7 @@ async function main() {
 
   await prisma.siteContent.upsert({
     where: { key: "resume" },
-    update: {
-      value: JSON.stringify(resume)
-    },
+    update: {},
     create: {
       key: "resume",
       value: JSON.stringify(resume)
