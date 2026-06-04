@@ -2,13 +2,14 @@ services:
   backend:
     build:
       context: ./backend
+    restart: unless-stopped
     environment:
       NODE_ENV: "production"
       DATABASE_URL: "file:/app/prisma/prod.db"
       PORT: 8080
       TRUST_PROXY: "${TRUST_PROXY:-true}"
-      CORS_ORIGIN: "${CORS_ORIGIN:-https://portfolio.example.com}"
-      CONTACT_NOTIFICATION_EMAIL: "${CONTACT_NOTIFICATION_EMAIL:-unlu.mehmett1@gmail.com}"
+      CORS_ORIGIN: "${CORS_ORIGIN:?Set CORS_ORIGIN in your environment}"
+      CONTACT_NOTIFICATION_EMAIL: "${CONTACT_NOTIFICATION_EMAIL:-}"
       CONTACT_EMAIL_FROM: "${CONTACT_EMAIL_FROM:-Mehmet Portfolio <onboarding@resend.dev>}"
       RESEND_API_KEY: "${RESEND_API_KEY:-}"
       CONTACT_RATE_LIMIT_WINDOW_MINUTES: "${CONTACT_RATE_LIMIT_WINDOW_MINUTES:-15}"
@@ -23,21 +24,45 @@ services:
       ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in your environment}"
       ADMIN_SESSION_SECRET: "${ADMIN_SESSION_SECRET:?Set ADMIN_SESSION_SECRET in your environment}"
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     volumes:
       - backend_sqlite:/app/prisma
 
   frontend:
     build:
       context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: "${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL in your environment}"
+        NEXT_PUBLIC_SITE_URL: "${NEXT_PUBLIC_SITE_URL:?Set NEXT_PUBLIC_SITE_URL in your environment}"
+    restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: "http://localhost:8080/api"
-      NEXT_PUBLIC_SITE_URL: "${NEXT_PUBLIC_SITE_URL:-https://portfolio.example.com}"
-    ports:
-      - "3001:3001"
+      INTERNAL_API_URL: "http://backend:8080/api"
+      NEXT_PUBLIC_API_URL: "${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL in your environment}"
+      NEXT_PUBLIC_SITE_URL: "${NEXT_PUBLIC_SITE_URL:?Set NEXT_PUBLIC_SITE_URL in your environment}"
+    expose:
+      - "3001"
     depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SITE_HOST: "${SITE_HOST:?Set SITE_HOST in your environment}"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
       - backend
 
 volumes:
   backend_sqlite:
+  caddy_data:
+  caddy_config:

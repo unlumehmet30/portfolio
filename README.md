@@ -130,22 +130,38 @@ npm run start --workspace frontend
 
 ## Docker
 
+Create the production Compose environment file:
+
 ```bash
-docker compose up --build
+cp .env.example .env
 ```
 
-The backend container runs `prisma db push`, seeds content, and starts the API. The frontend expects the backend at `http://localhost:8080/api`.
-
-For production-style compose runs, set these variables in your shell or `.env` first:
+Set the public hostname and secrets in `.env`. A custom domain is optional; for a Droplet
+with public IP `165.232.45.167`, `sslip.io` can provide the hostname:
 
 ```env
-CORS_ORIGIN="https://your-domain.com"
-NEXT_PUBLIC_SITE_URL="https://your-domain.com"
+SITE_HOST="165.232.45.167.sslip.io"
+CORS_ORIGIN="https://165.232.45.167.sslip.io"
+NEXT_PUBLIC_API_URL="https://165.232.45.167.sslip.io/api"
+NEXT_PUBLIC_SITE_URL="https://165.232.45.167.sslip.io"
 ADMIN_PASSWORD="<strong-random-password>"
 ADMIN_SESSION_SECRET="<at-least-32-char-random-secret>"
 ```
 
-`ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` are required in compose to prevent accidental weak defaults.
+Start the stack:
+
+```bash
+docker compose up -d --build
+```
+
+Caddy publishes ports `80` and `443`, obtains an HTTPS certificate, and routes `/api` to
+the backend while routing all other requests to the frontend. The frontend and backend
+ports are only exposed inside the Compose network. The backend container runs
+`prisma db push`, seeds content, and starts the API. SQLite data and Caddy certificates
+are stored in named Docker volumes.
+
+`SITE_HOST`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `ADMIN_PASSWORD`, and
+`ADMIN_SESSION_SECRET` are required in Compose to prevent accidental production defaults.
 
 ## API Documentation
 
@@ -237,6 +253,8 @@ Authorization: Bearer <token>
 
 - Deploy the frontend to Vercel or any Node-compatible Next.js host.
 - Deploy the backend to Render, Fly.io, Railway, or a VPS.
+- For a DigitalOcean Droplet, use the included Docker Compose and Caddy configuration.
+- Open inbound TCP ports `80` and `443`, UDP port `443`, and restrict SSH port `22` to trusted IPs when possible.
 - SQLite is fine for the MVP. For production contact data and admin editing, switch Prisma to PostgreSQL.
 - Set `NEXT_PUBLIC_API_URL` to the deployed backend URL.
 - Set `CORS_ORIGIN` to the deployed frontend URL.

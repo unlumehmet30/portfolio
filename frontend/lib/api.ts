@@ -10,6 +10,15 @@ import type {
 } from "@/types/content";
 
 export const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
+const internalApiBaseUrl = process.env.INTERNAL_API_URL;
+
+function getApiBaseUrl() {
+  if (typeof window === "undefined" && internalApiBaseUrl) {
+    return internalApiBaseUrl;
+  }
+
+  return apiBaseUrl;
+}
 
 type NextFetchInit = RequestInit & {
   next?: {
@@ -18,7 +27,7 @@ type NextFetchInit = RequestInit & {
 };
 
 async function request<T>(path: string, init?: NextFetchInit): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -70,7 +79,7 @@ export async function submitContact(payload: ContactPayload) {
 }
 
 async function adminRequest<T>(path: string, token: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}/admin${path}`, {
+  const response = await fetch(`${getApiBaseUrl()}/admin${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
