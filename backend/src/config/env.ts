@@ -58,6 +58,7 @@ const envSchema = z.object({
   CONTACT_MIN_FILL_SECONDS: z.coerce.number().int().positive().default(2),
   CONTACT_REMINDER_DAYS: z.coerce.number().int().positive().default(7),
   CONTACT_REMINDER_INTERVAL_MINUTES: z.coerce.number().int().positive().default(60),
+  UPLOADS_DIR: z.string().trim().default("uploads"),
   ADMIN_USERNAME: z.string().default("admin"),
   ADMIN_PASSWORD: z.string().default("change-this-password"),
   ADMIN_SESSION_SECRET: z.string().default("change-this-session-secret")

@@ -16,6 +16,7 @@ import {
   adminUpdateResume,
   loginAdmin
 } from "../services/admin.service.js";
+import { projectUploadUrl } from "../config/uploads.js";
 import { sendSuccess } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { HttpError } from "../utils/http-error.js";
@@ -70,6 +71,16 @@ export const adminProjectUpdateController = asyncHandler(async (req, res) => {
 export const adminProjectDeleteController = asyncHandler(async (req, res) => {
   const result = await adminDeleteProject(parseId(req.params.id));
   sendSuccess(res, result);
+});
+
+export const adminProjectImageUploadController = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new HttpError("Project image file is required", 400, "BAD_REQUEST");
+  }
+
+  sendSuccess(res, {
+    imageUrl: projectUploadUrl(req.file.filename)
+  }, 201);
 });
 
 export const adminPostsController = asyncHandler(async (_req, res) => {

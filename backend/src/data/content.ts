@@ -15,6 +15,7 @@ export type SeedProject = {
   results: string;
   tags: string[];
   metrics: SeedMetric[];
+  imageUrl?: string;
   githubUrl?: string;
   demoUrl?: string;
   featured: boolean;

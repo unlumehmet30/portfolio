@@ -12,6 +12,7 @@ import {
   adminPostUpdateController,
   adminProfileController,
   adminProfileUpdateController,
+  adminProjectImageUploadController,
   adminProjectCreateController,
   adminProjectDeleteController,
   adminProjectsController,
@@ -20,6 +21,7 @@ import {
   adminResumeUpdateController
 } from "../controllers/admin.controller.js";
 import { requireAdmin } from "../middleware/admin-auth.js";
+import { projectImageUpload } from "../middleware/project-image-upload.js";
 import { createRateLimit } from "../middleware/rate-limit.js";
 
 export const adminRouter = Router();
@@ -57,6 +59,11 @@ adminRouter.get("/projects", adminProjectsController);
 adminRouter.post("/projects", adminProjectCreateController);
 adminRouter.put("/projects/:id", adminProjectUpdateController);
 adminRouter.delete("/projects/:id", adminProjectDeleteController);
+adminRouter.post(
+  "/uploads/project-image",
+  projectImageUpload.single("image"),
+  adminProjectImageUploadController
+);
 
 adminRouter.get("/posts", adminPostsController);
 adminRouter.post("/posts", adminPostCreateController);

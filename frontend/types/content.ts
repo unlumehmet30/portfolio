@@ -50,6 +50,7 @@ export type Project = {
   results: string;
   tags: string[];
   metrics: Metric[];
+  imageUrl?: string | null;
   githubUrl?: string | null;
   demoUrl?: string | null;
   featured: boolean;

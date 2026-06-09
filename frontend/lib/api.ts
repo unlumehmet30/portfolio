@@ -144,6 +144,29 @@ export async function updateAdminProject(
   });
 }
 
+export async function uploadAdminProjectImage(token: string, file: File) {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await fetch(`${getApiBaseUrl()}/admin/uploads/project-image`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: formData,
+    cache: "no-store"
+  });
+
+  const payload = (await response.json()) as ApiEnvelope<{ imageUrl: string }>;
+
+  if (!response.ok || !payload.success) {
+    const message = payload.success ? "Image upload failed" : payload.error.message;
+    throw new Error(message);
+  }
+
+  return payload.data;
+}
+
 export async function deleteAdminProject(token: string, id: number) {
   return adminRequest<{ id: number }>(`/projects/${id}`, token, {
     method: "DELETE"

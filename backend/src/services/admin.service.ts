@@ -12,6 +12,27 @@ const optionalUrl = z.preprocess(
   z.string().url().nullable().optional()
 );
 
+const optionalImageUrl = z.preprocess(
+  (value) => (value === "" || value === null ? null : value),
+  z
+    .string()
+    .trim()
+    .refine((value) => {
+      if (value.startsWith("/")) return true;
+
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return false;
+      }
+    }, {
+      message: "Image URL must be a relative path or a valid URL"
+    })
+    .nullable()
+    .optional()
+);
+
 export const loginSchema = z.object({
   username: z.string().trim().min(1, "Username is required"),
   password: z.string().min(1, "Password is required")
@@ -45,6 +66,7 @@ export const projectSchema = z.object({
   results: z.string().trim().min(1),
   tags: z.array(z.string().trim().min(1)).default([]),
   metrics: z.array(metricSchema).default([]),
+  imageUrl: optionalImageUrl,
   githubUrl: optionalUrl,
   demoUrl: optionalUrl,
   featured: z.boolean().default(false)
@@ -100,6 +122,7 @@ function serializeProject(project: {
   results: string;
   tags: string;
   metrics: string;
+  imageUrl: string | null;
   githubUrl: string | null;
   demoUrl: string | null;
   featured: boolean;

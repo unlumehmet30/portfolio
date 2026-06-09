@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -13,6 +14,7 @@ import {
   RefreshCw,
   Save,
   Trash2,
+  Upload,
   UserRound
 } from "lucide-react";
 import { adminTokenKey } from "@/components/AdminLoginForm";
@@ -33,6 +35,7 @@ import {
   getAdminProjects,
   getAdminResume,
   markAdminContactMessageHandled,
+  uploadAdminProjectImage,
   updateAdminPost,
   updateAdminProfile,
   updateAdminProject,
@@ -70,6 +73,7 @@ const emptyProject: ProjectDraft = {
   results: "",
   tags: [],
   metrics: [],
+  imageUrl: "",
   githubUrl: "",
   demoUrl: "",
   featured: false
@@ -217,6 +221,7 @@ export function AdminDashboard() {
   const [projectDraft, setProjectDraft] = useState<ProjectDraft>(emptyProject);
   const [projectTags, setProjectTags] = useState("");
   const [projectMetrics, setProjectMetrics] = useState("");
+  const [projectImageUploading, setProjectImageUploading] = useState(false);
   const [postDraft, setPostDraft] = useState<PostDraft>(emptyPost);
   const [postTags, setPostTags] = useState("");
 
@@ -292,6 +297,7 @@ export function AdminDashboard() {
       results: project.results,
       tags: project.tags,
       metrics: project.metrics,
+      imageUrl: project.imageUrl ?? "",
       githubUrl: project.githubUrl ?? "",
       demoUrl: project.demoUrl ?? "",
       featured: project.featured
@@ -307,6 +313,7 @@ export function AdminDashboard() {
       ...projectDraft,
       tags: textToTags(projectTags),
       metrics: textToMetrics(projectMetrics),
+      imageUrl: projectDraft.imageUrl || null,
       githubUrl: projectDraft.githubUrl || null,
       demoUrl: projectDraft.demoUrl || null
     };
@@ -322,6 +329,28 @@ export function AdminDashboard() {
     setProjectMetrics("");
     await loadData(token);
     setStatus("Project saved.");
+  }
+
+  async function uploadProjectImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setProjectImageUploading(true);
+    setStatus("Uploading project image...");
+
+    try {
+      const { imageUrl } = await uploadAdminProjectImage(token, file);
+      setProjectDraft((draft) => ({
+        ...draft,
+        imageUrl
+      }));
+      setStatus("Project image uploaded. Save the project to keep it.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Project image upload failed.");
+    } finally {
+      setProjectImageUploading(false);
+      event.target.value = "";
+    }
   }
 
   async function removeProject(id: number) {
@@ -435,6 +464,38 @@ export function AdminDashboard() {
             <form onSubmit={saveProject} className="grid gap-4">
               <Field label="Title" value={projectDraft.title} onChange={(value) => setProjectDraft({ ...projectDraft, title: value })} />
               <Field label="Slug" value={projectDraft.slug} onChange={(value) => setProjectDraft({ ...projectDraft, slug: value })} />
+              <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+                <Field label="Image URL" value={projectDraft.imageUrl ?? ""} onChange={(value) => setProjectDraft({ ...projectDraft, imageUrl: value })} />
+                <label className="block space-y-2 text-sm">
+                  <span className="text-muted-foreground">Upload image</span>
+                  <Input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    disabled={projectImageUploading}
+                    onChange={(event) => void uploadProjectImage(event)}
+                  />
+                </label>
+              </div>
+              {projectDraft.imageUrl ? (
+                <div className="relative overflow-hidden rounded-md border border-border bg-muted">
+                  {projectDraft.imageUrl.startsWith("/") ? (
+                    <div className="relative aspect-[16/9]">
+                      <Image
+                        src={projectDraft.imageUrl}
+                        alt="Project image preview"
+                        fill
+                        sizes="(min-width: 1280px) 420px, 100vw"
+                        unoptimized={projectDraft.imageUrl.startsWith("/api/uploads/")}
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-3 text-xs text-muted-foreground">
+                      External image URL set. Preview is shown after saving if the domain is allowed.
+                    </div>
+                  )}
+                </div>
+              ) : null}
               <Field label="Summary" value={projectDraft.summary} onChange={(value) => setProjectDraft({ ...projectDraft, summary: value })} multiline />
               <Field label="Description" value={projectDraft.description} onChange={(value) => setProjectDraft({ ...projectDraft, description: value })} multiline />
               <Field label="Problem" value={projectDraft.problem} onChange={(value) => setProjectDraft({ ...projectDraft, problem: value })} multiline />
@@ -456,8 +517,8 @@ export function AdminDashboard() {
                 Featured project
               </label>
               <Button type="submit" className="w-fit">
-                <Save size={17} />
-                Save project
+                {projectImageUploading ? <Upload size={17} /> : <Save size={17} />}
+                {projectImageUploading ? "Uploading image..." : "Save project"}
               </Button>
             </form>
           </Card>

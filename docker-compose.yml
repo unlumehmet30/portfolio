@@ -21,6 +21,7 @@ services:
       CONTACT_MIN_FILL_SECONDS: "${CONTACT_MIN_FILL_SECONDS:-2}"
       CONTACT_REMINDER_DAYS: "${CONTACT_REMINDER_DAYS:-7}"
       CONTACT_REMINDER_INTERVAL_MINUTES: "${CONTACT_REMINDER_INTERVAL_MINUTES:-60}"
+      UPLOADS_DIR: "${UPLOADS_DIR:-uploads}"
       ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in your environment}"
       ADMIN_SESSION_SECRET: "${ADMIN_SESSION_SECRET:?Set ADMIN_SESSION_SECRET in your environment}"
@@ -28,6 +29,7 @@ services:
       - "8080"
     volumes:
       - backend_sqlite:/app/prisma
+      - backend_uploads:/app/uploads
 
   frontend:
     build:
@@ -64,5 +66,6 @@ services:
 
 volumes:
   backend_sqlite:
+  backend_uploads:
   caddy_data:
   caddy_config:

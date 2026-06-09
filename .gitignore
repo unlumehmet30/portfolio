@@ -25,6 +25,7 @@ coverage/
 *.db-journal
 *.sqlite
 *.sqlite-journal
+backend/uploads/
 
 # logs
 npm-debug.log*

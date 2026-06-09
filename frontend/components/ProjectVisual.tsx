@@ -150,14 +150,21 @@ export function ProjectVisual({
   className,
   sizes = "(min-width: 1024px) 50vw, 100vw"
 }: {
-  project?: Pick<Project, "slug" | "title">;
+  project?: Pick<Project, "slug" | "title" | "imageUrl">;
   locale?: Locale;
   className?: string;
   sizes?: string;
 }) {
   const visual = getProjectVisual(project?.slug);
+  const imageSrc = project?.imageUrl || visual.src;
+  const shouldSkipOptimization =
+    Boolean(imageSrc) && (imageSrc!.startsWith("/api/uploads/") || imageSrc!.startsWith("http"));
   const placeholderLabel = locale === "tr" ? "Görsel yer tutucu" : "Visual placeholder";
   const fallbackTitle = locale === "tr" ? "Seçili proje görseli" : "Selected project visual";
+  const imageAlt =
+    project?.imageUrl && project?.title
+      ? project.title
+      : visual.alt[locale];
 
   return (
     <div
@@ -166,12 +173,13 @@ export function ProjectVisual({
         className
       )}
     >
-      {visual.src ? (
+      {imageSrc ? (
         <Image
-          src={visual.src}
-          alt={visual.alt[locale]}
+          src={imageSrc}
+          alt={imageAlt}
           fill
           sizes={sizes}
+          unoptimized={shouldSkipOptimization}
           className="object-cover"
         />
       ) : (
