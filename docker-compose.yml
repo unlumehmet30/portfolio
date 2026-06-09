@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: "production"
-      DATABASE_URL: "file:/app/prisma/prod.db"
+      DATABASE_URL: "file:/app/data/prod.db"
       PORT: 8080
       TRUST_PROXY: "${TRUST_PROXY:-true}"
       CORS_ORIGIN: "${CORS_ORIGIN:?Set CORS_ORIGIN in your environment}"
@@ -28,7 +28,7 @@ services:
     expose:
       - "8080"
     volumes:
-      - backend_sqlite:/app/prisma
+      - backend_sqlite:/app/data
       - backend_uploads:/app/uploads
 
   frontend:
