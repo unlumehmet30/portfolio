@@ -65,7 +65,3 @@ body {
     linear-gradient(90deg, hsl(var(--foreground) / 0.045) 1px, transparent 1px);
   background-size: 48px 48px;
 }
-
-.subtle-rule {
-  background-image: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.12), transparent);
-}

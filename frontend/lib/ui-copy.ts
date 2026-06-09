@@ -193,7 +193,7 @@ const uiCopy: Record<Locale, UiCopy> = {
         contact: "Contact"
       },
       workbench: {
-        cardTitle: "Current desk",
+        cardTitle: "Featured case study",
         location: "Istanbul / ITU",
         title: "Forecasting, computer vision, and making slow data code less painful.",
         description:
@@ -399,7 +399,7 @@ const uiCopy: Record<Locale, UiCopy> = {
         contact: "İletişim"
       },
       workbench: {
-        cardTitle: "Çalışma masası",
+        cardTitle: "Seçili vaka analizi",
         location: "İstanbul / İTÜ",
         title: "Tahminleme, bilgisayarlı görü ve performans odaklı veri mühendisliği.",
         description:

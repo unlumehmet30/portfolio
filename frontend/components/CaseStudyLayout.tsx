@@ -1,6 +1,7 @@
 import { ExternalLink, Github } from "lucide-react";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
 import { MetricCard } from "@/components/MetricCard";
+import { ProjectVisual } from "@/components/ProjectVisual";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -10,7 +11,7 @@ import type { Project } from "@/types/content";
 
 function ListBlock({ title, items }: { title: string; items: string[] }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <div className="border-t border-border pt-5">
       <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{title}</h3>
       <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
         {items.map((item) => (
@@ -63,12 +64,21 @@ export function CaseStudyLayout({ project, locale = "en" }: { project: Project; 
         </div>
       </div>
 
-      <div className="mt-16 grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-border bg-card p-6">
+      <div className="mt-14">
+        <ProjectVisual
+          project={project}
+          locale={locale}
+          className="aspect-[16/7] md:min-h-[300px]"
+          sizes="(min-width: 1200px) 1200px, 100vw"
+        />
+      </div>
+
+      <div className="mt-16 grid gap-8 border-y border-border py-8 md:grid-cols-2">
+        <div>
           <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.problem}</h2>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.problem}</p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-6">
+        <div>
           <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.challenge}</h2>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.challenge}</p>
         </div>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { BrainCircuit, DatabaseZap, Gauge, GitBranch, ShieldCheck } from "lucide-react";
 import { BlogCard } from "@/components/BlogCard";
 import { HeroSection } from "@/components/HeroSection";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -44,8 +43,6 @@ async function safe<T>(promise: Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-const icons = [BrainCircuit, ShieldCheck, Gauge, DatabaseZap, GitBranch] as const;
-
 export default async function TurkishHomePage() {
   const locale = "tr" as const;
   const copy = getUiCopy(locale).home;
@@ -59,10 +56,6 @@ export default async function TurkishHomePage() {
   const projects = localizeProjects(projectData, locale);
   const posts = localizePosts(postData, locale);
   const featured = projects.filter((project) => project.featured);
-  const systems = copy.workOn.systems.map((item, index) => ({
-    ...item,
-    icon: icons[index]
-  }));
 
   return (
     <>
@@ -74,21 +67,18 @@ export default async function TurkishHomePage() {
           title={copy.workOn.title}
           description={copy.workOn.description}
         />
-        <div className="mt-10 grid gap-4 md:grid-cols-5">
-          {systems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.title} className="rounded-lg border border-border bg-card p-5">
-                <Icon className="text-accent" size={22} />
-                <h3 className="mt-5 font-semibold">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.description}</p>
-              </div>
-            );
-          })}
+        <div className="mt-10 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-5">
+          {copy.workOn.systems.map((item, index) => (
+            <div key={item.title} className="border-t border-border pt-5">
+              <p className="font-mono text-xs text-accent">0{index + 1}</p>
+              <h3 className="mt-5 font-semibold">{item.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.description}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 md:py-20">
+      <section className="mx-auto max-w-[1200px] border-t border-border/70 px-4 py-12 sm:px-6 md:py-20">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <SectionHeader
             eyebrow={copy.selectedWork.eyebrow}
@@ -98,10 +88,15 @@ export default async function TurkishHomePage() {
           <ButtonLink href={localizePath(locale, "/projects")} variant="outline">{copy.selectedWork.allProjects}</ButtonLink>
         </div>
         {featured.length ? (
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {featured.map((project, index) => (
-              <ProjectCard key={project.slug} project={project} priority={index === 0} locale={locale} />
-            ))}
+          <div className="mt-10 space-y-10">
+            <ProjectCard project={featured[0]} priority locale={locale} />
+            {featured.length > 1 ? (
+              <div className="grid gap-8 md:grid-cols-2">
+                {featured.slice(1).map((project) => (
+                  <ProjectCard key={project.slug} project={project} locale={locale} />
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="mt-10 rounded-lg border border-border bg-card p-6 text-muted-foreground">
@@ -110,7 +105,7 @@ export default async function TurkishHomePage() {
         )}
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 md:py-20">
+      <section className="mx-auto max-w-[1200px] border-t border-border/70 px-4 py-12 sm:px-6 md:py-20">
         <SectionHeader
           eyebrow={copy.tools.eyebrow}
           title={copy.tools.title}
@@ -136,7 +131,7 @@ export default async function TurkishHomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 md:py-20">
+      <section className="mx-auto max-w-[1200px] border-t border-border/70 px-4 py-12 sm:px-6 md:py-20">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <SectionHeader
             eyebrow={copy.notes.eyebrow}
