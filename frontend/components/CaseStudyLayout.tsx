@@ -1,7 +1,7 @@
 import { ExternalLink, Github } from "lucide-react";
-import Image from "next/image";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
 import { MetricCard } from "@/components/MetricCard";
+import { ProjectGallery } from "@/components/ProjectGallery";
 import { ProjectVisual } from "@/components/ProjectVisual";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -76,25 +76,7 @@ export function CaseStudyLayout({ project, locale = "en" }: { project: Project; 
         />
       </div>
 
-      {galleryImages.length ? (
-        <section className="mt-10">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{galleryTitle}</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {galleryImages.map((image, index) => (
-              <div key={`${image.url}-${index}`} className="relative aspect-video overflow-hidden border border-border bg-muted">
-                <Image
-                  src={image.url}
-                  alt={image.alt || `${project.title} screenshot ${index + 1}`}
-                  fill
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  unoptimized={image.url.startsWith("/api/uploads/") || image.url.startsWith("http")}
-                  className="object-contain"
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <ProjectGallery title={galleryTitle} projectTitle={project.title} images={galleryImages} locale={locale} />
 
       <div className="mt-16 grid gap-8 border-y border-border py-8 md:grid-cols-2">
         <div>
