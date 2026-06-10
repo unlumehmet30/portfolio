@@ -38,6 +38,14 @@ export type CaseStudy = {
   diagram: "forecasting" | "optimization" | "visual-odometry" | "speech" | "mobile";
 };
 
+export type ProjectImage = {
+  id?: number;
+  url: string;
+  alt?: string | null;
+  sortOrder?: number;
+  createdAt?: string;
+};
+
 export type Project = {
   id: number;
   title: string;
@@ -51,6 +59,7 @@ export type Project = {
   tags: string[];
   metrics: Metric[];
   imageUrl?: string | null;
+  galleryImages: ProjectImage[];
   githubUrl?: string | null;
   demoUrl?: string | null;
   featured: boolean;

@@ -1,4 +1,5 @@
 import { ExternalLink, Github } from "lucide-react";
+import Image from "next/image";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
 import { MetricCard } from "@/components/MetricCard";
 import { ProjectVisual } from "@/components/ProjectVisual";
@@ -28,6 +29,8 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
 export function CaseStudyLayout({ project, locale = "en" }: { project: Project; locale?: Locale }) {
   const copy = getUiCopy(locale).caseStudy;
   const details = project.caseStudy;
+  const galleryImages = project.galleryImages ?? [];
+  const galleryTitle = locale === "tr" ? "Proje Galerisi" : "Project Gallery";
 
   return (
     <article className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6 md:py-20">
@@ -72,6 +75,26 @@ export function CaseStudyLayout({ project, locale = "en" }: { project: Project; 
           sizes="(min-width: 1200px) 1200px, 100vw"
         />
       </div>
+
+      {galleryImages.length ? (
+        <section className="mt-10">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{galleryTitle}</h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {galleryImages.map((image, index) => (
+              <div key={`${image.url}-${index}`} className="relative aspect-video overflow-hidden border border-border bg-muted">
+                <Image
+                  src={image.url}
+                  alt={image.alt || `${project.title} screenshot ${index + 1}`}
+                  fill
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  unoptimized={image.url.startsWith("/api/uploads/") || image.url.startsWith("http")}
+                  className="object-contain"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="mt-16 grid gap-8 border-y border-border py-8 md:grid-cols-2">
         <div>

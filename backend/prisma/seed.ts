@@ -15,13 +15,22 @@ async function main() {
   });
 
   for (const project of projects) {
+    const { tags, metrics, galleryImages = [], ...projectData } = project;
+
     await prisma.project.upsert({
       where: { slug: project.slug },
       update: {},
       create: {
-        ...project,
-        tags: JSON.stringify(project.tags),
-        metrics: JSON.stringify(project.metrics)
+        ...projectData,
+        tags: JSON.stringify(tags),
+        metrics: JSON.stringify(metrics),
+        projectImages: {
+          create: galleryImages.map((image, index) => ({
+            url: image.url,
+            alt: image.alt ?? null,
+            sortOrder: index
+          }))
+        }
       }
     });
   }

@@ -10,18 +10,39 @@ type Metric = {
 };
 
 type ProjectRecord = Awaited<ReturnType<typeof prisma.project.findFirst>>;
+type ProjectImageRecord = {
+  id: number;
+  url: string;
+  alt: string | null;
+  sortOrder: number;
+  createdAt: Date;
+};
 
-function serializeProject(project: NonNullable<ProjectRecord>) {
+function serializeProject(project: NonNullable<ProjectRecord> & { projectImages?: ProjectImageRecord[] }) {
+  const { projectImages = [], ...projectData } = project;
+
   return {
-    ...project,
+    ...projectData,
     tags: parseJsonField<string[]>(project.tags, []),
     metrics: parseJsonField<Metric[]>(project.metrics, []),
+    galleryImages: projectImages.map((image) => ({
+      id: image.id,
+      url: image.url,
+      alt: image.alt,
+      sortOrder: image.sortOrder,
+      createdAt: image.createdAt
+    })),
     caseStudy: caseStudyDetails[project.slug] ?? null
   };
 }
 
 export async function getProjects() {
   const projects = await prisma.project.findMany({
+    include: {
+      projectImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
+    },
     orderBy: [{ featured: "desc" }, { id: "asc" }]
   });
 
@@ -30,7 +51,12 @@ export async function getProjects() {
 
 export async function getProjectBySlug(slug: string) {
   const project = await prisma.project.findUnique({
-    where: { slug }
+    where: { slug },
+    include: {
+      projectImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
+    }
   });
 
   if (!project) {

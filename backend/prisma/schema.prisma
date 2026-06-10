@@ -8,7 +8,7 @@ datasource db {
 }
 
 model UserProfile {
-  id          Int     @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   name        String
   title       String
   bio         String
@@ -20,23 +20,36 @@ model UserProfile {
 }
 
 model Project {
-  id           Int      @id @default(autoincrement())
-  title        String
-  slug         String   @unique
-  summary      String
-  description  String
-  problem      String
-  challenge    String
-  architecture String
-  results      String
-  tags         String   @default("[]")
-  metrics      String   @default("[]")
-  imageUrl     String?
-  githubUrl    String?
-  demoUrl      String?
-  featured     Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  title         String
+  slug          String         @unique
+  summary       String
+  description   String
+  problem       String
+  challenge     String
+  architecture  String
+  results       String
+  tags          String         @default("[]")
+  metrics       String         @default("[]")
+  imageUrl      String?
+  githubUrl     String?
+  demoUrl       String?
+  featured      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  projectImages ProjectImage[]
+}
+
+model ProjectImage {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sortOrder])
 }
 
 model Post {

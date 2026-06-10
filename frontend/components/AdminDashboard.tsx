@@ -5,6 +5,8 @@ import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } fro
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
+  ArrowDown,
+  ArrowUp,
   CheckCircle2,
   FileText,
   Inbox,
@@ -42,7 +44,7 @@ import {
   updateAdminResume
 } from "@/lib/api";
 import { defaultProfile } from "@/lib/site";
-import type { ContactMessage, Metric, Post, Profile, Project, Resume } from "@/types/content";
+import type { ContactMessage, Metric, Post, Profile, Project, ProjectImage, Resume } from "@/types/content";
 
 type TabKey = "profile" | "projects" | "posts" | "resume" | "contacts";
 
@@ -74,6 +76,7 @@ const emptyProject: ProjectDraft = {
   tags: [],
   metrics: [],
   imageUrl: "",
+  galleryImages: [],
   githubUrl: "",
   demoUrl: "",
   featured: false
@@ -113,6 +116,17 @@ function textToMetrics(value: string): Metric[] {
       return { label, value: metricValue, context };
     })
     .filter((metric) => metric.label && metric.value && metric.context);
+}
+
+function normalizeGalleryImages(images: ProjectImage[]) {
+  return images
+    .filter((image) => image.url.trim())
+    .map((image, index) => ({
+      ...image,
+      url: image.url.trim(),
+      alt: image.alt?.trim() || null,
+      sortOrder: index
+    }));
 }
 
 function Field({
@@ -222,6 +236,7 @@ export function AdminDashboard() {
   const [projectTags, setProjectTags] = useState("");
   const [projectMetrics, setProjectMetrics] = useState("");
   const [projectImageUploading, setProjectImageUploading] = useState(false);
+  const [projectGalleryUploading, setProjectGalleryUploading] = useState(false);
   const [postDraft, setPostDraft] = useState<PostDraft>(emptyPost);
   const [postTags, setPostTags] = useState("");
 
@@ -298,6 +313,7 @@ export function AdminDashboard() {
       tags: project.tags,
       metrics: project.metrics,
       imageUrl: project.imageUrl ?? "",
+      galleryImages: project.galleryImages ?? [],
       githubUrl: project.githubUrl ?? "",
       demoUrl: project.demoUrl ?? "",
       featured: project.featured
@@ -314,21 +330,26 @@ export function AdminDashboard() {
       tags: textToTags(projectTags),
       metrics: textToMetrics(projectMetrics),
       imageUrl: projectDraft.imageUrl || null,
+      galleryImages: normalizeGalleryImages(projectDraft.galleryImages ?? []),
       githubUrl: projectDraft.githubUrl || null,
       demoUrl: projectDraft.demoUrl || null
     };
 
-    if (projectDraft.id) {
-      await updateAdminProject(token, projectDraft.id, payload);
-    } else {
-      await createAdminProject(token, payload);
-    }
+    try {
+      if (projectDraft.id) {
+        await updateAdminProject(token, projectDraft.id, payload);
+      } else {
+        await createAdminProject(token, payload);
+      }
 
-    setProjectDraft(emptyProject);
-    setProjectTags("");
-    setProjectMetrics("");
-    await loadData(token);
-    setStatus("Project saved.");
+      setProjectDraft(emptyProject);
+      setProjectTags("");
+      setProjectMetrics("");
+      await loadData(token);
+      setStatus("Project saved.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Project save failed.");
+    }
   }
 
   async function uploadProjectImage(event: ChangeEvent<HTMLInputElement>) {
@@ -351,6 +372,74 @@ export function AdminDashboard() {
       setProjectImageUploading(false);
       event.target.value = "";
     }
+  }
+
+  async function uploadProjectGalleryImages(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    setProjectGalleryUploading(true);
+    setStatus("Uploading gallery images...");
+
+    try {
+      const uploadedImages = await Promise.all(
+        files.map((file) => uploadAdminProjectImage(token, file))
+      );
+      setProjectDraft((draft) => {
+        const existingImages = draft.galleryImages ?? [];
+        const startIndex = existingImages.length;
+        const nextImages = uploadedImages.map(({ imageUrl }, index) => ({
+          url: imageUrl,
+          alt: draft.title ? `${draft.title} screenshot ${startIndex + index + 1}` : null,
+          sortOrder: startIndex + index
+        }));
+
+        return {
+          ...draft,
+          galleryImages: normalizeGalleryImages([...existingImages, ...nextImages])
+        };
+      });
+      setStatus("Gallery images uploaded. Save the project to keep them.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Gallery image upload failed.");
+    } finally {
+      setProjectGalleryUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  function updateProjectGalleryImage(index: number, patch: Partial<ProjectImage>) {
+    setProjectDraft((draft) => ({
+      ...draft,
+      galleryImages: (draft.galleryImages ?? []).map((image, imageIndex) =>
+        imageIndex === index ? { ...image, ...patch } : image
+      )
+    }));
+  }
+
+  function removeProjectGalleryImage(index: number) {
+    setProjectDraft((draft) => ({
+      ...draft,
+      galleryImages: normalizeGalleryImages((draft.galleryImages ?? []).filter((_, imageIndex) => imageIndex !== index))
+    }));
+  }
+
+  function moveProjectGalleryImage(index: number, direction: -1 | 1) {
+    setProjectDraft((draft) => {
+      const images = [...(draft.galleryImages ?? [])];
+      const nextIndex = index + direction;
+
+      if (nextIndex < 0 || nextIndex >= images.length) {
+        return draft;
+      }
+
+      [images[index], images[nextIndex]] = [images[nextIndex], images[index]];
+
+      return {
+        ...draft,
+        galleryImages: normalizeGalleryImages(images)
+      };
+    });
   }
 
   async function removeProject(id: number) {
@@ -496,6 +585,99 @@ export function AdminDashboard() {
                   )}
                 </div>
               ) : null}
+              <div className="grid gap-3 border-t border-border pt-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <label className="block min-w-[220px] flex-1 space-y-2 text-sm">
+                    <span className="text-muted-foreground">Gallery images</span>
+                    <Input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      disabled={projectGalleryUploading}
+                      onChange={(event) => void uploadProjectGalleryImages(event)}
+                    />
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    {(projectDraft.galleryImages ?? []).length} image{(projectDraft.galleryImages ?? []).length === 1 ? "" : "s"}
+                  </p>
+                </div>
+                {(projectDraft.galleryImages ?? []).length ? (
+                  <div className="grid gap-3">
+                    {(projectDraft.galleryImages ?? []).map((image, index) => (
+                      <div key={`${image.url}-${index}`} className="grid gap-3 rounded-md border border-border p-3 md:grid-cols-[150px_1fr]">
+                        <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+                          {image.url.startsWith("/") ? (
+                            <Image
+                              src={image.url}
+                              alt={image.alt || "Gallery image preview"}
+                              fill
+                              sizes="150px"
+                              unoptimized={image.url.startsWith("/api/uploads/")}
+                              className="object-contain"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center px-3 text-center text-xs text-muted-foreground">
+                              External image
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid gap-2">
+                          <Input
+                            value={image.url}
+                            onChange={(event) => updateProjectGalleryImage(index, { url: event.target.value })}
+                            aria-label={`Gallery image ${index + 1} URL`}
+                          />
+                          <Input
+                            value={image.alt ?? ""}
+                            onChange={(event) => updateProjectGalleryImage(index, { alt: event.target.value })}
+                            aria-label={`Gallery image ${index + 1} alt text`}
+                            placeholder="Alt text"
+                          />
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setProjectDraft({ ...projectDraft, imageUrl: image.url })}
+                            >
+                              Use as cover
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              title="Move up"
+                              disabled={index === 0}
+                              onClick={() => moveProjectGalleryImage(index, -1)}
+                            >
+                              <ArrowUp size={15} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              title="Move down"
+                              disabled={index === (projectDraft.galleryImages ?? []).length - 1}
+                              onClick={() => moveProjectGalleryImage(index, 1)}
+                            >
+                              <ArrowDown size={15} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              title="Remove image"
+                              onClick={() => removeProjectGalleryImage(index)}
+                            >
+                              <Trash2 size={15} />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
               <Field label="Summary" value={projectDraft.summary} onChange={(value) => setProjectDraft({ ...projectDraft, summary: value })} multiline />
               <Field label="Description" value={projectDraft.description} onChange={(value) => setProjectDraft({ ...projectDraft, description: value })} multiline />
               <Field label="Problem" value={projectDraft.problem} onChange={(value) => setProjectDraft({ ...projectDraft, problem: value })} multiline />
@@ -516,9 +698,9 @@ export function AdminDashboard() {
                 />
                 Featured project
               </label>
-              <Button type="submit" className="w-fit">
-                {projectImageUploading ? <Upload size={17} /> : <Save size={17} />}
-                {projectImageUploading ? "Uploading image..." : "Save project"}
+              <Button type="submit" className="w-fit" disabled={projectImageUploading || projectGalleryUploading}>
+                {projectImageUploading || projectGalleryUploading ? <Upload size={17} /> : <Save size={17} />}
+                {projectImageUploading || projectGalleryUploading ? "Uploading image..." : "Save project"}
               </Button>
             </form>
           </Card>

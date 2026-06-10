@@ -16,6 +16,10 @@ export type SeedProject = {
   tags: string[];
   metrics: SeedMetric[];
   imageUrl?: string;
+  galleryImages?: Array<{
+    url: string;
+    alt?: string;
+  }>;
   githubUrl?: string;
   demoUrl?: string;
   featured: boolean;

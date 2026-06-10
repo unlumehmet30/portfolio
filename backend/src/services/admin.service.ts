@@ -12,25 +12,31 @@ const optionalUrl = z.preprocess(
   z.string().url().nullable().optional()
 );
 
+const imageUrl = z
+  .string()
+  .trim()
+  .min(1)
+  .refine((value) => {
+    if (value.startsWith("/")) return true;
+
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return false;
+    }
+  }, {
+    message: "Image URL must be a relative path or a valid URL"
+  });
+
 const optionalImageUrl = z.preprocess(
   (value) => (value === "" || value === null ? null : value),
-  z
-    .string()
-    .trim()
-    .refine((value) => {
-      if (value.startsWith("/")) return true;
+  imageUrl.nullable().optional()
+);
 
-      try {
-        new URL(value);
-        return true;
-      } catch {
-        return false;
-      }
-    }, {
-      message: "Image URL must be a relative path or a valid URL"
-    })
-    .nullable()
-    .optional()
+const optionalImageAlt = z.preprocess(
+  (value) => (value === "" || value === null ? null : value),
+  z.string().trim().nullable().optional()
 );
 
 export const loginSchema = z.object({
@@ -55,6 +61,13 @@ const metricSchema = z.object({
   context: z.string().trim().min(1)
 });
 
+const projectGalleryImageSchema = z.object({
+  id: z.number().int().positive().optional(),
+  url: imageUrl,
+  alt: optionalImageAlt,
+  sortOrder: z.number().int().nonnegative().optional()
+});
+
 export const projectSchema = z.object({
   title: z.string().trim().min(1),
   slug: z.string().trim().optional(),
@@ -67,6 +80,7 @@ export const projectSchema = z.object({
   tags: z.array(z.string().trim().min(1)).default([]),
   metrics: z.array(metricSchema).default([]),
   imageUrl: optionalImageUrl,
+  galleryImages: z.array(projectGalleryImageSchema).default([]),
   githubUrl: optionalUrl,
   demoUrl: optionalUrl,
   featured: z.boolean().default(false)
@@ -110,6 +124,14 @@ export const resumeSchema = z.object({
   })
 });
 
+type ProjectImageRecord = {
+  id: number;
+  url: string;
+  alt: string | null;
+  sortOrder: number;
+  createdAt: Date;
+};
+
 function serializeProject(project: {
   id: number;
   title: string;
@@ -128,12 +150,30 @@ function serializeProject(project: {
   featured: boolean;
   createdAt: Date;
   updatedAt: Date;
+  projectImages?: ProjectImageRecord[];
 }) {
+  const { projectImages = [], ...projectData } = project;
+
   return {
-    ...project,
+    ...projectData,
     tags: parseJsonField<string[]>(project.tags, []),
-    metrics: parseJsonField<z.infer<typeof metricSchema>[]>(project.metrics, [])
+    metrics: parseJsonField<z.infer<typeof metricSchema>[]>(project.metrics, []),
+    galleryImages: projectImages.map((image) => ({
+      id: image.id,
+      url: image.url,
+      alt: image.alt,
+      sortOrder: image.sortOrder,
+      createdAt: image.createdAt
+    }))
   };
+}
+
+function normalizeProjectImages(images: z.infer<typeof projectGalleryImageSchema>[]) {
+  return images.map((image, index) => ({
+    url: image.url,
+    alt: image.alt ?? null,
+    sortOrder: image.sortOrder ?? index
+  }));
 }
 
 function serializePost(post: {
@@ -191,6 +231,11 @@ export async function adminUpdateProfile(input: unknown) {
 
 export async function adminListProjects() {
   const projects = await prisma.project.findMany({
+    include: {
+      projectImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
+    },
     orderBy: [{ featured: "desc" }, { id: "asc" }]
   });
 
@@ -200,13 +245,22 @@ export async function adminListProjects() {
 export async function adminCreateProject(input: unknown) {
   const data = projectSchema.parse(input);
   const slug = data.slug ? slugify(data.slug) : slugify(data.title);
+  const { galleryImages, ...projectData } = data;
 
   const project = await prisma.project.create({
     data: {
-      ...data,
+      ...projectData,
       slug,
-      tags: JSON.stringify(data.tags),
-      metrics: JSON.stringify(data.metrics)
+      tags: JSON.stringify(projectData.tags),
+      metrics: JSON.stringify(projectData.metrics),
+      projectImages: {
+        create: normalizeProjectImages(galleryImages)
+      }
+    },
+    include: {
+      projectImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
     }
   });
 
@@ -216,14 +270,24 @@ export async function adminCreateProject(input: unknown) {
 export async function adminUpdateProject(id: number, input: unknown) {
   const data = projectSchema.parse(input);
   const slug = data.slug ? slugify(data.slug) : slugify(data.title);
+  const { galleryImages, ...projectData } = data;
 
   const project = await prisma.project.update({
     where: { id },
     data: {
-      ...data,
+      ...projectData,
       slug,
-      tags: JSON.stringify(data.tags),
-      metrics: JSON.stringify(data.metrics)
+      tags: JSON.stringify(projectData.tags),
+      metrics: JSON.stringify(projectData.metrics),
+      projectImages: {
+        deleteMany: {},
+        create: normalizeProjectImages(galleryImages)
+      }
+    },
+    include: {
+      projectImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
     }
   });
 
