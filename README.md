@@ -157,9 +157,11 @@ docker compose up -d --build
 Caddy publishes ports `80` and `443`, obtains an HTTPS certificate, and routes `/api` to
 the backend while routing all other requests to the frontend. The frontend and backend
 ports are only exposed inside the Compose network. The backend container runs
-`prisma db push`, creates any missing initial content, and starts the API. Existing content
-edited through the admin panel is not overwritten on restart. SQLite data and Caddy
-certificates are stored in named Docker volumes.
+`prisma db push`, seeds only when the database has no core content, and starts the API.
+Existing content edited through the admin panel is not overwritten on restart. SQLite
+data, uploaded project images, and Caddy certificates are stored in named Docker volumes.
+Do not use `docker compose down -v` in production unless you intentionally want to delete
+the SQLite database, uploaded images, and Caddy certificate volumes.
 
 `SITE_HOST`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `ADMIN_PASSWORD`, and
 `ADMIN_SESSION_SECRET` are required in Compose to prevent accidental production defaults.

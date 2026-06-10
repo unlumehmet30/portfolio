@@ -1,10 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+import { pathToFileURL } from "url";
 import { posts, profile, projects } from "../src/data/content.js";
 import { resume } from "../src/data/resume.js";
 
-const prisma = new PrismaClient();
-
-async function main() {
+export async function seedDatabase(prisma: PrismaClient) {
   await prisma.userProfile.upsert({
     where: { id: 1 },
     update: {},
@@ -56,13 +55,24 @@ async function main() {
   });
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
+async function main() {
+  const prisma = new PrismaClient();
+
+  try {
+    await seedDatabase(prisma);
     console.info("Database seeded.");
-  })
-  .catch(async (error) => {
-    console.error(error);
+  } finally {
     await prisma.$disconnect();
+  }
+}
+
+const isDirectRun = process.argv[1]
+  ? import.meta.url === pathToFileURL(process.argv[1]).href
+  : false;
+
+if (isDirectRun) {
+  main().catch((error) => {
+    console.error(error);
     process.exit(1);
   });
+}
