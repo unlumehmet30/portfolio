@@ -84,16 +84,24 @@ export function CaseStudyLayout({ project, locale = "en" }: { project: Project; 
         </div>
       </div>
 
-      <div className="mt-14">
-        <ProjectVisual
-          project={project}
+      {galleryImages.length ? (
+        <ProjectGallery
+          title={galleryTitle}
+          projectTitle={project.title}
+          images={galleryImages}
           locale={locale}
-          className="aspect-[16/7] md:min-h-[300px]"
-          sizes="(min-width: 1200px) 1200px, 100vw"
+          className="mt-14"
         />
-      </div>
-
-      <ProjectGallery title={galleryTitle} projectTitle={project.title} images={galleryImages} locale={locale} />
+      ) : (
+        <div className="mt-14">
+          <ProjectVisual
+            project={project}
+            locale={locale}
+            className="aspect-[16/7] md:min-h-[300px]"
+            sizes="(min-width: 1200px) 1200px, 100vw"
+          />
+        </div>
+      )}
 
       <div className="mt-16 grid gap-8 border-y border-border py-8 md:grid-cols-2">
         <div>

@@ -14,6 +14,7 @@ type ProjectGalleryProps = {
   projectTitle: string;
   images: ProjectImage[];
   locale?: Locale;
+  className?: string;
 };
 
 function shouldSkipOptimization(src: string) {
@@ -29,7 +30,7 @@ function isTextInputTarget(target: EventTarget | null) {
   );
 }
 
-export function ProjectGallery({ title, projectTitle, images, locale = "en" }: ProjectGalleryProps) {
+export function ProjectGallery({ title, projectTitle, images, locale = "en", className }: ProjectGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const pointerStartX = useRef<number | null>(null);
@@ -131,7 +132,10 @@ export function ProjectGallery({ title, projectTitle, images, locale = "en" }: P
 
   return (
     <section
-      className="mt-10 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+      className={cn(
+        "mt-10 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
+        className
+      )}
       aria-label={title}
       onKeyDown={handleKeyDown}
       tabIndex={0}
