@@ -486,7 +486,7 @@ export function AdminDashboard() {
                         fill
                         sizes="(min-width: 1280px) 420px, 100vw"
                         unoptimized={projectDraft.imageUrl.startsWith("/api/uploads/")}
-                        className="object-cover"
+                        className="object-contain"
                       />
                     </div>
                   ) : (

@@ -157,6 +157,7 @@ export function ProjectVisual({
 }) {
   const visual = getProjectVisual(project?.slug);
   const imageSrc = project?.imageUrl || visual.src;
+  const hasUploadedImage = Boolean(project?.imageUrl);
   const shouldSkipOptimization =
     Boolean(imageSrc) && (imageSrc!.startsWith("/api/uploads/") || imageSrc!.startsWith("http"));
   const placeholderLabel = locale === "tr" ? "Görsel yer tutucu" : "Visual placeholder";
@@ -180,7 +181,7 @@ export function ProjectVisual({
           fill
           sizes={sizes}
           unoptimized={shouldSkipOptimization}
-          className="object-cover"
+          className={hasUploadedImage ? "object-contain" : "object-cover"}
         />
       ) : (
         <>
