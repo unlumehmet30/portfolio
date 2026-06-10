@@ -10,6 +10,23 @@ import { type Locale } from "@/lib/locale";
 import { getUiCopy } from "@/lib/ui-copy";
 import type { Project } from "@/types/content";
 
+function getProjectGalleryImages(project: Project) {
+  const galleryImages = project.galleryImages ?? [];
+
+  if (!project.imageUrl) {
+    return galleryImages;
+  }
+
+  return [
+    {
+      url: project.imageUrl,
+      alt: project.title,
+      sortOrder: -1
+    },
+    ...galleryImages.filter((image) => image.url !== project.imageUrl)
+  ];
+}
+
 function ListBlock({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="border-t border-border pt-5">
@@ -29,7 +46,7 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
 export function CaseStudyLayout({ project, locale = "en" }: { project: Project; locale?: Locale }) {
   const copy = getUiCopy(locale).caseStudy;
   const details = project.caseStudy;
-  const galleryImages = project.galleryImages ?? [];
+  const galleryImages = getProjectGalleryImages(project);
   const galleryTitle = locale === "tr" ? "Proje Galerisi" : "Project Gallery";
 
   return (
