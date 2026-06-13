@@ -171,18 +171,27 @@ export function ProjectVisual({
     <div
       className={cn(
         "relative isolate overflow-hidden border border-border bg-card",
+        hasUploadedImage && "media-color-stage",
         className
       )}
     >
       {imageSrc ? (
-        <Image
-          src={imageSrc}
-          alt={imageAlt}
-          fill
-          sizes={sizes}
-          unoptimized={shouldSkipOptimization}
-          className={hasUploadedImage ? "object-contain" : "object-cover"}
-        />
+        <>
+          <Image
+            src={imageSrc}
+            alt={imageAlt}
+            fill
+            sizes={sizes}
+            unoptimized={shouldSkipOptimization}
+            className={cn(hasUploadedImage ? "object-contain" : "object-cover", hasUploadedImage && "z-10")}
+          />
+          {hasUploadedImage ? (
+            <>
+              <div aria-hidden="true" className="media-color-tint pointer-events-none absolute inset-0 z-20" />
+              <div aria-hidden="true" className="media-color-vignette pointer-events-none absolute inset-0 z-30" />
+            </>
+          ) : null}
+        </>
       ) : (
         <>
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-accent/[0.08] via-transparent to-foreground/[0.03]" />

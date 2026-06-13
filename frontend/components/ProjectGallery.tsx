@@ -169,7 +169,7 @@ export function ProjectGallery({ title, projectTitle, images, locale = "en", cla
       </div>
 
       <div
-        className="relative overflow-hidden border border-border bg-muted touch-pan-y"
+        className="media-color-stage relative overflow-hidden border border-border touch-pan-y"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
@@ -177,7 +177,7 @@ export function ProjectGallery({ title, projectTitle, images, locale = "en", cla
       >
         <div
           className={cn(
-            "flex transition-transform duration-300 ease-out",
+            "relative z-10 flex transition-transform duration-300 ease-out",
             pointerStartX.current !== null && "transition-none"
           )}
           style={{
@@ -198,6 +198,8 @@ export function ProjectGallery({ title, projectTitle, images, locale = "en", cla
             </div>
           ))}
         </div>
+        <div aria-hidden="true" className="media-color-tint pointer-events-none absolute inset-0 z-20" />
+        <div aria-hidden="true" className="media-color-vignette pointer-events-none absolute inset-0 z-30" />
       </div>
 
       {canNavigate ? (
