@@ -4,14 +4,23 @@
     -Server
     -Via
     -X-Powered-By
+    defer
   }
 
   @api path /api /api/*
   handle @api {
-    reverse_proxy backend:8080
+    reverse_proxy backend:8080 {
+      header_down -Server
+      header_down -Via
+      header_down -X-Powered-By
+    }
   }
 
   handle {
-    reverse_proxy frontend:3001
+    reverse_proxy frontend:3001 {
+      header_down -Server
+      header_down -Via
+      header_down -X-Powered-By
+    }
   }
 }
