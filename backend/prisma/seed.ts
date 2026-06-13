@@ -35,12 +35,21 @@ export async function seedDatabase(prisma: PrismaClient) {
   }
 
   for (const post of posts) {
+    const { tags, images = [], ...postData } = post;
+
     await prisma.post.upsert({
       where: { slug: post.slug },
       update: {},
       create: {
-        ...post,
-        tags: JSON.stringify(post.tags)
+        ...postData,
+        tags: JSON.stringify(tags),
+        postImages: {
+          create: images.map((image, index) => ({
+            url: image.url,
+            alt: image.alt ?? null,
+            sortOrder: index
+          }))
+        }
       }
     });
   }

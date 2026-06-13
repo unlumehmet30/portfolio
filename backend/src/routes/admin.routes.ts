@@ -8,6 +8,7 @@ import {
   adminMeController,
   adminPostCreateController,
   adminPostDeleteController,
+  adminPostImageUploadController,
   adminPostsController,
   adminPostUpdateController,
   adminProfileController,
@@ -21,7 +22,7 @@ import {
   adminResumeUpdateController
 } from "../controllers/admin.controller.js";
 import { requireAdmin } from "../middleware/admin-auth.js";
-import { projectImageUpload } from "../middleware/project-image-upload.js";
+import { postImageUpload, projectImageUpload } from "../middleware/project-image-upload.js";
 import { createRateLimit } from "../middleware/rate-limit.js";
 
 export const adminRouter = Router();
@@ -63,6 +64,11 @@ adminRouter.post(
   "/uploads/project-image",
   projectImageUpload.single("image"),
   adminProjectImageUploadController
+);
+adminRouter.post(
+  "/uploads/post-image",
+  postImageUpload.single("image"),
+  adminPostImageUploadController
 );
 
 adminRouter.get("/posts", adminPostsController);

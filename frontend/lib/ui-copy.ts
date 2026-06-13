@@ -295,11 +295,11 @@ const uiCopy: Record<Locale, UiCopy> = {
     notes: {
       metadataTitle: "Notes",
       metadataDescription:
-        "Short technical notes by Mehmet Ünlü on forecasting, validation, metrics, optimization, visual odometry, and speech workflows.",
+        "Technical notes, course notes, visual explanations, and cheat sheets by Mehmet Ünlü on AI, ML, forecasting, computer vision, and systems.",
       eyebrow: "Notes",
-      title: "Small writeups from the workbench.",
+      title: "Technical notes, diagrams, and build writeups.",
       description:
-        "Short writing around validation choices, metrics, optimization, visual odometry, and speech-processing workflows.",
+        "A mixed notebook for blog-style build logs, AI course notes, visual explanations, and compact cheat sheets.",
       empty: "No notes are available yet. Start the backend and seed the database.",
       fallbackDetailTitle: "Note"
     },
@@ -501,11 +501,11 @@ const uiCopy: Record<Locale, UiCopy> = {
     notes: {
       metadataTitle: "Notlar",
       metadataDescription:
-        "Mehmet Ünlü'den tahminleme, doğrulama, optimizasyon, görsel odometri ve konuşma iş akışları üzerine teknik notlar.",
+        "Mehmet Ünlü'den AI, ML, tahminleme, bilgisayarlı görü ve sistemler üzerine teknik notlar, ders notları, görsel anlatımlar ve özet kartları.",
       eyebrow: "Notlar",
-      title: "Çalışma masasından kısa yazılar.",
+      title: "Teknik notlar, çizimler ve geliştirme yazıları.",
       description:
-        "Doğrulama stratejileri, metrikler, optimizasyon, görsel odometri ve konuşma işleme akışları üzerine kısa teknik notlar.",
+        "Blog tarzı geliştirme notları, AI ders notları, görsel anlatımlar ve kısa özet kartları için düzenli bir arşiv.",
       empty: "Henüz not yok. Backend'i çalıştırıp veritabanını seed et.",
       fallbackDetailTitle: "Not"
     },

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BlogCard } from "@/components/BlogCard";
+import { NotesFilter } from "@/components/NotesFilter";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getPosts } from "@/lib/api";
 import { localizePosts } from "@/lib/content-localization";
@@ -32,11 +32,7 @@ export default async function TurkishNotesPage() {
         description={copy.description}
       />
       {posts.length ? (
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <BlogCard key={post.slug} post={post} locale="tr" />
-          ))}
-        </div>
+        <NotesFilter posts={posts} locale="tr" />
       ) : (
         <div className="mt-12 rounded-lg border border-border bg-card p-6 text-muted-foreground">
           {copy.empty}

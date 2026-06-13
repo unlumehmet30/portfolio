@@ -53,15 +53,30 @@ model ProjectImage {
 }
 
 model Post {
+  id            Int         @id @default(autoincrement())
+  title         String
+  slug          String      @unique
+  excerpt       String
+  content       String
+  type          String      @default("blog")
+  tags          String      @default("[]")
+  coverImageUrl String?
+  published     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  postImages    PostImage[]
+}
+
+model PostImage {
   id        Int      @id @default(autoincrement())
-  title     String
-  slug      String   @unique
-  excerpt   String
-  content   String
-  tags      String   @default("[]")
-  published Boolean  @default(false)
+  postId    Int
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, sortOrder])
 }
 
 model ContactMessage {

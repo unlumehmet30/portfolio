@@ -37,6 +37,7 @@ import {
   getAdminProjects,
   getAdminResume,
   markAdminContactMessageHandled,
+  uploadAdminPostImage,
   uploadAdminProjectImage,
   updateAdminPost,
   updateAdminProfile,
@@ -44,7 +45,7 @@ import {
   updateAdminResume
 } from "@/lib/api";
 import { defaultProfile } from "@/lib/site";
-import type { ContactMessage, Metric, Post, Profile, Project, ProjectImage, Resume } from "@/types/content";
+import type { ContactMessage, Metric, Post, PostImage, PostType, Profile, Project, ProjectImage, Resume } from "@/types/content";
 
 type TabKey = "profile" | "projects" | "posts" | "resume" | "contacts";
 
@@ -62,6 +63,13 @@ const tabs: Array<{ key: TabKey; label: string; icon: typeof UserRound }> = [
   { key: "posts", label: "Notes", icon: FileText },
   { key: "resume", label: "Resume", icon: Save },
   { key: "contacts", label: "Messages", icon: Inbox }
+];
+
+const noteTypes: Array<{ value: PostType; label: string }> = [
+  { value: "blog", label: "Blog" },
+  { value: "course-note", label: "Course note" },
+  { value: "visual-note", label: "Visual note" },
+  { value: "cheatsheet", label: "Cheat sheet" }
 ];
 
 const emptyProject: ProjectDraft = {
@@ -87,7 +95,10 @@ const emptyPost: PostDraft = {
   slug: "",
   excerpt: "",
   content: "",
+  type: "blog",
   tags: [],
+  coverImageUrl: "",
+  images: [],
   published: false
 };
 
@@ -119,6 +130,17 @@ function textToMetrics(value: string): Metric[] {
 }
 
 function normalizeGalleryImages(images: ProjectImage[]) {
+  return images
+    .filter((image) => image.url.trim())
+    .map((image, index) => ({
+      ...image,
+      url: image.url.trim(),
+      alt: image.alt?.trim() || null,
+      sortOrder: index
+    }));
+}
+
+function normalizePostImages(images: PostImage[]) {
   return images
     .filter((image) => image.url.trim())
     .map((image, index) => ({
@@ -239,6 +261,8 @@ export function AdminDashboard() {
   const [projectGalleryUploading, setProjectGalleryUploading] = useState(false);
   const [postDraft, setPostDraft] = useState<PostDraft>(emptyPost);
   const [postTags, setPostTags] = useState("");
+  const [postCoverUploading, setPostCoverUploading] = useState(false);
+  const [postGalleryUploading, setPostGalleryUploading] = useState(false);
 
   const selectedProjectTitle = useMemo(
     () => (projectDraft.id ? `Editing #${projectDraft.id}` : "New project"),
@@ -456,7 +480,10 @@ export function AdminDashboard() {
       slug: post.slug,
       excerpt: post.excerpt,
       content: post.content,
+      type: post.type,
       tags: post.tags,
+      coverImageUrl: post.coverImageUrl ?? "",
+      images: post.images ?? [],
       published: post.published
     });
     setPostTags(tagsToText(post.tags));
@@ -467,19 +494,115 @@ export function AdminDashboard() {
     setStatus("Saving note...");
     const payload = {
       ...postDraft,
-      tags: textToTags(postTags)
+      tags: textToTags(postTags),
+      coverImageUrl: postDraft.coverImageUrl || null,
+      images: normalizePostImages(postDraft.images ?? [])
     };
 
-    if (postDraft.id) {
-      await updateAdminPost(token, postDraft.id, payload);
-    } else {
-      await createAdminPost(token, payload);
-    }
+    try {
+      if (postDraft.id) {
+        await updateAdminPost(token, postDraft.id, payload);
+      } else {
+        await createAdminPost(token, payload);
+      }
 
-    setPostDraft(emptyPost);
-    setPostTags("");
-    await loadData(token);
-    setStatus("Note saved.");
+      setPostDraft(emptyPost);
+      setPostTags("");
+      await loadData(token);
+      setStatus("Note saved.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Note save failed.");
+    }
+  }
+
+  async function uploadPostCoverImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setPostCoverUploading(true);
+    setStatus("Uploading note cover image...");
+
+    try {
+      const { imageUrl } = await uploadAdminPostImage(token, file);
+      setPostDraft((draft) => ({
+        ...draft,
+        coverImageUrl: imageUrl
+      }));
+      setStatus("Note cover image uploaded. Save the note to keep it.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Note cover image upload failed.");
+    } finally {
+      setPostCoverUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  async function uploadPostGalleryImages(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    setPostGalleryUploading(true);
+    setStatus("Uploading note images...");
+
+    try {
+      const uploadedImages = await Promise.all(
+        files.map((file) => uploadAdminPostImage(token, file))
+      );
+      setPostDraft((draft) => {
+        const existingImages = draft.images ?? [];
+        const startIndex = existingImages.length;
+        const nextImages = uploadedImages.map(({ imageUrl }, index) => ({
+          url: imageUrl,
+          alt: draft.title ? `${draft.title} visual ${startIndex + index + 1}` : null,
+          sortOrder: startIndex + index
+        }));
+
+        return {
+          ...draft,
+          images: normalizePostImages([...existingImages, ...nextImages])
+        };
+      });
+      setStatus("Note images uploaded. Save the note to keep them.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Note image upload failed.");
+    } finally {
+      setPostGalleryUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  function updatePostImage(index: number, patch: Partial<PostImage>) {
+    setPostDraft((draft) => ({
+      ...draft,
+      images: (draft.images ?? []).map((image, imageIndex) =>
+        imageIndex === index ? { ...image, ...patch } : image
+      )
+    }));
+  }
+
+  function removePostImage(index: number) {
+    setPostDraft((draft) => ({
+      ...draft,
+      images: normalizePostImages((draft.images ?? []).filter((_, imageIndex) => imageIndex !== index))
+    }));
+  }
+
+  function movePostImage(index: number, direction: -1 | 1) {
+    setPostDraft((draft) => {
+      const images = [...(draft.images ?? [])];
+      const nextIndex = index + direction;
+
+      if (nextIndex < 0 || nextIndex >= images.length) {
+        return draft;
+      }
+
+      [images[index], images[nextIndex]] = [images[nextIndex], images[index]];
+
+      return {
+        ...draft,
+        images: normalizePostImages(images)
+      };
+    });
   }
 
   async function removePost(id: number) {
@@ -741,8 +864,147 @@ export function AdminDashboard() {
             <form onSubmit={savePost} className="grid gap-4">
               <Field label="Title" value={postDraft.title} onChange={(value) => setPostDraft({ ...postDraft, title: value })} />
               <Field label="Slug" value={postDraft.slug} onChange={(value) => setPostDraft({ ...postDraft, slug: value })} />
+              <label className="block space-y-2 text-sm">
+                <span className="text-muted-foreground">Note type</span>
+                <select
+                  value={postDraft.type}
+                  onChange={(event) => setPostDraft({ ...postDraft, type: event.target.value as PostType })}
+                  className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {noteTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+                <Field label="Cover image URL" value={postDraft.coverImageUrl ?? ""} onChange={(value) => setPostDraft({ ...postDraft, coverImageUrl: value })} />
+                <label className="block space-y-2 text-sm">
+                  <span className="text-muted-foreground">Upload cover</span>
+                  <Input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    disabled={postCoverUploading}
+                    onChange={(event) => void uploadPostCoverImage(event)}
+                  />
+                </label>
+              </div>
+              {postDraft.coverImageUrl ? (
+                <div className="relative overflow-hidden rounded-md border border-border bg-muted">
+                  {postDraft.coverImageUrl.startsWith("/") ? (
+                    <div className="relative aspect-[16/8]">
+                      <Image
+                        src={postDraft.coverImageUrl}
+                        alt="Note cover preview"
+                        fill
+                        sizes="(min-width: 1280px) 520px, 100vw"
+                        unoptimized={postDraft.coverImageUrl.startsWith("/api/uploads/")}
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-3 text-xs text-muted-foreground">
+                      External cover URL set. Preview is shown after saving if the domain is allowed.
+                    </div>
+                  )}
+                </div>
+              ) : null}
               <Field label="Excerpt" value={postDraft.excerpt} onChange={(value) => setPostDraft({ ...postDraft, excerpt: value })} multiline />
               <Field label="Content" value={postDraft.content} onChange={(value) => setPostDraft({ ...postDraft, content: value })} multiline />
+              <div className="grid gap-3 border-t border-border pt-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <label className="block min-w-[220px] flex-1 space-y-2 text-sm">
+                    <span className="text-muted-foreground">Note images / diagrams</span>
+                    <Input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      disabled={postGalleryUploading}
+                      onChange={(event) => void uploadPostGalleryImages(event)}
+                    />
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    {(postDraft.images ?? []).length} image{(postDraft.images ?? []).length === 1 ? "" : "s"}
+                  </p>
+                </div>
+                {(postDraft.images ?? []).length ? (
+                  <div className="grid gap-3">
+                    {(postDraft.images ?? []).map((image, index) => (
+                      <div key={`${image.url}-${index}`} className="grid gap-3 rounded-md border border-border p-3 md:grid-cols-[150px_1fr]">
+                        <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+                          {image.url.startsWith("/") ? (
+                            <Image
+                              src={image.url}
+                              alt={image.alt || "Note image preview"}
+                              fill
+                              sizes="150px"
+                              unoptimized={image.url.startsWith("/api/uploads/")}
+                              className="object-contain"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center px-3 text-center text-xs text-muted-foreground">
+                              External image
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid gap-2">
+                          <Input
+                            value={image.url}
+                            onChange={(event) => updatePostImage(index, { url: event.target.value })}
+                            aria-label={`Note image ${index + 1} URL`}
+                          />
+                          <Input
+                            value={image.alt ?? ""}
+                            onChange={(event) => updatePostImage(index, { alt: event.target.value })}
+                            aria-label={`Note image ${index + 1} alt text`}
+                            placeholder="Alt text"
+                          />
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setPostDraft({ ...postDraft, coverImageUrl: image.url })}
+                            >
+                              Use as cover
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              title="Move up"
+                              disabled={index === 0}
+                              onClick={() => movePostImage(index, -1)}
+                            >
+                              <ArrowUp size={15} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              title="Move down"
+                              disabled={index === (postDraft.images ?? []).length - 1}
+                              onClick={() => movePostImage(index, 1)}
+                            >
+                              <ArrowDown size={15} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              title="Remove image"
+                              onClick={() => removePostImage(index)}
+                            >
+                              <Trash2 size={15} />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
               <Field label="Tags comma separated" value={postTags} onChange={setPostTags} />
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <input
@@ -752,9 +1014,9 @@ export function AdminDashboard() {
                 />
                 Published
               </label>
-              <Button type="submit" className="w-fit">
-                <Save size={17} />
-                Save note
+              <Button type="submit" className="w-fit" disabled={postCoverUploading || postGalleryUploading}>
+                {postCoverUploading || postGalleryUploading ? <Upload size={17} /> : <Save size={17} />}
+                {postCoverUploading || postGalleryUploading ? "Uploading image..." : "Save note"}
               </Button>
             </form>
           </Card>
@@ -764,10 +1026,12 @@ export function AdminDashboard() {
               {posts.map((post) => (
                 <div key={post.id} className="rounded-lg border border-border p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold">{post.title}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{post.published ? "Published" : "Draft"} · {post.slug}</p>
-                    </div>
+	                    <div>
+	                      <p className="font-semibold">{post.title}</p>
+	                      <p className="mt-1 text-sm text-muted-foreground">
+	                        {noteTypes.find((type) => type.value === post.type)?.label ?? post.type} · {post.published ? "Published" : "Draft"} · {post.slug}
+	                      </p>
+	                    </div>
                     <div className="flex gap-2">
                       <Button type="button" variant="outline" size="sm" onClick={() => editPost(post)}>Edit</Button>
                       <Button type="button" variant="ghost" size="sm" onClick={() => void removePost(post.id)}>

@@ -46,6 +46,16 @@ export type ProjectImage = {
   createdAt?: string;
 };
 
+export type PostType = "blog" | "course-note" | "visual-note" | "cheatsheet";
+
+export type PostImage = {
+  id?: number;
+  url: string;
+  alt?: string | null;
+  sortOrder?: number;
+  createdAt?: string;
+};
+
 export type Project = {
   id: number;
   title: string;
@@ -74,7 +84,10 @@ export type Post = {
   slug: string;
   excerpt: string;
   content: string;
+  type: PostType;
   tags: string[];
+  coverImageUrl?: string | null;
+  images: PostImage[];
   published: boolean;
   createdAt: string;
   updatedAt: string;

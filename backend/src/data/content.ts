@@ -25,6 +25,21 @@ export type SeedProject = {
   featured: boolean;
 };
 
+export type SeedPost = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  type?: "blog" | "course-note" | "visual-note" | "cheatsheet";
+  tags: string[];
+  coverImageUrl?: string;
+  images?: Array<{
+    url: string;
+    alt?: string;
+  }>;
+  published: boolean;
+};
+
 export const profile = {
   name: "Mehmet Ünlü",
   title: "Electronics & Communication Engineering Student",
@@ -165,10 +180,11 @@ export const projects: SeedProject[] = [
   }
 ];
 
-export const posts = [
+export const posts: SeedPost[] = [
   {
     title: "Avoiding Data Leakage in Recursive Forecasting",
     slug: "avoiding-data-leakage-in-recursive-forecasting",
+    type: "course-note",
     excerpt:
       "A practical note on preserving temporal integrity when lagged features depend on previous predictions.",
     content:
@@ -179,6 +195,7 @@ export const posts = [
   {
     title: "Why WAPE Alone Can Be Misleading",
     slug: "why-wape-alone-can-be-misleading",
+    type: "cheatsheet",
     excerpt:
       "WAPE is useful, but sparse demand and high zero ratios can hide important failure modes.",
     content:
@@ -189,6 +206,7 @@ export const posts = [
   {
     title: "Two-Stage Modeling for Intermittent Demand",
     slug: "two-stage-modeling-for-intermittent-demand",
+    type: "course-note",
     excerpt:
       "Separating sale occurrence from sale magnitude can make sparse forecasting systems easier to reason about.",
     content:
@@ -199,6 +217,7 @@ export const posts = [
   {
     title: "Vectorization vs Python Loops in ML Pipelines",
     slug: "vectorization-vs-python-loops-in-ml-pipelines",
+    type: "cheatsheet",
     excerpt:
       "The fastest pipeline improvement is often moving repeated Python-level work into vectorized array operations.",
     content:
@@ -209,6 +228,7 @@ export const posts = [
   {
     title: "Hybrid Visual Odometry: RAFT + ORB",
     slug: "hybrid-visual-odometry-raft-orb",
+    type: "visual-note",
     excerpt:
       "A confidence selector can turn deep and classical visual odometry branches into a more robust research architecture.",
     content:
@@ -219,6 +239,7 @@ export const posts = [
   {
     title: "Building Self-Hosted Whisper Pipelines",
     slug: "building-self-hosted-whisper-pipelines",
+    type: "blog",
     excerpt:
       "Whisper becomes more useful when transcription is treated as one stage in a larger NLP system.",
     content:

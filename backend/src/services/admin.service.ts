@@ -68,6 +68,15 @@ const projectGalleryImageSchema = z.object({
   sortOrder: z.number().int().nonnegative().optional()
 });
 
+const postTypeSchema = z.enum(["blog", "course-note", "visual-note", "cheatsheet"]);
+
+const postImageSchema = z.object({
+  id: z.number().int().positive().optional(),
+  url: imageUrl,
+  alt: optionalImageAlt,
+  sortOrder: z.number().int().nonnegative().optional()
+});
+
 export const projectSchema = z.object({
   title: z.string().trim().min(1),
   slug: z.string().trim().optional(),
@@ -91,7 +100,10 @@ export const postSchema = z.object({
   slug: z.string().trim().optional(),
   excerpt: z.string().trim().min(1),
   content: z.string().trim().min(1),
+  type: postTypeSchema.default("blog"),
   tags: z.array(z.string().trim().min(1)).default([]),
+  coverImageUrl: optionalImageUrl,
+  images: z.array(postImageSchema).default([]),
   published: z.boolean().default(false)
 });
 
@@ -125,6 +137,14 @@ export const resumeSchema = z.object({
 });
 
 type ProjectImageRecord = {
+  id: number;
+  url: string;
+  alt: string | null;
+  sortOrder: number;
+  createdAt: Date;
+};
+
+type ContentImageRecord = {
   id: number;
   url: string;
   alt: string | null;
@@ -182,15 +202,36 @@ function serializePost(post: {
   slug: string;
   excerpt: string;
   content: string;
+  type: string;
   tags: string;
+  coverImageUrl: string | null;
   published: boolean;
   createdAt: Date;
   updatedAt: Date;
+  postImages?: ContentImageRecord[];
 }) {
+  const { postImages = [], ...postData } = post;
+
   return {
-    ...post,
-    tags: parseJsonField<string[]>(post.tags, [])
+    ...postData,
+    type: postData.type || "blog",
+    tags: parseJsonField<string[]>(post.tags, []),
+    images: postImages.map((image) => ({
+      id: image.id,
+      url: image.url,
+      alt: image.alt,
+      sortOrder: image.sortOrder,
+      createdAt: image.createdAt
+    }))
   };
+}
+
+function normalizePostImages(images: z.infer<typeof postImageSchema>[]) {
+  return images.map((image, index) => ({
+    url: image.url,
+    alt: image.alt ?? null,
+    sortOrder: image.sortOrder ?? index
+  }));
 }
 
 export async function loginAdmin(input: unknown) {
@@ -304,6 +345,11 @@ export async function adminDeleteProject(id: number) {
 
 export async function adminListPosts() {
   const posts = await prisma.post.findMany({
+    include: {
+      postImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
+    },
     orderBy: { createdAt: "desc" }
   });
 
@@ -313,12 +359,21 @@ export async function adminListPosts() {
 export async function adminCreatePost(input: unknown) {
   const data = postSchema.parse(input);
   const slug = data.slug ? slugify(data.slug) : slugify(data.title);
+  const { images, ...postData } = data;
 
   const post = await prisma.post.create({
     data: {
-      ...data,
+      ...postData,
       slug,
-      tags: JSON.stringify(data.tags)
+      tags: JSON.stringify(postData.tags),
+      postImages: {
+        create: normalizePostImages(images)
+      }
+    },
+    include: {
+      postImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
     }
   });
 
@@ -328,13 +383,23 @@ export async function adminCreatePost(input: unknown) {
 export async function adminUpdatePost(id: number, input: unknown) {
   const data = postSchema.parse(input);
   const slug = data.slug ? slugify(data.slug) : slugify(data.title);
+  const { images, ...postData } = data;
 
   const post = await prisma.post.update({
     where: { id },
     data: {
-      ...data,
+      ...postData,
       slug,
-      tags: JSON.stringify(data.tags)
+      tags: JSON.stringify(postData.tags),
+      postImages: {
+        deleteMany: {},
+        create: normalizePostImages(images)
+      }
+    },
+    include: {
+      postImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      }
     }
   });
 
