@@ -22,7 +22,11 @@ import {
   adminResumeUpdateController
 } from "../controllers/admin.controller.js";
 import { requireAdmin } from "../middleware/admin-auth.js";
-import { postImageUpload, projectImageUpload } from "../middleware/project-image-upload.js";
+import {
+  postImageUpload,
+  projectImageUpload,
+  validateImageSignature
+} from "../middleware/project-image-upload.js";
 import { createRateLimit } from "../middleware/rate-limit.js";
 
 export const adminRouter = Router();
@@ -32,6 +36,11 @@ adminRouter.use((_req, res, next) => {
   next();
 });
 
+const adminLoginIpRateLimit = createRateLimit({
+  windowMs: env.ADMIN_LOGIN_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
+  max: env.ADMIN_LOGIN_RATE_LIMIT_MAX,
+  message: "Too many login attempts. Please wait and try again."
+});
 const adminLoginRateLimit = createRateLimit({
   windowMs: env.ADMIN_LOGIN_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
   max: env.ADMIN_LOGIN_RATE_LIMIT_MAX,
@@ -48,7 +57,7 @@ const adminApiRateLimit = createRateLimit({
   message: "Too many admin API requests. Please slow down."
 });
 
-adminRouter.post("/login", adminLoginRateLimit, adminLoginController);
+adminRouter.post("/login", adminLoginIpRateLimit, adminLoginRateLimit, adminLoginController);
 adminRouter.use(requireAdmin);
 adminRouter.use(adminApiRateLimit);
 
@@ -63,11 +72,13 @@ adminRouter.delete("/projects/:id", adminProjectDeleteController);
 adminRouter.post(
   "/uploads/project-image",
   projectImageUpload.single("image"),
+  validateImageSignature,
   adminProjectImageUploadController
 );
 adminRouter.post(
   "/uploads/post-image",
   postImageUpload.single("image"),
+  validateImageSignature,
   adminPostImageUploadController
 );
 

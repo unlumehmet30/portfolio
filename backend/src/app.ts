@@ -45,7 +45,7 @@ export function createApp() {
 
         callback(null, false);
       },
-      credentials: true,
+      credentials: false,
       methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"]
     })

@@ -7,12 +7,21 @@ type AdminTokenPayload = {
   exp: number;
 };
 
+type AdminTokenHeader = {
+  alg: "HS256";
+  typ: "JWT";
+};
+
 function encode(value: unknown) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
 }
 
-function decode<T>(value: string): T {
-  return JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as T;
+function decode<T>(value: string): T | null {
+  try {
+    return JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as T;
+  } catch {
+    return null;
+  }
 }
 
 function sign(value: string) {
@@ -20,7 +29,7 @@ function sign(value: string) {
 }
 
 export function createAdminToken(username: string) {
-  const header = encode({ alg: "HS256", typ: "JWT" });
+  const header = encode({ alg: "HS256", typ: "JWT" } satisfies AdminTokenHeader);
   const payload = encode({
     sub: username,
     role: "admin",
@@ -32,9 +41,21 @@ export function createAdminToken(username: string) {
 }
 
 export function verifyAdminToken(token: string) {
-  const [header, payload, signature] = token.split(".");
+  const parts = token.split(".");
+
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  const [header, payload, signature] = parts;
 
   if (!header || !payload || !signature) {
+    return null;
+  }
+
+  const decodedHeader = decode<AdminTokenHeader>(header);
+
+  if (!decodedHeader || decodedHeader.alg !== "HS256" || decodedHeader.typ !== "JWT") {
     return null;
   }
 
@@ -52,7 +73,13 @@ export function verifyAdminToken(token: string) {
 
   const decoded = decode<AdminTokenPayload>(payload);
 
-  if (decoded.role !== "admin" || decoded.exp < Math.floor(Date.now() / 1000)) {
+  if (
+    !decoded ||
+    typeof decoded.sub !== "string" ||
+    decoded.role !== "admin" ||
+    !Number.isFinite(decoded.exp) ||
+    decoded.exp < Math.floor(Date.now() / 1000)
+  ) {
     return null;
   }
 

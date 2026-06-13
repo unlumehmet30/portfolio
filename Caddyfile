@@ -1,5 +1,10 @@
 {$SITE_HOST} {
   encode zstd gzip
+  header {
+    -Server
+    -Via
+    -X-Powered-By
+  }
 
   @api path /api /api/*
   handle @api {

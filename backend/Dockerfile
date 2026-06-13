@@ -21,5 +21,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/package.json ./package.json
+RUN mkdir -p /app/data /app/uploads && chown -R node:node /app
+USER node
 EXPOSE 8080
 CMD ["sh", "-c", "npx prisma db push && npm run db:seed:if-empty && npm run start"]

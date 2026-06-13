@@ -24,6 +24,10 @@ export function runStartupSecurityChecks() {
     errors.push("CORS_ORIGIN must only contain https origins in production.");
   }
 
+  if (env.TRUST_PROXY === true) {
+    errors.push("TRUST_PROXY must be a specific proxy count in production, such as 1.");
+  }
+
   if (env.CONTACT_EMAIL_FROM.includes("onboarding@resend.dev")) {
     warnings.push("CONTACT_EMAIL_FROM uses onboarding@resend.dev. Use a verified domain sender in production.");
   }

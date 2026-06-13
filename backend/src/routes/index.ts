@@ -21,7 +21,6 @@ const contactRateLimit = createRateLimit({
 
 apiRouter.get("/health", (_req, res) => {
   sendSuccess(res, {
-    service: "personal-website-backend",
     status: "ok"
   });
 });

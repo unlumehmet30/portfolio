@@ -1,5 +1,20 @@
 const isProduction = process.env.NODE_ENV === "production";
 
+function getOrigin(value) {
+  if (!value) return null;
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
+const apiOrigin = getOrigin(process.env.NEXT_PUBLIC_API_URL);
+const connectSrc = isProduction
+  ? ["connect-src 'self'", apiOrigin].filter(Boolean).join(" ")
+  : "connect-src 'self' https: http: ws: wss:";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -12,8 +27,10 @@ const contentSecurityPolicy = [
   isProduction
     ? "script-src 'self' 'unsafe-inline'"
     : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "connect-src 'self' https: http: ws: wss:"
+  connectSrc,
+  isProduction ? "upgrade-insecure-requests" : ""
 ]
+  .filter(Boolean)
   .join("; ")
   .replace(/\s{2,}/g, " ")
   .trim();

@@ -18,6 +18,16 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     return;
   }
 
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    error.name === "MulterError"
+  ) {
+    sendError(res, "Invalid image upload request", "BAD_REQUEST", 400);
+    return;
+  }
+
   if (typeof error === "object" && error !== null && "code" in error) {
     sendError(res, "Database request failed", "INTERNAL_SERVER_ERROR", 500);
     return;
