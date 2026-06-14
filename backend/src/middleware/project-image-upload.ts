@@ -5,6 +5,7 @@ import type { RequestHandler } from "express";
 import multer from "multer";
 import { ensureUploadDirectories, postFilesUploadsDir, postUploadsDir, projectUploadsDir } from "../config/uploads.js";
 import { HttpError } from "../utils/http-error.js";
+import { renderHtmlMathFile } from "../utils/html-math.js";
 
 const allowedMimeTypes = new Map([
   ["image/jpeg", ".jpg"],
@@ -86,6 +87,10 @@ export const validatePostFileSignature: RequestHandler = async (req, _res, next)
     const fileBytes = await fs.readFile(req.file.path);
 
     if (hasPostFileSignature(req.file, fileBytes)) {
+      if (req.file.mimetype === "text/html") {
+        await renderHtmlMathFile(req.file.path);
+      }
+
       next();
       return;
     }
