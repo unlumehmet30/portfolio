@@ -88,6 +88,7 @@ async function canvasToFile(canvas: HTMLCanvasElement, originalFile: File) {
 }
 
 export function ImageCropperModal({
+  allowOriginalUpload = true,
   aspectOptions = defaultAspectOptions,
   file,
   initialAspectRatio,
@@ -97,6 +98,7 @@ export function ImageCropperModal({
   onOriginal,
   title
 }: {
+  allowOriginalUpload?: boolean;
   aspectOptions?: AspectOption[];
   file: File;
   initialAspectRatio: number;
@@ -254,10 +256,12 @@ export function ImageCropperModal({
                 <Crop size={17} />
                 {isUploading ? "Uploading..." : `Crop ${selectedAspectLabel} and upload`}
               </Button>
-              <Button type="button" variant="outline" onClick={() => void onOriginal(file)} disabled={isUploading}>
-                <Upload size={17} />
-                Upload original
-              </Button>
+              {allowOriginalUpload ? (
+                <Button type="button" variant="outline" onClick={() => void onOriginal(file)} disabled={isUploading}>
+                  <Upload size={17} />
+                  Upload original
+                </Button>
+              ) : null}
               <Button type="button" variant="ghost" onClick={onCancel} disabled={isUploading}>
                 Skip this image
               </Button>

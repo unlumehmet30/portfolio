@@ -8,6 +8,7 @@ import {
   ArrowDown,
   ArrowUp,
   CheckCircle2,
+  Crop,
   FileText,
   Inbox,
   Layers3,
@@ -26,6 +27,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  apiBaseUrl,
   createAdminPost,
   createAdminProject,
   deleteAdminContactMessage,
@@ -61,10 +63,12 @@ type PostDraft = Omit<Post, "id" | "createdAt" | "updatedAt"> & {
 type CropDestination = "project-cover" | "project-gallery" | "post-cover" | "post-gallery";
 
 type PendingCrop = {
+  allowOriginalUpload?: boolean;
   destination: CropDestination;
   file: File;
   id: string;
   initialAspectRatio: number;
+  replaceIndex?: number;
   title: string;
 };
 
@@ -160,6 +164,33 @@ function normalizePostImages(images: PostImage[]) {
       alt: image.alt?.trim() || null,
       sortOrder: index
     }));
+}
+
+function fileNameFromImageUrl(url: string, fallback: string) {
+  try {
+    const { pathname } = new URL(url, window.location.origin);
+    const fileName = decodeURIComponent(pathname.split("/").filter(Boolean).pop() ?? "");
+
+    if (fileName) {
+      return fileName;
+    }
+  } catch {
+    // Use the fallback name below when the URL is malformed.
+  }
+
+  return `${fallback.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "image"}.jpg`;
+}
+
+function resolveImageFetchUrl(url: string) {
+  if (!url.startsWith("/api/")) {
+    return url;
+  }
+
+  try {
+    return `${new URL(apiBaseUrl).origin}${url}`;
+  } catch {
+    return url;
+  }
 }
 
 function Field({
@@ -358,7 +389,13 @@ export function AdminDashboard() {
     setStatus(nextStatus);
   }
 
-  function queueCropUploads(files: File[], destination: CropDestination, initialAspectRatio: number, title: string) {
+  function queueCropUploads(
+    files: File[],
+    destination: CropDestination,
+    initialAspectRatio: number,
+    title: string,
+    options: { allowOriginalUpload?: boolean; replaceIndex?: number; status?: string } = {}
+  ) {
     if (!files.length) return;
 
     setDestinationUploading(destination, true);
@@ -368,11 +405,58 @@ export function AdminDashboard() {
         destination,
         file,
         id: `${destination}-${file.name}-${file.lastModified}-${index}`,
+        allowOriginalUpload: options.allowOriginalUpload ?? true,
         initialAspectRatio,
+        replaceIndex: files.length === 1 ? options.replaceIndex : undefined,
         title: files.length > 1 ? `${title} (${index + 1}/${files.length})` : title
       }))
     ]);
-    setStatus("Crop the selected image before upload.");
+    setStatus(options.status ?? "Crop the selected image before upload.");
+  }
+
+  async function loadExistingImageFile(url: string, title: string) {
+    const response = await fetch(resolveImageFetchUrl(url), {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("Existing image could not be loaded for cropping.");
+    }
+
+    const blob = await response.blob();
+
+    if (!blob.type.startsWith("image/")) {
+      throw new Error("Existing file is not an image.");
+    }
+
+    return new File([blob], fileNameFromImageUrl(url, title), {
+      type: blob.type
+    });
+  }
+
+  async function cropExistingImage(
+    url: string,
+    destination: CropDestination,
+    initialAspectRatio: number,
+    title: string,
+    replaceIndex?: number
+  ) {
+    if (!url.trim()) return;
+
+    setDestinationUploading(destination, true);
+    setStatus("Loading existing image for cropping...");
+
+    try {
+      const file = await loadExistingImageFile(url, title);
+      queueCropUploads([file], destination, initialAspectRatio, title, {
+        allowOriginalUpload: false,
+        replaceIndex,
+        status: "Crop the existing image before upload."
+      });
+    } catch (error) {
+      setDestinationUploading(destination, false);
+      setStatus(error instanceof Error ? error.message : "Existing image could not be loaded for cropping.");
+    }
   }
 
   async function uploadPreparedImage(request: PendingCrop, file: File) {
@@ -389,6 +473,25 @@ export function AdminDashboard() {
       const { imageUrl } = await uploadAdminProjectImage(token, file);
       setProjectDraft((draft) => {
         const existingImages = draft.galleryImages ?? [];
+        if (request.replaceIndex !== undefined) {
+          const nextImages = [...existingImages];
+          const previousImage = nextImages[request.replaceIndex];
+
+          if (!previousImage) {
+            return draft;
+          }
+
+          nextImages[request.replaceIndex] = {
+            ...previousImage,
+            url: imageUrl
+          };
+
+          return {
+            ...draft,
+            galleryImages: normalizeGalleryImages(nextImages)
+          };
+        }
+
         const nextImage = {
           url: imageUrl,
           alt: draft.title ? `${draft.title} screenshot ${existingImages.length + 1}` : null,
@@ -415,6 +518,25 @@ export function AdminDashboard() {
     const { imageUrl } = await uploadAdminPostImage(token, file);
     setPostDraft((draft) => {
       const existingImages = draft.images ?? [];
+      if (request.replaceIndex !== undefined) {
+        const nextImages = [...existingImages];
+        const previousImage = nextImages[request.replaceIndex];
+
+        if (!previousImage) {
+          return draft;
+        }
+
+        nextImages[request.replaceIndex] = {
+          ...previousImage,
+          url: imageUrl
+        };
+
+        return {
+          ...draft,
+          images: normalizePostImages(nextImages)
+        };
+      }
+
       const nextImage = {
         url: imageUrl,
         alt: draft.title ? `${draft.title} visual ${existingImages.length + 1}` : null,
@@ -746,16 +868,32 @@ export function AdminDashboard() {
               {projectDraft.imageUrl ? (
                 <div className="relative overflow-hidden rounded-md border border-border bg-muted">
                   {projectDraft.imageUrl.startsWith("/") ? (
-                    <div className="relative aspect-[16/9]">
-                      <Image
-                        src={projectDraft.imageUrl}
-                        alt="Project image preview"
-                        fill
-                        sizes="(min-width: 1280px) 420px, 100vw"
-                        unoptimized={projectDraft.imageUrl.startsWith("/api/uploads/")}
-                        className="object-contain"
-                      />
-                    </div>
+                    <>
+                      <div className="relative aspect-[16/9]">
+                        <Image
+                          src={projectDraft.imageUrl}
+                          alt="Project image preview"
+                          fill
+                          sizes="(min-width: 1280px) 420px, 100vw"
+                          unoptimized={projectDraft.imageUrl.startsWith("/api/uploads/")}
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="flex justify-end border-t border-border bg-card p-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={projectImageUploading}
+                          onClick={() =>
+                            void cropExistingImage(projectDraft.imageUrl ?? "", "project-cover", 16 / 9, "Project cover")
+                          }
+                        >
+                          <Crop size={15} />
+                          Crop current image
+                        </Button>
+                      </div>
+                    </>
                   ) : (
                     <div className="p-3 text-xs text-muted-foreground">
                       External image URL set. Preview is shown after saving if the domain is allowed.
@@ -812,6 +950,26 @@ export function AdminDashboard() {
                             placeholder="Alt text"
                           />
                           <div className="flex flex-wrap gap-2">
+                            {image.url.startsWith("/") ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={projectGalleryUploading}
+                                onClick={() =>
+                                  void cropExistingImage(
+                                    image.url,
+                                    "project-gallery",
+                                    16 / 9,
+                                    `Project gallery image ${index + 1}`,
+                                    index
+                                  )
+                                }
+                              >
+                                <Crop size={15} />
+                                Crop
+                              </Button>
+                            ) : null}
                             <Button
                               type="button"
                               variant="outline"
@@ -948,16 +1106,32 @@ export function AdminDashboard() {
               {postDraft.coverImageUrl ? (
                 <div className="relative overflow-hidden rounded-md border border-border bg-muted">
                   {postDraft.coverImageUrl.startsWith("/") ? (
-                    <div className="relative aspect-[16/8]">
-                      <Image
-                        src={postDraft.coverImageUrl}
-                        alt="Note cover preview"
-                        fill
-                        sizes="(min-width: 1280px) 520px, 100vw"
-                        unoptimized={postDraft.coverImageUrl.startsWith("/api/uploads/")}
-                        className="object-contain"
-                      />
-                    </div>
+                    <>
+                      <div className="relative aspect-[16/8]">
+                        <Image
+                          src={postDraft.coverImageUrl}
+                          alt="Note cover preview"
+                          fill
+                          sizes="(min-width: 1280px) 520px, 100vw"
+                          unoptimized={postDraft.coverImageUrl.startsWith("/api/uploads/")}
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="flex justify-end border-t border-border bg-card p-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={postCoverUploading}
+                          onClick={() =>
+                            void cropExistingImage(postDraft.coverImageUrl ?? "", "post-cover", 2, "Note cover")
+                          }
+                        >
+                          <Crop size={15} />
+                          Crop current image
+                        </Button>
+                      </div>
+                    </>
                   ) : (
                     <div className="p-3 text-xs text-muted-foreground">
                       External cover URL set. Preview is shown after saving if the domain is allowed.
@@ -1016,6 +1190,26 @@ export function AdminDashboard() {
                             placeholder="Alt text"
                           />
                           <div className="flex flex-wrap gap-2">
+                            {image.url.startsWith("/") ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={postGalleryUploading}
+                                onClick={() =>
+                                  void cropExistingImage(
+                                    image.url,
+                                    "post-gallery",
+                                    16 / 9,
+                                    `Note image ${index + 1}`,
+                                    index
+                                  )
+                                }
+                              >
+                                <Crop size={15} />
+                                Crop
+                              </Button>
+                            ) : null}
                             <Button
                               type="button"
                               variant="outline"
@@ -1189,6 +1383,7 @@ export function AdminDashboard() {
       </AdminShell>
       {activeCrop ? (
         <ImageCropperModal
+          allowOriginalUpload={activeCrop.allowOriginalUpload ?? true}
           file={activeCrop.file}
           initialAspectRatio={activeCrop.initialAspectRatio}
           isUploading={cropProcessing}
