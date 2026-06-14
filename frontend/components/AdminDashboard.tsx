@@ -823,21 +823,36 @@ export function AdminDashboard() {
     setStatus(files.length > 1 ? "Uploading note files..." : "Uploading note file...");
 
     try {
-      const uploadedFiles = await Promise.all(
+      const uploadResults = await Promise.all(
         files.map(async (file) => {
           const response = await uploadAdminPostFile(token, file);
-          return response.file;
+          return response;
         })
       );
+      const uploadedFiles = uploadResults.map((result) => result.file);
+      const convertedMarkdown = uploadResults
+        .map((result) => result.markdown?.trim())
+        .filter((markdown): markdown is string => Boolean(markdown))
+        .join("\n\n---\n\n");
+      const shouldImportMarkdown = convertedMarkdown
+        ? window.confirm("HTML file converted to Markdown. Add the converted content to the note body?")
+        : false;
 
       setPostDraft((draft) => {
         const existingFiles = draft.files ?? [];
+        const nextContent = shouldImportMarkdown
+          ? [draft.content.trim(), convertedMarkdown].filter(Boolean).join("\n\n")
+          : draft.content;
+
         return {
           ...draft,
+          content: nextContent,
           files: normalizePostFiles([...existingFiles, ...uploadedFiles])
         };
       });
-      setStatus("Note file uploaded. Save the note to keep it.");
+      setStatus(shouldImportMarkdown
+        ? "Note file uploaded and converted Markdown was added. Save the note to keep it."
+        : "Note file uploaded. Save the note to keep it.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Note file upload failed.");
     } finally {

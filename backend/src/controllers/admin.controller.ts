@@ -100,6 +100,10 @@ export const adminPostFileUploadController = asyncHandler(async (req, res) => {
 
   const fileType = req.file.mimetype === "application/pdf" ? "pdf" : "html";
   const title = req.file.originalname.replace(/\.[^.]+$/, "") || "Note file";
+  const markdown =
+    typeof res.locals.postFileMarkdown === "string" && res.locals.postFileMarkdown.trim()
+      ? res.locals.postFileMarkdown.trim()
+      : undefined;
 
   sendSuccess(res, {
     file: {
@@ -108,7 +112,8 @@ export const adminPostFileUploadController = asyncHandler(async (req, res) => {
       fileType,
       mimeType: req.file.mimetype,
       sizeBytes: req.file.size
-    }
+    },
+    markdown
   }, 201);
 });
 

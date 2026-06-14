@@ -206,7 +206,10 @@ export async function uploadAdminPostFile(token: string, file: File) {
     cache: "no-store"
   });
 
-  const payload = (await response.json()) as ApiEnvelope<{ file: Omit<PostFile, "createdAt" | "id" | "sortOrder"> }>;
+  const payload = (await response.json()) as ApiEnvelope<{
+    file: Omit<PostFile, "createdAt" | "id" | "sortOrder">;
+    markdown?: string;
+  }>;
 
   if (!response.ok || !payload.success) {
     const message = payload.success ? "File upload failed" : payload.error.message;

@@ -4,6 +4,7 @@ import path from "path";
 import type { RequestHandler } from "express";
 import multer from "multer";
 import { ensureUploadDirectories, postFilesUploadsDir, postUploadsDir, projectUploadsDir } from "../config/uploads.js";
+import { htmlToMarkdown } from "../utils/html-to-markdown.js";
 import { HttpError } from "../utils/http-error.js";
 import { renderHtmlMathFile } from "../utils/html-math.js";
 
@@ -77,7 +78,7 @@ export const validateImageSignature: RequestHandler = async (req, _res, next) =>
   }
 };
 
-export const validatePostFileSignature: RequestHandler = async (req, _res, next) => {
+export const validatePostFileSignature: RequestHandler = async (req, res, next) => {
   try {
     if (!req.file) {
       next();
@@ -88,6 +89,7 @@ export const validatePostFileSignature: RequestHandler = async (req, _res, next)
 
     if (hasPostFileSignature(req.file, fileBytes)) {
       if (req.file.mimetype === "text/html") {
+        res.locals.postFileMarkdown = htmlToMarkdown(fileBytes.toString("utf8"));
         await renderHtmlMathFile(req.file.path);
       }
 
