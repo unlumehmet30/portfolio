@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MarkdownContent } from "@/components/MarkdownContent";
+import { NoteFilePreview } from "@/components/NoteFilePreview";
 import { Badge } from "@/components/ui/badge";
 import { getPost, getPosts } from "@/lib/api";
 import { getNoteTypeLabel } from "@/lib/note-types";
@@ -117,6 +118,7 @@ export default async function NoteDetailPage({ params }: PageProps) {
           </div>
         </section>
       ) : null}
+      <NoteFilePreview files={post.files ?? []} locale="en" />
     </article>
   );
 }

@@ -24,7 +24,7 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     "name" in error &&
     error.name === "MulterError"
   ) {
-    sendError(res, "Invalid image upload request", "BAD_REQUEST", 400);
+    sendError(res, "Invalid file upload request", "BAD_REQUEST", 400);
     return;
   }
 

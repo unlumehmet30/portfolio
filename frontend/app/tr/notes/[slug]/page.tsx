@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MarkdownContent } from "@/components/MarkdownContent";
+import { NoteFilePreview } from "@/components/NoteFilePreview";
 import { Badge } from "@/components/ui/badge";
 import { getPost, getPosts } from "@/lib/api";
 import { localizePost } from "@/lib/content-localization";
@@ -120,6 +121,7 @@ export default async function TurkishNoteDetailPage({ params }: PageProps) {
           </div>
         </section>
       ) : null}
+      <NoteFilePreview files={post.files ?? []} locale="tr" />
     </article>
   );
 }

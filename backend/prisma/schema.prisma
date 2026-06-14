@@ -65,6 +65,7 @@ model Post {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   postImages    PostImage[]
+  postFiles     PostFile[]
 }
 
 model PostImage {
@@ -72,6 +73,21 @@ model PostImage {
   postId    Int
   url       String
   alt       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, sortOrder])
+}
+
+model PostFile {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  title     String
+  url       String
+  fileType  String
+  mimeType  String
+  sizeBytes Int
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)

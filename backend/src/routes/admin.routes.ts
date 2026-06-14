@@ -8,6 +8,7 @@ import {
   adminMeController,
   adminPostCreateController,
   adminPostDeleteController,
+  adminPostFileUploadController,
   adminPostImageUploadController,
   adminPostsController,
   adminPostUpdateController,
@@ -24,8 +25,10 @@ import {
 import { requireAdmin } from "../middleware/admin-auth.js";
 import {
   postImageUpload,
+  postFileUpload,
   projectImageUpload,
-  validateImageSignature
+  validateImageSignature,
+  validatePostFileSignature
 } from "../middleware/project-image-upload.js";
 import { createRateLimit } from "../middleware/rate-limit.js";
 
@@ -80,6 +83,12 @@ adminRouter.post(
   postImageUpload.single("image"),
   validateImageSignature,
   adminPostImageUploadController
+);
+adminRouter.post(
+  "/uploads/post-file",
+  postFileUpload.single("file"),
+  validatePostFileSignature,
+  adminPostFileUploadController
 );
 
 adminRouter.get("/posts", adminPostsController);

@@ -4,6 +4,7 @@ import type {
   ContactMessage,
   ContactPayload,
   Post,
+  PostFile,
   Profile,
   Project,
   Resume
@@ -184,6 +185,29 @@ export async function uploadAdminPostImage(token: string, file: File) {
 
   if (!response.ok || !payload.success) {
     const message = payload.success ? "Image upload failed" : payload.error.message;
+    throw new Error(message);
+  }
+
+  return payload.data;
+}
+
+export async function uploadAdminPostFile(token: string, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${getApiBaseUrl()}/admin/uploads/post-file`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: formData,
+    cache: "no-store"
+  });
+
+  const payload = (await response.json()) as ApiEnvelope<{ file: Omit<PostFile, "createdAt" | "id" | "sortOrder"> }>;
+
+  if (!response.ok || !payload.success) {
+    const message = payload.success ? "File upload failed" : payload.error.message;
     throw new Error(message);
   }
 

@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import type { RequestHandler } from "express";
 import multer from "multer";
-import { ensureUploadDirectories, postUploadsDir, projectUploadsDir } from "../config/uploads.js";
+import { ensureUploadDirectories, postFilesUploadsDir, postUploadsDir, projectUploadsDir } from "../config/uploads.js";
 import { HttpError } from "../utils/http-error.js";
 
 const allowedMimeTypes = new Map([
@@ -11,6 +11,11 @@ const allowedMimeTypes = new Map([
   ["image/png", ".png"],
   ["image/webp", ".webp"],
   ["image/gif", ".gif"]
+]);
+
+const allowedPostFileMimeTypes = new Map([
+  ["application/pdf", ".pdf"],
+  ["text/html", ".html"]
 ]);
 
 ensureUploadDirectories();
@@ -37,6 +42,19 @@ function hasImageSignature(file: Express.Multer.File, bytes: Buffer) {
   return false;
 }
 
+function hasPostFileSignature(file: Express.Multer.File, bytes: Buffer) {
+  if (file.mimetype === "application/pdf") {
+    return bytes.subarray(0, 5).toString("ascii") === "%PDF-";
+  }
+
+  if (file.mimetype === "text/html") {
+    const preview = bytes.subarray(0, Math.min(bytes.length, 4096)).toString("utf8").trimStart().toLowerCase();
+    return preview.startsWith("<!doctype html") || preview.startsWith("<html") || preview.includes("<body");
+  }
+
+  return false;
+}
+
 export const validateImageSignature: RequestHandler = async (req, _res, next) => {
   try {
     if (!req.file) {
@@ -53,6 +71,27 @@ export const validateImageSignature: RequestHandler = async (req, _res, next) =>
 
     await fs.unlink(req.file.path).catch(() => undefined);
     next(new HttpError("Uploaded file content does not match an allowed image type.", 400, "BAD_REQUEST"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const validatePostFileSignature: RequestHandler = async (req, _res, next) => {
+  try {
+    if (!req.file) {
+      next();
+      return;
+    }
+
+    const fileBytes = await fs.readFile(req.file.path);
+
+    if (hasPostFileSignature(req.file, fileBytes)) {
+      next();
+      return;
+    }
+
+    await fs.unlink(req.file.path).catch(() => undefined);
+    next(new HttpError("Uploaded file content does not match an allowed note file type.", 400, "BAD_REQUEST"));
   } catch (error) {
     next(error);
   }
@@ -87,3 +126,28 @@ function createImageUpload(destination: string) {
 
 export const projectImageUpload = createImageUpload(projectUploadsDir);
 export const postImageUpload = createImageUpload(postUploadsDir);
+
+export const postFileUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, callback) => {
+      callback(null, postFilesUploadsDir);
+    },
+    filename: (_req, file, callback) => {
+      const extension =
+        allowedPostFileMimeTypes.get(file.mimetype) ||
+        path.extname(file.originalname).toLowerCase();
+      callback(null, `${randomUUID()}${extension}`);
+    }
+  }),
+  limits: {
+    fileSize: 20 * 1024 * 1024
+  },
+  fileFilter: (_req, file, callback) => {
+    if (!allowedPostFileMimeTypes.has(file.mimetype)) {
+      callback(new HttpError("Only PDF and HTML note files are allowed.", 400, "BAD_REQUEST"));
+      return;
+    }
+
+    callback(null, true);
+  }
+});

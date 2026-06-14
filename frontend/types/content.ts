@@ -47,11 +47,23 @@ export type ProjectImage = {
 };
 
 export type PostType = "blog" | "course-note" | "visual-note" | "cheatsheet";
+export type PostFileType = "pdf" | "html";
 
 export type PostImage = {
   id?: number;
   url: string;
   alt?: string | null;
+  sortOrder?: number;
+  createdAt?: string;
+};
+
+export type PostFile = {
+  id?: number;
+  title: string;
+  url: string;
+  fileType: PostFileType;
+  mimeType: string;
+  sizeBytes: number;
   sortOrder?: number;
   createdAt?: string;
 };
@@ -88,6 +100,7 @@ export type Post = {
   tags: string[];
   coverImageUrl?: string | null;
   images: PostImage[];
+  files: PostFile[];
   published: boolean;
   createdAt: string;
   updatedAt: string;

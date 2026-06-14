@@ -40,6 +40,7 @@ import {
   getAdminProjects,
   getAdminResume,
   markAdminContactMessageHandled,
+  uploadAdminPostFile,
   uploadAdminPostImage,
   uploadAdminProjectImage,
   updateAdminPost,
@@ -48,7 +49,7 @@ import {
   updateAdminResume
 } from "@/lib/api";
 import { defaultProfile } from "@/lib/site";
-import type { ContactMessage, Metric, Post, PostImage, PostType, Profile, Project, ProjectImage, Resume } from "@/types/content";
+import type { ContactMessage, Metric, Post, PostFile, PostFileType, PostImage, PostType, Profile, Project, ProjectImage, Resume } from "@/types/content";
 
 type TabKey = "profile" | "projects" | "posts" | "resume" | "contacts";
 
@@ -115,6 +116,7 @@ const emptyPost: PostDraft = {
   tags: [],
   coverImageUrl: "",
   images: [],
+  files: [],
   published: false
 };
 
@@ -165,6 +167,32 @@ function normalizePostImages(images: PostImage[]) {
       alt: image.alt?.trim() || null,
       sortOrder: index
     }));
+}
+
+function normalizePostFiles(files: PostFile[]) {
+  return files
+    .filter((file) => file.url.trim() && file.title.trim())
+    .map((file, index) => ({
+      ...file,
+      title: file.title.trim(),
+      url: file.url.trim(),
+      fileType: file.fileType,
+      mimeType: file.mimeType.trim() || (file.fileType === "pdf" ? "application/pdf" : "text/html"),
+      sizeBytes: Number.isFinite(file.sizeBytes) ? file.sizeBytes : 0,
+      sortOrder: index
+    }));
+}
+
+function formatBytes(value: number) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "size unknown";
+  }
+
+  if (value < 1024 * 1024) {
+    return `${Math.max(1, Math.round(value / 1024))} KB`;
+  }
+
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function fileNameFromImageUrl(url: string, fallback: string) {
@@ -306,6 +334,7 @@ export function AdminDashboard() {
   const [postTags, setPostTags] = useState("");
   const [postCoverUploading, setPostCoverUploading] = useState(false);
   const [postGalleryUploading, setPostGalleryUploading] = useState(false);
+  const [postFileUploading, setPostFileUploading] = useState(false);
   const [pendingCrops, setPendingCrops] = useState<PendingCrop[]>([]);
   const [cropProcessing, setCropProcessing] = useState(false);
 
@@ -703,6 +732,7 @@ export function AdminDashboard() {
       tags: post.tags,
       coverImageUrl: post.coverImageUrl ?? "",
       images: post.images ?? [],
+      files: post.files ?? [],
       published: post.published
     });
     setPostTags(tagsToText(post.tags));
@@ -715,7 +745,8 @@ export function AdminDashboard() {
       ...postDraft,
       tags: textToTags(postTags),
       coverImageUrl: postDraft.coverImageUrl || null,
-      images: normalizePostImages(postDraft.images ?? [])
+      images: normalizePostImages(postDraft.images ?? []),
+      files: normalizePostFiles(postDraft.files ?? [])
     };
 
     try {
@@ -780,6 +811,71 @@ export function AdminDashboard() {
       return {
         ...draft,
         images: normalizePostImages(images)
+      };
+    });
+  }
+
+  async function uploadPostFiles(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    setPostFileUploading(true);
+    setStatus(files.length > 1 ? "Uploading note files..." : "Uploading note file...");
+
+    try {
+      const uploadedFiles = await Promise.all(
+        files.map(async (file) => {
+          const response = await uploadAdminPostFile(token, file);
+          return response.file;
+        })
+      );
+
+      setPostDraft((draft) => {
+        const existingFiles = draft.files ?? [];
+        return {
+          ...draft,
+          files: normalizePostFiles([...existingFiles, ...uploadedFiles])
+        };
+      });
+      setStatus("Note file uploaded. Save the note to keep it.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Note file upload failed.");
+    } finally {
+      setPostFileUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  function updatePostFile(index: number, patch: Partial<PostFile>) {
+    setPostDraft((draft) => ({
+      ...draft,
+      files: (draft.files ?? []).map((file, fileIndex) =>
+        fileIndex === index ? { ...file, ...patch } : file
+      )
+    }));
+  }
+
+  function removePostFile(index: number) {
+    setPostDraft((draft) => ({
+      ...draft,
+      files: normalizePostFiles((draft.files ?? []).filter((_, fileIndex) => fileIndex !== index))
+    }));
+  }
+
+  function movePostFile(index: number, direction: -1 | 1) {
+    setPostDraft((draft) => {
+      const files = [...(draft.files ?? [])];
+      const nextIndex = index + direction;
+
+      if (nextIndex < 0 || nextIndex >= files.length) {
+        return draft;
+      }
+
+      [files[index], files[nextIndex]] = [files[nextIndex], files[index]];
+
+      return {
+        ...draft,
+        files: normalizePostFiles(files)
       };
     });
   }
@@ -1257,6 +1353,106 @@ export function AdminDashboard() {
                   </div>
                 ) : null}
               </div>
+              <div className="grid gap-3 border-t border-border pt-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <label className="block min-w-[220px] flex-1 space-y-2 text-sm">
+                    <span className="text-muted-foreground">Note files</span>
+                    <Input
+                      type="file"
+                      multiple
+                      accept="application/pdf,text/html,.pdf,.html,.htm"
+                      disabled={postFileUploading}
+                      onChange={(event) => void uploadPostFiles(event)}
+                    />
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    {(postDraft.files ?? []).length} file{(postDraft.files ?? []).length === 1 ? "" : "s"}
+                  </p>
+                </div>
+                {(postDraft.files ?? []).length ? (
+                  <div className="grid gap-3">
+                    {(postDraft.files ?? []).map((file, index) => (
+                      <div key={`${file.url}-${index}`} className="grid gap-3 rounded-md border border-border p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold">{file.title}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {file.fileType.toUpperCase()} · {file.mimeType} · {formatBytes(file.sizeBytes)}
+                            </p>
+                          </div>
+                          <a
+                            href={file.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-sm font-medium text-accent hover:underline"
+                          >
+                            Preview
+                          </a>
+                        </div>
+                        <div className="grid gap-2 md:grid-cols-[1fr_120px]">
+                          <Input
+                            value={file.title}
+                            onChange={(event) => updatePostFile(index, { title: event.target.value })}
+                            aria-label={`Note file ${index + 1} title`}
+                            placeholder="File title"
+                          />
+                          <select
+                            value={file.fileType}
+                            onChange={(event) => {
+                              const fileType = event.target.value as PostFileType;
+                              updatePostFile(index, {
+                                fileType,
+                                mimeType: fileType === "pdf" ? "application/pdf" : "text/html"
+                              });
+                            }}
+                            className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            aria-label={`Note file ${index + 1} type`}
+                          >
+                            <option value="pdf">PDF</option>
+                            <option value="html">HTML</option>
+                          </select>
+                        </div>
+                        <Input
+                          value={file.url}
+                          onChange={(event) => updatePostFile(index, { url: event.target.value })}
+                          aria-label={`Note file ${index + 1} URL`}
+                        />
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            title="Move up"
+                            disabled={index === 0}
+                            onClick={() => movePostFile(index, -1)}
+                          >
+                            <ArrowUp size={15} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            title="Move down"
+                            disabled={index === (postDraft.files ?? []).length - 1}
+                            onClick={() => movePostFile(index, 1)}
+                          >
+                            <ArrowDown size={15} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            title="Remove file"
+                            onClick={() => removePostFile(index)}
+                          >
+                            <Trash2 size={15} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
               <Field label="Tags comma separated" value={postTags} onChange={setPostTags} />
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <input
@@ -1266,9 +1462,9 @@ export function AdminDashboard() {
                 />
                 Published
               </label>
-              <Button type="submit" className="w-fit" disabled={postCoverUploading || postGalleryUploading}>
-                {postCoverUploading || postGalleryUploading ? <Upload size={17} /> : <Save size={17} />}
-                {postCoverUploading || postGalleryUploading ? "Uploading image..." : "Save note"}
+              <Button type="submit" className="w-fit" disabled={postCoverUploading || postGalleryUploading || postFileUploading}>
+                {postCoverUploading || postGalleryUploading || postFileUploading ? <Upload size={17} /> : <Save size={17} />}
+                {postCoverUploading || postGalleryUploading || postFileUploading ? "Uploading file..." : "Save note"}
               </Button>
             </form>
           </Card>

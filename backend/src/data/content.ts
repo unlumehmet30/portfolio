@@ -37,6 +37,13 @@ export type SeedPost = {
     url: string;
     alt?: string;
   }>;
+  files?: Array<{
+    title: string;
+    url: string;
+    fileType: "pdf" | "html";
+    mimeType: string;
+    sizeBytes: number;
+  }>;
   published: boolean;
 };
 

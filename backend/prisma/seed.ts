@@ -35,7 +35,7 @@ export async function seedDatabase(prisma: PrismaClient) {
   }
 
   for (const post of posts) {
-    const { tags, images = [], ...postData } = post;
+    const { tags, files = [], images = [], ...postData } = post;
 
     await prisma.post.upsert({
       where: { slug: post.slug },
@@ -47,6 +47,12 @@ export async function seedDatabase(prisma: PrismaClient) {
           create: images.map((image, index) => ({
             url: image.url,
             alt: image.alt ?? null,
+            sortOrder: index
+          }))
+        },
+        postFiles: {
+          create: files.map((file, index) => ({
+            ...file,
             sortOrder: index
           }))
         }

@@ -3,9 +3,25 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
-import { ensureUploadDirectories, uploadsRoot } from "./config/uploads.js";
+import { ensureUploadDirectories, postFilesUploadsDir, uploadsRoot } from "./config/uploads.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { apiRouter } from "./routes/index.js";
+
+function setUploadHeaders(res: express.Response, filePath: string) {
+  if (!filePath.startsWith(postFilesUploadsDir)) {
+    return;
+  }
+
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+
+  if (filePath.endsWith(".html") || filePath.endsWith(".htm")) {
+    res.setHeader(
+      "Content-Security-Policy",
+      "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data: https:; font-src data: https:;"
+    );
+  }
+}
 
 export function createApp() {
   ensureUploadDirectories();
@@ -55,7 +71,8 @@ export function createApp() {
 
   app.use("/api/uploads", express.static(uploadsRoot, {
     immutable: true,
-    maxAge: "30d"
+    maxAge: "30d",
+    setHeaders: setUploadHeaders
   }));
   app.use("/api", apiRouter);
 

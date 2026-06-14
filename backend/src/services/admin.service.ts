@@ -77,6 +77,18 @@ const postImageSchema = z.object({
   sortOrder: z.number().int().nonnegative().optional()
 });
 
+const postFileTypeSchema = z.enum(["pdf", "html"]);
+
+const postFileSchema = z.object({
+  id: z.number().int().positive().optional(),
+  title: z.string().trim().min(1),
+  url: imageUrl,
+  fileType: postFileTypeSchema,
+  mimeType: z.string().trim().min(1),
+  sizeBytes: z.number().int().nonnegative(),
+  sortOrder: z.number().int().nonnegative().optional()
+});
+
 export const projectSchema = z.object({
   title: z.string().trim().min(1),
   slug: z.string().trim().optional(),
@@ -104,6 +116,7 @@ export const postSchema = z.object({
   tags: z.array(z.string().trim().min(1)).default([]),
   coverImageUrl: optionalImageUrl,
   images: z.array(postImageSchema).default([]),
+  files: z.array(postFileSchema).default([]),
   published: z.boolean().default(false)
 });
 
@@ -148,6 +161,17 @@ type ContentImageRecord = {
   id: number;
   url: string;
   alt: string | null;
+  sortOrder: number;
+  createdAt: Date;
+};
+
+type ContentFileRecord = {
+  id: number;
+  title: string;
+  url: string;
+  fileType: string;
+  mimeType: string;
+  sizeBytes: number;
   sortOrder: number;
   createdAt: Date;
 };
@@ -209,8 +233,9 @@ function serializePost(post: {
   createdAt: Date;
   updatedAt: Date;
   postImages?: ContentImageRecord[];
+  postFiles?: ContentFileRecord[];
 }) {
-  const { postImages = [], ...postData } = post;
+  const { postFiles = [], postImages = [], ...postData } = post;
 
   return {
     ...postData,
@@ -222,6 +247,16 @@ function serializePost(post: {
       alt: image.alt,
       sortOrder: image.sortOrder,
       createdAt: image.createdAt
+    })),
+    files: postFiles.map((file) => ({
+      id: file.id,
+      title: file.title,
+      url: file.url,
+      fileType: file.fileType,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+      sortOrder: file.sortOrder,
+      createdAt: file.createdAt
     }))
   };
 }
@@ -231,6 +266,17 @@ function normalizePostImages(images: z.infer<typeof postImageSchema>[]) {
     url: image.url,
     alt: image.alt ?? null,
     sortOrder: image.sortOrder ?? index
+  }));
+}
+
+function normalizePostFiles(files: z.infer<typeof postFileSchema>[]) {
+  return files.map((file, index) => ({
+    title: file.title,
+    url: file.url,
+    fileType: file.fileType,
+    mimeType: file.mimeType,
+    sizeBytes: file.sizeBytes,
+    sortOrder: file.sortOrder ?? index
   }));
 }
 
@@ -348,6 +394,9 @@ export async function adminListPosts() {
     include: {
       postImages: {
         orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      },
+      postFiles: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
       }
     },
     orderBy: { createdAt: "desc" }
@@ -359,7 +408,7 @@ export async function adminListPosts() {
 export async function adminCreatePost(input: unknown) {
   const data = postSchema.parse(input);
   const slug = data.slug ? slugify(data.slug) : slugify(data.title);
-  const { images, ...postData } = data;
+  const { files, images, ...postData } = data;
 
   const post = await prisma.post.create({
     data: {
@@ -368,10 +417,16 @@ export async function adminCreatePost(input: unknown) {
       tags: JSON.stringify(postData.tags),
       postImages: {
         create: normalizePostImages(images)
+      },
+      postFiles: {
+        create: normalizePostFiles(files)
       }
     },
     include: {
       postImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      },
+      postFiles: {
         orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
       }
     }
@@ -383,7 +438,7 @@ export async function adminCreatePost(input: unknown) {
 export async function adminUpdatePost(id: number, input: unknown) {
   const data = postSchema.parse(input);
   const slug = data.slug ? slugify(data.slug) : slugify(data.title);
-  const { images, ...postData } = data;
+  const { files, images, ...postData } = data;
 
   const post = await prisma.post.update({
     where: { id },
@@ -394,10 +449,17 @@ export async function adminUpdatePost(id: number, input: unknown) {
       postImages: {
         deleteMany: {},
         create: normalizePostImages(images)
+      },
+      postFiles: {
+        deleteMany: {},
+        create: normalizePostFiles(files)
       }
     },
     include: {
       postImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      },
+      postFiles: {
         orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
       }
     }

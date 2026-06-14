@@ -11,8 +11,19 @@ type ContentImageRecord = {
   createdAt: Date;
 };
 
-function serializePost(post: NonNullable<PostRecord> & { postImages?: ContentImageRecord[] }) {
-  const { postImages = [], ...postData } = post;
+type ContentFileRecord = {
+  id: number;
+  title: string;
+  url: string;
+  fileType: string;
+  mimeType: string;
+  sizeBytes: number;
+  sortOrder: number;
+  createdAt: Date;
+};
+
+function serializePost(post: NonNullable<PostRecord> & { postFiles?: ContentFileRecord[]; postImages?: ContentImageRecord[] }) {
+  const { postFiles = [], postImages = [], ...postData } = post;
 
   return {
     ...postData,
@@ -24,6 +35,16 @@ function serializePost(post: NonNullable<PostRecord> & { postImages?: ContentIma
       alt: image.alt,
       sortOrder: image.sortOrder,
       createdAt: image.createdAt
+    })),
+    files: postFiles.map((file) => ({
+      id: file.id,
+      title: file.title,
+      url: file.url,
+      fileType: file.fileType,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+      sortOrder: file.sortOrder,
+      createdAt: file.createdAt
     }))
   };
 }
@@ -33,6 +54,9 @@ export async function getPosts() {
     where: { published: true },
     include: {
       postImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      },
+      postFiles: {
         orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
       }
     },
@@ -47,6 +71,9 @@ export async function getPostBySlug(slug: string) {
     where: { slug, published: true },
     include: {
       postImages: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
+      },
+      postFiles: {
         orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
       }
     }

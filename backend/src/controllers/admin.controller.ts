@@ -16,7 +16,7 @@ import {
   adminUpdateResume,
   loginAdmin
 } from "../services/admin.service.js";
-import { postUploadUrl, projectUploadUrl } from "../config/uploads.js";
+import { postFileUploadUrl, postUploadUrl, projectUploadUrl } from "../config/uploads.js";
 import { sendSuccess } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { HttpError } from "../utils/http-error.js";
@@ -90,6 +90,25 @@ export const adminPostImageUploadController = asyncHandler(async (req, res) => {
 
   sendSuccess(res, {
     imageUrl: postUploadUrl(req.file.filename)
+  }, 201);
+});
+
+export const adminPostFileUploadController = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new HttpError("Post file is required", 400, "BAD_REQUEST");
+  }
+
+  const fileType = req.file.mimetype === "application/pdf" ? "pdf" : "html";
+  const title = req.file.originalname.replace(/\.[^.]+$/, "") || "Note file";
+
+  sendSuccess(res, {
+    file: {
+      title,
+      url: postFileUploadUrl(req.file.filename),
+      fileType,
+      mimeType: req.file.mimetype,
+      sizeBytes: req.file.size
+    }
   }, 201);
 });
 
