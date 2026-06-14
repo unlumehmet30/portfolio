@@ -14,13 +14,18 @@ function setUploadHeaders(res: express.Response, filePath: string) {
 
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
 
   if (filePath.endsWith(".html") || filePath.endsWith(".htm")) {
     res.setHeader(
       "Content-Security-Policy",
-      "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data: https:; font-src data: https:;"
+      "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; style-src 'unsafe-inline'; img-src 'self' data: https:; font-src data: https:;"
     );
+    return;
   }
+
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'none'; object-src 'none'");
 }
 
 export function createApp() {

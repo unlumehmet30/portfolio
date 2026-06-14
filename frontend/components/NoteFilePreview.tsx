@@ -1,3 +1,4 @@
+import { ExternalLink, FileText } from "lucide-react";
 import type { Locale } from "@/lib/locale";
 import type { PostFile } from "@/types/content";
 
@@ -28,35 +29,30 @@ export function NoteFilePreview({ files, locale = "en" }: { files: PostFile[]; l
   return (
     <section className="mt-12 border-t border-border pt-8">
       <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{heading}</h2>
-      <div className="mt-5 grid gap-6">
+      <div className="mt-5 grid gap-3">
         {files.map((file, index) => (
-          <article key={`${file.url}-${index}`} className="overflow-hidden rounded-lg border border-border bg-card">
-            <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
+          <article
+            key={`${file.url}-${index}`}
+            className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
+                <FileText size={18} aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
                 <h3 className="font-semibold">{file.title}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{fileTypeLabel(file)}</p>
               </div>
-              <a className="text-sm font-medium text-accent hover:underline" href={file.url} target="_blank" rel="noreferrer">
-                {openLabel}
-              </a>
             </div>
-            {file.fileType === "pdf" ? (
-              <iframe
-                src={file.url}
-                title={file.title}
-                loading="lazy"
-                className="h-[680px] w-full bg-background"
-              />
-            ) : (
-              <iframe
-                src={file.url}
-                title={file.title}
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                sandbox=""
-                className="h-[680px] w-full bg-white"
-              />
-            )}
+            <a
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
+              href={file.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink size={16} aria-hidden="true" />
+              {openLabel}
+            </a>
           </article>
         ))}
       </div>
