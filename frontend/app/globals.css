@@ -105,3 +105,19 @@ body {
     inset 0 0 0 1px hsl(var(--accent) / 0.18),
     inset 0 -48px 90px hsl(var(--background) / 0.32);
 }
+
+.note-markdown .katex {
+  color: hsl(var(--foreground));
+}
+
+.note-markdown .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.75rem 0;
+}
+
+.note-markdown pre code {
+  display: block;
+  background: transparent;
+  padding: 0;
+}
