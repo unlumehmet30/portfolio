@@ -16,44 +16,20 @@ const defaultAspectOptions: AspectOption[] = [
   { label: "1:1", value: 1 }
 ];
 
-type CropBox = {
-  height: number;
-  width: number;
-  x: number;
-  y: number;
-};
-
 function fileBaseName(file: File) {
   return file.name.replace(/\.[^.]+$/, "") || "image";
 }
 
-function calculateCrop(image: HTMLImageElement, aspectRatio: number, zoom: number, xPercent: number, yPercent: number): CropBox {
-  const imageAspect = image.naturalWidth / image.naturalHeight;
-  let baseWidth = image.naturalWidth;
-  let baseHeight = image.naturalHeight;
-
-  if (imageAspect > aspectRatio) {
-    baseWidth = image.naturalHeight * aspectRatio;
-  } else {
-    baseHeight = image.naturalWidth / aspectRatio;
-  }
-
-  const width = Math.max(1, baseWidth / zoom);
-  const height = Math.max(1, baseHeight / zoom);
-  const maxX = Math.max(0, image.naturalWidth - width);
-  const maxY = Math.max(0, image.naturalHeight - height);
-
-  return {
-    x: maxX * (xPercent / 100),
-    y: maxY * (yPercent / 100),
-    width,
-    height
-  };
-}
-
-function drawCrop(canvas: HTMLCanvasElement, image: HTMLImageElement, crop: CropBox, aspectRatio: number) {
+function drawCrop(
+  canvas: HTMLCanvasElement,
+  image: HTMLImageElement,
+  aspectRatio: number,
+  zoom: number,
+  xPercent: number,
+  yPercent: number
+) {
   const maxWidth = 1600;
-  const width = Math.min(maxWidth, Math.max(480, Math.round(crop.width)));
+  const width = Math.min(maxWidth, Math.max(480, image.naturalWidth));
   const height = Math.round(width / aspectRatio);
   const context = canvas.getContext("2d");
 
@@ -67,7 +43,16 @@ function drawCrop(canvas: HTMLCanvasElement, image: HTMLImageElement, crop: Crop
   context.imageSmoothingQuality = "high";
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, width, height);
-  context.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height);
+
+  const coverScale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+  const scaledWidth = image.naturalWidth * coverScale * zoom;
+  const scaledHeight = image.naturalHeight * coverScale * zoom;
+  const maxOffsetX = Math.max(0, scaledWidth - width);
+  const maxOffsetY = Math.max(0, scaledHeight - height);
+  const offsetX = maxOffsetX * (xPercent / 100);
+  const offsetY = maxOffsetY * (yPercent / 100);
+
+  context.drawImage(image, -offsetX, -offsetY, scaledWidth, scaledHeight);
 }
 
 async function canvasToFile(canvas: HTMLCanvasElement, originalFile: File) {
@@ -152,7 +137,7 @@ export function ImageCropperModal({
       return;
     }
 
-    drawCrop(canvasRef.current, image, calculateCrop(image, aspectRatio, zoom, xPercent, yPercent), aspectRatio);
+    drawCrop(canvasRef.current, image, aspectRatio, zoom, xPercent, yPercent);
   }, [aspectRatio, image, xPercent, yPercent, zoom]);
 
   async function cropAndUpload() {
@@ -161,7 +146,7 @@ export function ImageCropperModal({
       return;
     }
 
-    drawCrop(canvasRef.current, image, calculateCrop(image, aspectRatio, zoom, xPercent, yPercent), aspectRatio);
+    drawCrop(canvasRef.current, image, aspectRatio, zoom, xPercent, yPercent);
     await onCropped(await canvasToFile(canvasRef.current, file));
   }
 
