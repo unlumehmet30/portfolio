@@ -20,6 +20,7 @@ import {
   UserRound
 } from "lucide-react";
 import { adminTokenKey } from "@/components/AdminLoginForm";
+import { ImageCropperModal } from "@/components/ImageCropperModal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,16 @@ type ProjectDraft = Omit<Project, "id" | "createdAt" | "updatedAt" | "caseStudy"
 
 type PostDraft = Omit<Post, "id" | "createdAt" | "updatedAt"> & {
   id?: number;
+};
+
+type CropDestination = "project-cover" | "project-gallery" | "post-cover" | "post-gallery";
+
+type PendingCrop = {
+  destination: CropDestination;
+  file: File;
+  id: string;
+  initialAspectRatio: number;
+  title: string;
 };
 
 const tabs: Array<{ key: TabKey; label: string; icon: typeof UserRound }> = [
@@ -263,6 +274,8 @@ export function AdminDashboard() {
   const [postTags, setPostTags] = useState("");
   const [postCoverUploading, setPostCoverUploading] = useState(false);
   const [postGalleryUploading, setPostGalleryUploading] = useState(false);
+  const [pendingCrops, setPendingCrops] = useState<PendingCrop[]>([]);
+  const [cropProcessing, setCropProcessing] = useState(false);
 
   const selectedProjectTitle = useMemo(
     () => (projectDraft.id ? `Editing #${projectDraft.id}` : "New project"),
@@ -271,6 +284,7 @@ export function AdminDashboard() {
   const selectedPostTitle = useMemo(() => (postDraft.id ? `Editing #${postDraft.id}` : "New note"), [postDraft.id]);
   const activeMessages = useMemo(() => messages.filter((message) => !message.archived), [messages]);
   const archivedMessages = useMemo(() => messages.filter((message) => message.archived), [messages]);
+  const activeCrop = pendingCrops[0] ?? null;
 
   const loadData = useCallback(async (activeToken: string) => {
     if (!activeToken) return;
@@ -313,6 +327,126 @@ export function AdminDashboard() {
   function logout() {
     window.sessionStorage.removeItem(adminTokenKey);
     router.push("/admin/login");
+  }
+
+  function setDestinationUploading(destination: CropDestination, value: boolean) {
+    if (destination === "project-cover") {
+      setProjectImageUploading(value);
+      return;
+    }
+
+    if (destination === "project-gallery") {
+      setProjectGalleryUploading(value);
+      return;
+    }
+
+    if (destination === "post-cover") {
+      setPostCoverUploading(value);
+      return;
+    }
+
+    setPostGalleryUploading(value);
+  }
+
+  function finishCropRequest(request: PendingCrop, nextStatus: string) {
+    const remainingCrops = pendingCrops.slice(1);
+
+    setPendingCrops(remainingCrops);
+    if (!remainingCrops.some((crop) => crop.destination === request.destination)) {
+      setDestinationUploading(request.destination, false);
+    }
+    setStatus(nextStatus);
+  }
+
+  function queueCropUploads(files: File[], destination: CropDestination, initialAspectRatio: number, title: string) {
+    if (!files.length) return;
+
+    setDestinationUploading(destination, true);
+    setPendingCrops((queue) => [
+      ...queue,
+      ...files.map((file, index) => ({
+        destination,
+        file,
+        id: `${destination}-${file.name}-${file.lastModified}-${index}`,
+        initialAspectRatio,
+        title: files.length > 1 ? `${title} (${index + 1}/${files.length})` : title
+      }))
+    ]);
+    setStatus("Crop the selected image before upload.");
+  }
+
+  async function uploadPreparedImage(request: PendingCrop, file: File) {
+    if (request.destination === "project-cover") {
+      const { imageUrl } = await uploadAdminProjectImage(token, file);
+      setProjectDraft((draft) => ({
+        ...draft,
+        imageUrl
+      }));
+      return;
+    }
+
+    if (request.destination === "project-gallery") {
+      const { imageUrl } = await uploadAdminProjectImage(token, file);
+      setProjectDraft((draft) => {
+        const existingImages = draft.galleryImages ?? [];
+        const nextImage = {
+          url: imageUrl,
+          alt: draft.title ? `${draft.title} screenshot ${existingImages.length + 1}` : null,
+          sortOrder: existingImages.length
+        };
+
+        return {
+          ...draft,
+          galleryImages: normalizeGalleryImages([...existingImages, nextImage])
+        };
+      });
+      return;
+    }
+
+    if (request.destination === "post-cover") {
+      const { imageUrl } = await uploadAdminPostImage(token, file);
+      setPostDraft((draft) => ({
+        ...draft,
+        coverImageUrl: imageUrl
+      }));
+      return;
+    }
+
+    const { imageUrl } = await uploadAdminPostImage(token, file);
+    setPostDraft((draft) => {
+      const existingImages = draft.images ?? [];
+      const nextImage = {
+        url: imageUrl,
+        alt: draft.title ? `${draft.title} visual ${existingImages.length + 1}` : null,
+        sortOrder: existingImages.length
+      };
+
+      return {
+        ...draft,
+        images: normalizePostImages([...existingImages, nextImage])
+      };
+    });
+  }
+
+  async function uploadCurrentCrop(file: File, useOriginal = false) {
+    if (!activeCrop) return;
+
+    setCropProcessing(true);
+    setStatus(useOriginal ? "Uploading original image..." : "Uploading cropped image...");
+
+    try {
+      await uploadPreparedImage(activeCrop, file);
+      finishCropRequest(activeCrop, "Image uploaded. Save the content to keep it.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Image upload failed.");
+    } finally {
+      setCropProcessing(false);
+    }
+  }
+
+  function skipCurrentCrop() {
+    if (!activeCrop || cropProcessing) return;
+    finishCropRequest(activeCrop, "Image skipped.");
   }
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
@@ -376,60 +510,20 @@ export function AdminDashboard() {
     }
   }
 
-  async function uploadProjectImage(event: ChangeEvent<HTMLInputElement>) {
+  function uploadProjectImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setProjectImageUploading(true);
-    setStatus("Uploading project image...");
-
-    try {
-      const { imageUrl } = await uploadAdminProjectImage(token, file);
-      setProjectDraft((draft) => ({
-        ...draft,
-        imageUrl
-      }));
-      setStatus("Project image uploaded. Save the project to keep it.");
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Project image upload failed.");
-    } finally {
-      setProjectImageUploading(false);
-      event.target.value = "";
-    }
+    queueCropUploads([file], "project-cover", 16 / 9, "Project cover");
+    event.target.value = "";
   }
 
-  async function uploadProjectGalleryImages(event: ChangeEvent<HTMLInputElement>) {
+  function uploadProjectGalleryImages(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
 
-    setProjectGalleryUploading(true);
-    setStatus("Uploading gallery images...");
-
-    try {
-      const uploadedImages = await Promise.all(
-        files.map((file) => uploadAdminProjectImage(token, file))
-      );
-      setProjectDraft((draft) => {
-        const existingImages = draft.galleryImages ?? [];
-        const startIndex = existingImages.length;
-        const nextImages = uploadedImages.map(({ imageUrl }, index) => ({
-          url: imageUrl,
-          alt: draft.title ? `${draft.title} screenshot ${startIndex + index + 1}` : null,
-          sortOrder: startIndex + index
-        }));
-
-        return {
-          ...draft,
-          galleryImages: normalizeGalleryImages([...existingImages, ...nextImages])
-        };
-      });
-      setStatus("Gallery images uploaded. Save the project to keep them.");
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Gallery image upload failed.");
-    } finally {
-      setProjectGalleryUploading(false);
-      event.target.value = "";
-    }
+    queueCropUploads(files, "project-gallery", 16 / 9, "Project gallery image");
+    event.target.value = "";
   }
 
   function updateProjectGalleryImage(index: number, patch: Partial<ProjectImage>) {
@@ -515,60 +609,20 @@ export function AdminDashboard() {
     }
   }
 
-  async function uploadPostCoverImage(event: ChangeEvent<HTMLInputElement>) {
+  function uploadPostCoverImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setPostCoverUploading(true);
-    setStatus("Uploading note cover image...");
-
-    try {
-      const { imageUrl } = await uploadAdminPostImage(token, file);
-      setPostDraft((draft) => ({
-        ...draft,
-        coverImageUrl: imageUrl
-      }));
-      setStatus("Note cover image uploaded. Save the note to keep it.");
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Note cover image upload failed.");
-    } finally {
-      setPostCoverUploading(false);
-      event.target.value = "";
-    }
+    queueCropUploads([file], "post-cover", 2, "Note cover");
+    event.target.value = "";
   }
 
-  async function uploadPostGalleryImages(event: ChangeEvent<HTMLInputElement>) {
+  function uploadPostGalleryImages(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
 
-    setPostGalleryUploading(true);
-    setStatus("Uploading note images...");
-
-    try {
-      const uploadedImages = await Promise.all(
-        files.map((file) => uploadAdminPostImage(token, file))
-      );
-      setPostDraft((draft) => {
-        const existingImages = draft.images ?? [];
-        const startIndex = existingImages.length;
-        const nextImages = uploadedImages.map(({ imageUrl }, index) => ({
-          url: imageUrl,
-          alt: draft.title ? `${draft.title} visual ${startIndex + index + 1}` : null,
-          sortOrder: startIndex + index
-        }));
-
-        return {
-          ...draft,
-          images: normalizePostImages([...existingImages, ...nextImages])
-        };
-      });
-      setStatus("Note images uploaded. Save the note to keep them.");
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Note image upload failed.");
-    } finally {
-      setPostGalleryUploading(false);
-      event.target.value = "";
-    }
+    queueCropUploads(files, "post-gallery", 16 / 9, "Note image");
+    event.target.value = "";
   }
 
   function updatePostImage(index: number, patch: Partial<PostImage>) {
@@ -635,13 +689,14 @@ export function AdminDashboard() {
   }
 
   return (
-    <AdminShell
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      onLogout={logout}
-      onRefresh={() => void loadData(token)}
-      status={status}
-    >
+    <>
+      <AdminShell
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onLogout={logout}
+        onRefresh={() => void loadData(token)}
+        status={status}
+      >
       {activeTab === "profile" ? (
         <Card className="p-5">
           <form onSubmit={saveProfile} className="grid gap-4">
@@ -1131,6 +1186,18 @@ export function AdminDashboard() {
           ) : null}
         </Card>
       ) : null}
-    </AdminShell>
+      </AdminShell>
+      {activeCrop ? (
+        <ImageCropperModal
+          file={activeCrop.file}
+          initialAspectRatio={activeCrop.initialAspectRatio}
+          isUploading={cropProcessing}
+          onCancel={skipCurrentCrop}
+          onCropped={(file) => uploadCurrentCrop(file)}
+          onOriginal={(file) => uploadCurrentCrop(file, true)}
+          title={activeCrop.title}
+        />
+      ) : null}
+    </>
   );
 }
