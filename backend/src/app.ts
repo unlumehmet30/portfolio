@@ -16,6 +16,7 @@ function setUploadHeaders(res: express.Response, filePath: string) {
   res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
 
   if (filePath.endsWith(".html") || filePath.endsWith(".htm")) {
     res.setHeader(

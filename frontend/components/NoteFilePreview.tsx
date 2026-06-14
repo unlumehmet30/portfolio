@@ -31,12 +31,16 @@ export function NoteFilePreview({ files, locale = "en" }: { files: PostFile[]; l
       <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">{heading}</h2>
       <div className="mt-5 grid gap-3">
         {files.map((file, index) => (
-          <article
+          <a
             key={`${file.url}-${index}`}
-            className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="group flex flex-col gap-4 rounded-lg border border-border bg-card p-4 transition-colors hover:border-accent hover:text-accent sm:flex-row sm:items-center sm:justify-between"
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${openLabel}: ${file.title}`}
           >
             <div className="flex min-w-0 items-start gap-3">
-              <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground">
+              <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground transition-colors group-hover:border-accent group-hover:text-accent">
                 <FileText size={18} aria-hidden="true" />
               </span>
               <div className="min-w-0">
@@ -44,16 +48,11 @@ export function NoteFilePreview({ files, locale = "en" }: { files: PostFile[]; l
                 <p className="mt-1 text-xs text-muted-foreground">{fileTypeLabel(file)}</p>
               </div>
             </div>
-            <a
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
-              href={file.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <span className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors group-hover:border-accent group-hover:text-accent">
               <ExternalLink size={16} aria-hidden="true" />
               {openLabel}
-            </a>
-          </article>
+            </span>
+          </a>
         ))}
       </div>
     </section>
