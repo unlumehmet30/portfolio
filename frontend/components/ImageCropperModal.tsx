@@ -44,15 +44,15 @@ function drawCrop(
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, width, height);
 
-  const coverScale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
-  const scaledWidth = image.naturalWidth * coverScale * zoom;
-  const scaledHeight = image.naturalHeight * coverScale * zoom;
+  const fitScale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+  const scaledWidth = image.naturalWidth * fitScale * zoom;
+  const scaledHeight = image.naturalHeight * fitScale * zoom;
   const maxOffsetX = Math.max(0, scaledWidth - width);
   const maxOffsetY = Math.max(0, scaledHeight - height);
-  const offsetX = maxOffsetX * (xPercent / 100);
-  const offsetY = maxOffsetY * (yPercent / 100);
+  const offsetX = maxOffsetX > 0 ? -maxOffsetX * (xPercent / 100) : (width - scaledWidth) / 2;
+  const offsetY = maxOffsetY > 0 ? -maxOffsetY * (yPercent / 100) : (height - scaledHeight) / 2;
 
-  context.drawImage(image, -offsetX, -offsetY, scaledWidth, scaledHeight);
+  context.drawImage(image, offsetX, offsetY, scaledWidth, scaledHeight);
 }
 
 async function canvasToFile(canvas: HTMLCanvasElement, originalFile: File) {
@@ -77,7 +77,7 @@ export function ImageCropperModal({
   aspectOptions = defaultAspectOptions,
   file,
   initialAspectRatio,
-  initialZoom = 1.15,
+  initialZoom = 1,
   isUploading,
   onCancel,
   onCropped,

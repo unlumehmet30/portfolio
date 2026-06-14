@@ -408,7 +408,7 @@ export function AdminDashboard() {
         id: `${destination}-${file.name}-${file.lastModified}-${index}`,
         allowOriginalUpload: options.allowOriginalUpload ?? true,
         initialAspectRatio,
-        initialZoom: options.initialZoom ?? 1.15,
+        initialZoom: options.initialZoom ?? 1,
         replaceIndex: files.length === 1 ? options.replaceIndex : undefined,
         title: files.length > 1 ? `${title} (${index + 1}/${files.length})` : title
       }))
@@ -452,7 +452,7 @@ export function AdminDashboard() {
       const file = await loadExistingImageFile(url, title);
       queueCropUploads([file], destination, initialAspectRatio, title, {
         allowOriginalUpload: false,
-        initialZoom: 1.25,
+        initialZoom: 1,
         replaceIndex,
         status: "Crop the existing image before upload."
       });
