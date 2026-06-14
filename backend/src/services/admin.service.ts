@@ -117,7 +117,7 @@ export const postSchema = z.object({
   coverImageUrl: optionalImageUrl,
   images: z.array(postImageSchema).default([]),
   files: z.array(postFileSchema).default([]),
-  published: z.boolean().default(false)
+  published: z.boolean().default(true)
 });
 
 const resumeExperienceSchema = z.object({

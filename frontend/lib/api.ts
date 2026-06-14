@@ -28,13 +28,15 @@ type NextFetchInit = RequestInit & {
 };
 
 async function request<T>(path: string, init?: NextFetchInit): Promise<T> {
+  const isGetRequest = !init?.method || init.method.toUpperCase() === "GET";
+
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     ...init,
+    cache: init?.cache ?? (isGetRequest ? "no-store" : undefined),
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {})
-    },
-    next: init?.method && init.method !== "GET" ? undefined : { revalidate: 60 }
+    }
   });
 
   const payload = (await response.json()) as ApiEnvelope<T>;

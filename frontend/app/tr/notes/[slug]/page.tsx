@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import { NoteFilePreview } from "@/components/NoteFilePreview";
 import { Badge } from "@/components/ui/badge";
-import { getPost, getPosts } from "@/lib/api";
+import { getPost } from "@/lib/api";
 import { localizePost } from "@/lib/content-localization";
 import { getNoteTypeLabel } from "@/lib/note-types";
 import { siteUrl } from "@/lib/site";
@@ -16,15 +16,6 @@ const copy = getUiCopy("tr").notes;
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateStaticParams() {
-  try {
-    const posts = await getPosts();
-    return posts.map((post) => ({ slug: post.slug }));
-  } catch {
-    return [];
-  }
-}
 
 async function loadPost(slug: string): Promise<Post | null> {
   try {

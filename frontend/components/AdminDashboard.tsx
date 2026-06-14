@@ -117,7 +117,7 @@ const emptyPost: PostDraft = {
   coverImageUrl: "",
   images: [],
   files: [],
-  published: false
+  published: true
 };
 
 function tagsToText(tags: string[]) {
@@ -1454,14 +1454,19 @@ export function AdminDashboard() {
                 ) : null}
               </div>
               <Field label="Tags comma separated" value={postTags} onChange={setPostTags} />
-              <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                <input
-                  type="checkbox"
-                  checked={postDraft.published}
-                  onChange={(event) => setPostDraft({ ...postDraft, published: event.target.checked })}
-                />
-                Published
-              </label>
+              <div className="rounded-lg border border-border bg-muted/20 p-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={postDraft.published}
+                    onChange={(event) => setPostDraft({ ...postDraft, published: event.target.checked })}
+                  />
+                  Published
+                </label>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  Published notes appear on the public Notes page. Turn this off to keep the note as a draft.
+                </p>
+              </div>
               <Button type="submit" className="w-fit" disabled={postCoverUploading || postGalleryUploading || postFileUploading}>
                 {postCoverUploading || postGalleryUploading || postFileUploading ? <Upload size={17} /> : <Save size={17} />}
                 {postCoverUploading || postGalleryUploading || postFileUploading ? "Uploading file..." : "Save note"}
