@@ -68,6 +68,7 @@ type PendingCrop = {
   file: File;
   id: string;
   initialAspectRatio: number;
+  initialZoom: number;
   replaceIndex?: number;
   title: string;
 };
@@ -394,7 +395,7 @@ export function AdminDashboard() {
     destination: CropDestination,
     initialAspectRatio: number,
     title: string,
-    options: { allowOriginalUpload?: boolean; replaceIndex?: number; status?: string } = {}
+    options: { allowOriginalUpload?: boolean; initialZoom?: number; replaceIndex?: number; status?: string } = {}
   ) {
     if (!files.length) return;
 
@@ -407,6 +408,7 @@ export function AdminDashboard() {
         id: `${destination}-${file.name}-${file.lastModified}-${index}`,
         allowOriginalUpload: options.allowOriginalUpload ?? true,
         initialAspectRatio,
+        initialZoom: options.initialZoom ?? 1.15,
         replaceIndex: files.length === 1 ? options.replaceIndex : undefined,
         title: files.length > 1 ? `${title} (${index + 1}/${files.length})` : title
       }))
@@ -450,6 +452,7 @@ export function AdminDashboard() {
       const file = await loadExistingImageFile(url, title);
       queueCropUploads([file], destination, initialAspectRatio, title, {
         allowOriginalUpload: false,
+        initialZoom: 1.25,
         replaceIndex,
         status: "Crop the existing image before upload."
       });
@@ -1386,6 +1389,7 @@ export function AdminDashboard() {
           allowOriginalUpload={activeCrop.allowOriginalUpload ?? true}
           file={activeCrop.file}
           initialAspectRatio={activeCrop.initialAspectRatio}
+          initialZoom={activeCrop.initialZoom}
           isUploading={cropProcessing}
           onCancel={skipCurrentCrop}
           onCropped={(file) => uploadCurrentCrop(file)}

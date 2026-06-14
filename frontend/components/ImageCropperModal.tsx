@@ -92,6 +92,7 @@ export function ImageCropperModal({
   aspectOptions = defaultAspectOptions,
   file,
   initialAspectRatio,
+  initialZoom = 1.15,
   isUploading,
   onCancel,
   onCropped,
@@ -102,6 +103,7 @@ export function ImageCropperModal({
   aspectOptions?: AspectOption[];
   file: File;
   initialAspectRatio: number;
+  initialZoom?: number;
   isUploading: boolean;
   onCancel: () => void;
   onCropped: (file: File) => Promise<void>;
@@ -113,7 +115,7 @@ export function ImageCropperModal({
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [xPercent, setXPercent] = useState(50);
   const [yPercent, setYPercent] = useState(50);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(initialZoom);
   const [error, setError] = useState("");
 
   const selectedAspectLabel = useMemo(
@@ -127,7 +129,7 @@ export function ImageCropperModal({
 
     setError("");
     setImage(null);
-    setZoom(1);
+    setZoom(initialZoom);
     setXPercent(50);
     setYPercent(50);
     setAspectRatio(initialAspectRatio);
@@ -143,7 +145,7 @@ export function ImageCropperModal({
     return () => {
       URL.revokeObjectURL(objectUrl);
     };
-  }, [file, initialAspectRatio]);
+  }, [file, initialAspectRatio, initialZoom]);
 
   useEffect(() => {
     if (!image || !canvasRef.current) {
@@ -207,8 +209,8 @@ export function ImageCropperModal({
 
             <label className="block space-y-2 text-sm">
               <span className="flex items-center justify-between gap-3 text-muted-foreground">
-                <span>Zoom</span>
-                <span>{zoom.toFixed(1)}x</span>
+                <span>Crop amount</span>
+                <span>{zoom.toFixed(2)}x</span>
               </span>
               <input
                 type="range"
