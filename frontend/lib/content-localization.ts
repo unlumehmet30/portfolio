@@ -16,6 +16,56 @@ type ProjectTranslation = Pick<
 };
 
 const projectTranslations: Record<string, ProjectTranslation> = {
+  "personal-portfolio-platform": {
+    title: "Kişisel Portfolyo Platformu",
+    summary:
+      "Dinamik projeler, notlar, medya yüklemeleri, admin araçları ve güvenli self-hosted dağıtım içeren full-stack portfolyo platformu. Özellik geliştirme aktif olarak devam ediyor.",
+    description:
+      "Next.js frontend, Express/Prisma backend, admin kontrollü içerik yönetimi, proje galerileri, dosya yüklemeli notlar, iletişim akışı ve Docker/Caddy dağıtımını birleştiren kişisel portfolyo platformunu geliştirdim ve canlıda yönetiyorum.",
+    problem:
+      "Statik bir portfolyo; her yeni proje, not, görsel veya özgeçmiş güncellemesi için kod değişikliği gerektirirdi ve içerik yönetimi ile dağıtım tarafındaki mühendisliği görünür kılmazdı.",
+    challenge:
+      "Temel zorluk, kişisel web sitesini sürdürülebilir bir ürüne dönüştürmekti: güvenli admin erişimi, kalıcı yüklemeler, dinamik içerik, zengin not render'ı, responsive galeriler, cache ve production hardening aynı sistemde hafif kalmalıydı.",
+    architecture:
+      "Frontend Next.js App Router ve ISR cache kullanır. Backend Express, Prisma ve SQLite ile REST API sunar. Admin rotaları projeleri, notları, yüklemeleri, özgeçmiş içeriğini ve iletişim mesajlarını yönetir; Caddy ise HTTPS'i sonlandırır ve Docker servislerini reverse proxy arkasında çalıştırır.",
+    results:
+      "Site dinamik projeleri, galeri yüklemelerini, görsel kırpmayı, PDF/HTML not eklerini, Markdown ve KaTeX render'ını, iletişim mesajlarını, güvenlik başlıklarını, rate limiting'i ve Docker tabanlı dağıtımı destekliyor; özellikler hâlâ aktif olarak geliştiriliyor.",
+    tags: ["Next.js", "TypeScript", "Express", "Prisma", "Docker", "Caddy", "Admin CMS", "Aktif Geliştirme"],
+    metrics: [
+      { label: "Teknoloji", value: "Next.js + API", context: "Frontend ve backend platformu" },
+      { label: "İçerik", value: "Dinamik", context: "Projeler, notlar, özgeçmiş, yüklemeler" },
+      { label: "Dağıtım", value: "Docker/Caddy", context: "VPS üzerinde HTTPS reverse proxy" },
+      { label: "Durum", value: "Gelişiyor", context: "Özellikler hâlâ ekleniyor" }
+    ],
+    caseStudy: {
+      dataset:
+        "Portfolyo içeriği, yüklenen proje medyaları, teknik notlar, özgeçmiş verisi, iletişim mesajları ve production dağıtım konfigürasyonu.",
+      technicalDecisions: [
+        "İçerik kod değişikliği olmadan yönetilebilsin diye statik-only portfolyo yerine full-stack mimari kullandım.",
+        "Public içeriği ISR ile cache'ledim, kimlik doğrulamalı admin akışlarını ise no-store davranışında tuttum.",
+        "Yüklenen medyaları kalıcı Docker volume üzerinde sakladım ve dosyalara kontrollü API path'leriyle eriştirdim.",
+        "HTTPS, reverse proxy ve merkezi güvenlik başlıkları için Docker servislerinin önüne Caddy koydum."
+      ],
+      implementationDetails: [
+        "Next.js public portfolyo, lokalize rotalar, proje sayfaları, notlar ve özgeçmiş görünümlerini render eder.",
+        "Express ve Prisma; projeler, notlar, yüklemeler, profil verisi, iletişim mesajları ve admin işlemleri için REST endpoint'leri sunar.",
+        "Admin paneli proje galerilerini, kapak görsellerini, görsel kırpmayı, PDF/HTML not dosyalarını ve Markdown içeriği destekler.",
+        "Production ortamı Caddy arkasında Docker servisleri olarak çalışır; backend ve frontend portları dışarıya kapalıdır."
+      ],
+      lessonsLearned: [
+        "Bir portfolyo, içerik operasyonları manuel kod düzenleme olmaktan çıktığında çok daha kullanışlı hale gelir.",
+        "Cache algılanan hızı ciddi artırır; ama admin rotaları ve public rotalar farklı tazelik kurallarına ihtiyaç duyar.",
+        "Upload yönetimi kalıcılık, validasyon, önizleme ve uzun vadeli deploy davranışıyla birlikte düşünülmelidir."
+      ],
+      futureImprovements: [
+        "Yüklemeleri daha kolay yedekleme ve CDN dağıtımı için object storage'a taşımak.",
+        "Projeler ve teknik notlar arasında arama/filtreleme eklemek.",
+        "Özel domain bağlandıktan sonra daha zengin analytics ve uptime monitoring eklemek.",
+        "Yeni portfolyo ihtiyaçları çıktıkça admin akışını genişletmeye devam etmek."
+      ],
+      diagram: "web-platform"
+    }
+  },
   "intermittent-demand-forecasting-system": {
     title: "Seyrek Talep Tahminleme Sistemi",
     summary:

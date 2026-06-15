@@ -125,6 +125,55 @@ function MobileArtwork() {
   );
 }
 
+function WebPlatformArtwork() {
+  return (
+    <div className="absolute inset-x-[9%] top-[12%] bottom-[29%]">
+      <div className="h-full border border-foreground/15 bg-foreground/[0.035]">
+        <div className="flex h-8 items-center gap-2 border-b border-foreground/10 px-3">
+          <span className="h-2 w-2 rounded-full bg-accent/70" />
+          <span className="h-2 w-2 rounded-full bg-foreground/20" />
+          <span className="h-2 w-2 rounded-full bg-foreground/15" />
+          <div className="ml-3 h-2 flex-1 bg-foreground/10" />
+        </div>
+        <div className="grid h-[calc(100%-2rem)] grid-cols-[0.32fr_0.68fr]">
+          <div className="border-r border-foreground/10 p-3">
+            <div className="h-3 w-3/4 bg-accent/45" />
+            <div className="mt-4 space-y-2">
+              {[62, 82, 48, 70].map((width, index) => (
+                <div key={`${width}-${index}`} className="h-1.5 bg-foreground/10" style={{ width: `${width}%` }} />
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-rows-[0.58fr_0.42fr]">
+            <div className="grid grid-cols-2 gap-3 p-3">
+              {[0, 1].map((panel) => (
+                <div key={panel} className="border border-accent/20 bg-accent/10 p-2">
+                  <div className="h-2 w-2/3 bg-accent/50" />
+                  <div className="mt-3 h-1.5 w-full bg-foreground/10" />
+                  <div className="mt-2 h-1.5 w-3/4 bg-foreground/10" />
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-foreground/10 p-3">
+              <div className="mb-3 flex gap-2">
+                <span className="h-4 w-16 bg-accent/35" />
+                <span className="h-4 w-12 bg-foreground/10" />
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {[76, 44, 88, 58].map((height, index) => (
+                  <div key={`${height}-${index}`} className="flex h-16 items-end bg-foreground/[0.04]">
+                    <span className="w-full bg-accent/45" style={{ height: `${height}%` }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function GenericArtwork() {
   return (
     <div className="absolute inset-[14%] border border-foreground/15">
@@ -141,6 +190,7 @@ function PlaceholderArtwork({ kind }: { kind: ProjectVisualKind }) {
   if (kind === "visual-odometry") return <VisualOdometryArtwork />;
   if (kind === "speech") return <SpeechArtwork />;
   if (kind === "mobile") return <MobileArtwork />;
+  if (kind === "web-platform") return <WebPlatformArtwork />;
   return <GenericArtwork />;
 }
 

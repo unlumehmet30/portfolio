@@ -61,6 +61,32 @@ export const profile = {
 
 export const projects: SeedProject[] = [
   {
+    title: "Personal Portfolio Platform",
+    slug: "personal-portfolio-platform",
+    summary:
+      "A full-stack portfolio platform with dynamic projects, notes, media uploads, admin tools, and secure self-hosted deployment. Active feature development continues.",
+    description:
+      "Built and operate a personal portfolio platform that combines a Next.js frontend, an Express/Prisma backend, admin-managed content, project galleries, notes with file uploads, contact handling, and Docker/Caddy deployment.",
+    problem:
+      "A static portfolio would require code changes for every new project, note, image, or resume update, and it would not show the engineering work behind content management and deployment.",
+    challenge:
+      "The challenge was turning a personal website into a maintainable product: secure admin access, durable uploads, dynamic content, rich note rendering, responsive galleries, caching, and production hardening without making the system heavy.",
+    architecture:
+      "The frontend uses Next.js App Router with ISR caching. The backend exposes a REST API with Express, Prisma, and SQLite. Admin routes manage projects, notes, uploads, resume content, and contact messages, while Caddy terminates HTTPS and reverse-proxies Docker services.",
+    results:
+      "The site supports dynamic projects, gallery uploads, image cropping, PDF/HTML note attachments, Markdown and KaTeX rendering, contact messages, security headers, rate limiting, Dockerized deployment, and is still actively being expanded.",
+    tags: ["Next.js", "TypeScript", "Express", "Prisma", "Docker", "Caddy", "Admin CMS", "Active Development"],
+    metrics: [
+      { label: "Stack", value: "Next.js + API", context: "Frontend and backend platform" },
+      { label: "Content", value: "Dynamic", context: "Projects, notes, resume, uploads" },
+      { label: "Deploy", value: "Docker/Caddy", context: "HTTPS reverse proxy on VPS" },
+      { label: "Status", value: "In progress", context: "Features are still being added" }
+    ],
+    githubUrl: "https://github.com/unlumehmet30/portfolio",
+    demoUrl: "https://165.232.45.167.sslip.io",
+    featured: true
+  },
+  {
     title: "Intermittent Demand Forecasting System",
     slug: "intermittent-demand-forecasting-system",
     summary:

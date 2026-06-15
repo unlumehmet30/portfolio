@@ -6,6 +6,7 @@ export type ProjectVisualKind =
   | "visual-odometry"
   | "speech"
   | "mobile"
+  | "web-platform"
   | "generic";
 
 type ProjectVisual = {
@@ -17,6 +18,15 @@ type ProjectVisual = {
 
 // Add an image under public/projects, then set src to its public URL.
 const projectVisuals: Record<string, ProjectVisual> = {
+  "personal-portfolio-platform": {
+    src: null,
+    suggestedFile: "/projects/personal-portfolio-platform.png",
+    kind: "web-platform",
+    alt: {
+      en: "Full-stack portfolio platform with admin dashboard and content APIs",
+      tr: "Admin paneli ve içerik API'leri olan full-stack portfolyo platformu"
+    }
+  },
   "intermittent-demand-forecasting-system": {
     src: null,
     suggestedFile: "/projects/demand-forecasting-overview.png",

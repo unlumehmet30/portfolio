@@ -6,9 +6,37 @@ export const caseStudyDetails: Record<
     implementationDetails: string[];
     lessonsLearned: string[];
     futureImprovements: string[];
-    diagram: "forecasting" | "optimization" | "visual-odometry" | "speech" | "mobile";
+    diagram: "forecasting" | "optimization" | "visual-odometry" | "speech" | "mobile" | "web-platform";
   }
 > = {
+  "personal-portfolio-platform": {
+    dataset:
+      "Portfolio content, uploaded project media, technical notes, resume data, contact messages, and production deployment configuration.",
+    technicalDecisions: [
+      "Use a full-stack architecture instead of a static-only portfolio so content can be managed without code changes.",
+      "Keep public content cached with ISR while preserving no-store behavior for authenticated admin workflows.",
+      "Store uploaded media on a persistent Docker volume and reference files through controlled API paths.",
+      "Put Caddy in front of the Docker services for HTTPS, reverse proxying, and centralized security headers."
+    ],
+    implementationDetails: [
+      "Next.js renders the public portfolio, localized routes, project pages, notes, and resume views.",
+      "Express and Prisma expose REST endpoints for projects, notes, uploads, profile data, contact messages, and admin actions.",
+      "The admin dashboard supports project galleries, cover images, image cropping, PDF/HTML note files, and Markdown content.",
+      "Production runs as Docker services behind Caddy, with backend and frontend ports kept internal."
+    ],
+    lessonsLearned: [
+      "A portfolio becomes more useful when content operations are part of the system, not manual code edits.",
+      "Caching improves perceived speed, but admin routes and public routes need different freshness rules.",
+      "Upload handling has to consider persistence, validation, previews, and long-term deploy behavior together."
+    ],
+    futureImprovements: [
+      "Move uploads to object storage for simpler backups and CDN delivery.",
+      "Add search and filtering across projects and technical notes.",
+      "Introduce richer analytics and uptime monitoring after the custom domain is attached.",
+      "Continue expanding the admin workflow as new portfolio needs appear."
+    ],
+    diagram: "web-platform"
+  },
   "intermittent-demand-forecasting-system": {
     dataset:
       "20k products, three years of daily sales, strongly sparse product-level targets, and approximately 85% zero-demand rows.",

@@ -35,7 +35,7 @@ export type CaseStudy = {
   implementationDetails: string[];
   lessonsLearned: string[];
   futureImprovements: string[];
-  diagram: "forecasting" | "optimization" | "visual-odometry" | "speech" | "mobile";
+  diagram: "forecasting" | "optimization" | "visual-odometry" | "speech" | "mobile" | "web-platform";
 };
 
 export type ProjectImage = {

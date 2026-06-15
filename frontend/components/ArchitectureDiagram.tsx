@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, BrainCircuit, GitBranch, Layers3, Repeat2, Route, ServerCog } from "lucide-react";
+import { ArrowRight, BrainCircuit, GitBranch, Globe2, Layers3, Repeat2, Route, ServerCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/locale";
 import type { CaseStudy } from "@/types/content";
@@ -44,6 +44,12 @@ const diagramCopy = {
       ["Flutter UX", "Parent and child interaction surfaces."],
       ["Firebase", "Authentication, storage, and media state."],
       ["Story Generation", "Story, subtitle, and voice workflows."]
+    ],
+    webPlatform: [
+      ["Next.js Frontend", "Public portfolio, notes, projects, resume, and localized routes."],
+      ["Express API", "REST endpoints for content, uploads, contact messages, and admin actions."],
+      ["Admin CMS", "Project galleries, note files, image cropping, and dynamic updates."],
+      ["Caddy + Docker", "HTTPS reverse proxy and isolated production services."]
     ]
   },
   tr: {
@@ -81,6 +87,12 @@ const diagramCopy = {
       ["Flutter UX", "Ebeveyn ve çocuk etkileşim yüzeyleri."],
       ["Firebase", "Kimlik doğrulama, depolama ve medya durumu."],
       ["Hikaye Üretimi", "Hikaye, altyazı ve ses iş akışları."]
+    ],
+    webPlatform: [
+      ["Next.js Frontend", "Public portfolyo, notlar, projeler, özgeçmiş ve yerelleştirilmiş rotalar."],
+      ["Express API", "İçerik, yüklemeler, iletişim mesajları ve admin işlemleri için REST endpoint'leri."],
+      ["Admin CMS", "Proje galerileri, not dosyaları, görsel kırpma ve dinamik güncellemeler."],
+      ["Caddy + Docker", "HTTPS reverse proxy ve izole production servisleri."]
     ]
   }
 } as const;
@@ -233,12 +245,29 @@ function MobileDiagram({ locale }: { locale: Locale }) {
   );
 }
 
+function WebPlatformDiagram({ locale }: { locale: Locale }) {
+  const copy = diagramCopy[locale].webPlatform;
+
+  return (
+    <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr]">
+      <Node label={copy[0][0]} detail={copy[0][1]} accent="green" />
+      <Connector />
+      <Node label={copy[1][0]} detail={copy[1][1]} accent="sky" />
+      <Connector />
+      <Node label={copy[2][0]} detail={copy[2][1]} accent="emerald" />
+      <Connector />
+      <Node label={copy[3][0]} detail={copy[3][1]} accent="amber" />
+    </div>
+  );
+}
+
 const iconMap: Record<DiagramType, typeof BrainCircuit> = {
   forecasting: Repeat2,
   optimization: ServerCog,
   "visual-odometry": Route,
   speech: BrainCircuit,
-  mobile: Layers3
+  mobile: Layers3,
+  "web-platform": Globe2
 };
 
 export function ArchitectureDiagram({ type, locale = "en" }: { type: DiagramType; locale?: Locale }) {
@@ -267,6 +296,7 @@ export function ArchitectureDiagram({ type, locale = "en" }: { type: DiagramType
       {type === "visual-odometry" ? <VisualOdometryDiagram locale={locale} /> : null}
       {type === "speech" ? <SpeechDiagram locale={locale} /> : null}
       {type === "mobile" ? <MobileDiagram locale={locale} /> : null}
+      {type === "web-platform" ? <WebPlatformDiagram locale={locale} /> : null}
     </motion.div>
   );
 }
