@@ -8,6 +8,61 @@ function shouldSkipOptimization(src: string) {
   return src.startsWith("/api/uploads/") || src.startsWith("http");
 }
 
+function isEscaped(value: string, index: number) {
+  let slashCount = 0;
+
+  for (let cursor = index - 1; cursor >= 0 && value[cursor] === "\\"; cursor -= 1) {
+    slashCount += 1;
+  }
+
+  return slashCount % 2 === 1;
+}
+
+function escapeMathPipesInTableLine(line: string) {
+  if (!line.trimStart().startsWith("|")) {
+    return line;
+  }
+
+  let normalized = "";
+  let inInlineMath = false;
+  let inDisplayMath = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    const nextCharacter = line[index + 1];
+
+    if (character === "$" && !isEscaped(line, index)) {
+      if (nextCharacter === "$") {
+        inDisplayMath = !inDisplayMath;
+        normalized += "$$";
+        index += 1;
+        continue;
+      }
+
+      inInlineMath = !inInlineMath;
+      normalized += character;
+      continue;
+    }
+
+    if (character === "|" && (inInlineMath || inDisplayMath) && !isEscaped(line, index)) {
+      normalized += "\\vert{}";
+      continue;
+    }
+
+    normalized += character;
+  }
+
+  return normalized;
+}
+
+function normalizeMarkdownContent(content: string) {
+  return content
+    .replace(/\\\.\s*/g, "\\, ")
+    .split("\n")
+    .map(escapeMathPipesInTableLine)
+    .join("\n");
+}
+
 const components: Components = {
   h1: ({ children }) => (
     <h1 className="mt-10 text-3xl font-semibold leading-tight text-foreground first:mt-0">
@@ -101,7 +156,7 @@ export function MarkdownContent({ content }: { content: string }) {
         rehypePlugins={[rehypeKatex]}
         components={components}
       >
-        {content}
+        {normalizeMarkdownContent(content)}
       </ReactMarkdown>
     </div>
   );

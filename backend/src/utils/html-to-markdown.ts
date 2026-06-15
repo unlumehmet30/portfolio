@@ -26,6 +26,61 @@ function mathMarkdown(formula: string, displayMode: boolean) {
   return displayMode ? `\n\n$$\n${formula}\n$$\n\n` : `$${formula}$`;
 }
 
+function isEscaped(value: string, index: number) {
+  let slashCount = 0;
+
+  for (let cursor = index - 1; cursor >= 0 && value[cursor] === "\\"; cursor -= 1) {
+    slashCount += 1;
+  }
+
+  return slashCount % 2 === 1;
+}
+
+function escapeMathPipesInTableLine(line: string) {
+  if (!line.trimStart().startsWith("|")) {
+    return line;
+  }
+
+  let normalized = "";
+  let inInlineMath = false;
+  let inDisplayMath = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    const nextCharacter = line[index + 1];
+
+    if (character === "$" && !isEscaped(line, index)) {
+      if (nextCharacter === "$") {
+        inDisplayMath = !inDisplayMath;
+        normalized += "$$";
+        index += 1;
+        continue;
+      }
+
+      inInlineMath = !inInlineMath;
+      normalized += character;
+      continue;
+    }
+
+    if (character === "|" && (inInlineMath || inDisplayMath) && !isEscaped(line, index)) {
+      normalized += "\\vert{}";
+      continue;
+    }
+
+    normalized += character;
+  }
+
+  return normalized;
+}
+
+function normalizeMarkdownMath(markdown: string) {
+  return markdown
+    .replace(/\\\.\s*/g, "\\, ")
+    .split("\n")
+    .map(escapeMathPipesInTableLine)
+    .join("\n");
+}
+
 function protectRawMath(html: string) {
   const replacements: Array<{ token: string; markdown: string }> = [];
   const createToken = (markdown: string) => {
@@ -148,7 +203,7 @@ export function htmlToMarkdown(html: string) {
     turndown.turndown(protectedHtml)
   );
 
-  return markdown
+  return normalizeMarkdownMath(markdown)
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
