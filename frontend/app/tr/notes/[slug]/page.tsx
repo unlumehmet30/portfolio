@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import { NoteFilePreview } from "@/components/NoteFilePreview";
 import { Badge } from "@/components/ui/badge";
-import { getPost } from "@/lib/api";
+import { getPost, getPosts } from "@/lib/api";
 import { localizePost } from "@/lib/content-localization";
 import { getNoteTypeLabel } from "@/lib/note-types";
 import { siteUrl } from "@/lib/site";
@@ -13,17 +14,28 @@ import type { Post } from "@/types/content";
 
 const copy = getUiCopy("tr").notes;
 
+export const revalidate = 60;
+
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-async function loadPost(slug: string): Promise<Post | null> {
+export async function generateStaticParams() {
+  try {
+    const posts = await getPosts();
+    return posts.map((post) => ({ slug: post.slug }));
+  } catch {
+    return [];
+  }
+}
+
+const loadPost = cache(async (slug: string): Promise<Post | null> => {
   try {
     return await getPost(slug);
   } catch {
     return null;
   }
-}
+});
 
 function shouldSkipOptimization(src: string) {
   return src.startsWith("/api/uploads/") || src.startsWith("http");

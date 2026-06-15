@@ -29,10 +29,11 @@ type NextFetchInit = RequestInit & {
 
 async function request<T>(path: string, init?: NextFetchInit): Promise<T> {
   const isGetRequest = !init?.method || init.method.toUpperCase() === "GET";
+  const defaultNext = isGetRequest && init?.cache !== "no-store" ? { revalidate: 60 } : undefined;
 
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     ...init,
-    cache: init?.cache ?? (isGetRequest ? "no-store" : undefined),
+    next: init?.next ?? defaultNext,
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {})
