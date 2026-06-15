@@ -18,7 +18,12 @@ function cleanFormula(value: string | null | undefined) {
     .replace(/\\\)$/, "")
     .replace(/^\\\[/, "")
     .replace(/\\\]$/, "")
+    .replace(/\\\.\s*/g, "\\, ")
     .trim();
+}
+
+function mathMarkdown(formula: string, displayMode: boolean) {
+  return displayMode ? `\n\n$$\n${formula}\n$$\n\n` : `$${formula}$`;
 }
 
 function protectRawMath(html: string) {
@@ -48,6 +53,9 @@ function isDisplayMath(node: HtmlNode) {
   return type.includes("mode=display") ||
     node.classList?.contains("display") ||
     node.classList?.contains("math-display") ||
+    node.parentNode?.classList?.contains("fb") ||
+    node.parentNode?.classList?.contains("key-eq") ||
+    node.parentNode?.classList?.contains("math-display") ||
     node.parentNode?.classList?.contains("katex-display") ||
     node.classList?.contains("katex-display") ||
     false;
@@ -77,7 +85,22 @@ turndown.addRule("mathScript", {
       return "";
     }
 
-    return isDisplayMath(node) ? `\n\n$$\n${formula}\n$$\n\n` : `$${formula}$`;
+    return mathMarkdown(formula, isDisplayMath(node));
+  }
+});
+
+turndown.addRule("katexErrorFormula", {
+  filter: (node: HtmlNode) =>
+    node.nodeName?.toLowerCase() === "span" &&
+    (node.classList?.contains("katex-error") || false),
+  replacement: (_content: string, node: HtmlNode) => {
+    const formula = cleanFormula(node.textContent);
+
+    if (!formula) {
+      return "";
+    }
+
+    return mathMarkdown(formula, isDisplayMath(node));
   }
 });
 
@@ -93,7 +116,7 @@ turndown.addRule("katexFormula", {
       return "";
     }
 
-    return isDisplayMath(node) ? `\n\n$$\n${formula}\n$$\n\n` : `$${formula}$`;
+    return mathMarkdown(formula, isDisplayMath(node));
   }
 });
 
@@ -108,7 +131,7 @@ turndown.addRule("inlineMath", {
       return "";
     }
 
-    return isDisplayMath(node) ? `\n\n$$\n${formula}\n$$\n\n` : `$${formula}$`;
+    return mathMarkdown(formula, isDisplayMath(node));
   }
 });
 
