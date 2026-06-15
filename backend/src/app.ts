@@ -1,7 +1,9 @@
 import cors from "cors";
 import express from "express";
+import fs from "fs";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
 import { env } from "./config/env.js";
 import { ensureUploadDirectories, postFilesUploadsDir, uploadsRoot } from "./config/uploads.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
@@ -27,6 +29,18 @@ function setUploadHeaders(res: express.Response, filePath: string) {
   }
 
   res.setHeader("Content-Security-Policy", "frame-ancestors 'none'; object-src 'none'");
+}
+
+function sanitizeDownloadName(value: string, fallback: string) {
+  const name = path.basename(value).replace(/\.[^.]+$/, "");
+  const safeName = name
+    .normalize("NFKD")
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
+
+  return safeName || fallback;
 }
 
 export function createApp() {
@@ -74,6 +88,46 @@ export function createApp() {
   );
   app.use(express.json({ limit: "1mb" }));
   app.use(morgan("dev"));
+
+  app.get("/api/downloads/post-files/:filename", (req, res, next) => {
+    const rawFilename = Array.isArray(req.params.filename) ? req.params.filename[0] : req.params.filename;
+    const filename = path.basename(rawFilename);
+    const extension = path.extname(filename).toLowerCase();
+
+    if (filename !== rawFilename || ![".pdf", ".html", ".htm"].includes(extension)) {
+      res.status(400).json({
+        success: false,
+        error: {
+          message: "Invalid download filename",
+          code: "BAD_REQUEST"
+        }
+      });
+      return;
+    }
+
+    const filePath = path.join(postFilesUploadsDir, filename);
+    const requestedName = typeof req.query.name === "string" ? req.query.name : filename;
+    const downloadName = `${sanitizeDownloadName(requestedName, "note-file")}${extension}`;
+
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({
+        success: false,
+        error: {
+          message: "Download file not found",
+          code: "NOT_FOUND"
+        }
+      });
+      return;
+    }
+
+    setUploadHeaders(res, filePath);
+    res.setHeader("Cache-Control", "private, no-store");
+    res.download(filePath, downloadName, (error) => {
+      if (error && !res.headersSent) {
+        next(error);
+      }
+    });
+  });
 
   app.use("/api/uploads", express.static(uploadsRoot, {
     immutable: true,
