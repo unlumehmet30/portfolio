@@ -37,6 +37,33 @@ export const caseStudyDetails: Record<
     ],
     diagram: "web-platform"
   },
+  "vcamp-website-content-platform": {
+    dataset:
+      "Organization profile content, team members, sponsors, project pages, project media, technical documents, blog posts, courses, and certificate records managed through the website backend.",
+    technicalDecisions: [
+      "Use Django admin as the content management surface for non-developer updates.",
+      "Expose read-only REST API endpoints for public website content.",
+      "Model project detail pages as structured related data rather than one large static page.",
+      "Keep certificate verification as a dedicated workflow with code-based lookups and badge-style JSON responses."
+    ],
+    implementationDetails: [
+      "React and Vite power the routed public frontend for home, projects, team, blog, sponsorship, search, and certificate pages.",
+      "Django REST Framework serializes nested project data including specifications, timeline, media, documents, tests, team, and sponsors.",
+      "The frontend maps raw API payloads into page-specific view models for project summaries, detailed project pages, blog content, and certificate verification.",
+      "The backend includes admin-managed rich text content, media uploads, document attachments, and organization info records."
+    ],
+    lessonsLearned: [
+      "Team websites become easier to maintain when project and member data are modeled explicitly.",
+      "Frontend experience depends heavily on shaping backend API responses into stable view models.",
+      "A team project should describe individual contribution clearly without implying solo ownership."
+    ],
+    futureImprovements: [
+      "Move public configuration and secrets fully into environment-managed settings.",
+      "Add production-oriented security hardening before publishing source code.",
+      "Expand automated tests around API serializers and certificate verification flows."
+    ],
+    diagram: "web-platform"
+  },
   "intermittent-demand-forecasting-system": {
     dataset:
       "20k products, three years of daily sales, strongly sparse product-level targets, and approximately 85% zero-demand rows.",

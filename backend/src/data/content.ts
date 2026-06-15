@@ -87,6 +87,40 @@ export const projects: SeedProject[] = [
     featured: true
   },
   {
+    title: "VCAMP Website & Content Platform",
+    slug: "vcamp-website-content-platform",
+    summary:
+      "A team-built web platform for the ITU VCAMP project team, combining a public website, content APIs, project pages, team profiles, blog posts, sponsors, and certificate verification workflows.",
+    description:
+      "Contributed across frontend and backend development in a 4-5 person team building the VCAMP website and content platform. The system presents team projects, members, sponsors, blog content, organization info, and certificate verification through a React frontend backed by a Django REST API.",
+    problem:
+      "The team needed a maintainable website where project, team, sponsor, blog, and certificate content could be managed from an admin interface instead of being hard-coded into static pages.",
+    challenge:
+      "The main challenge was connecting a rich public frontend to structured backend content models while supporting project detail pages, media, documents, team relations, blog content, sponsors, and certificate verification in a consistent user experience.",
+    architecture:
+      "The frontend is a Vite and React single-page application with routed pages for home, projects, team, blog, contact, sponsorship, search, and certificate verification. The backend uses Django, Django REST Framework, relational content models, Django admin, rich-text blog editing, media/document uploads, and read-only public API endpoints consumed by the frontend.",
+    results:
+      "The platform supports admin-managed content, project detail pages with specifications, timeline, gallery, documents, tests, team and sponsor relations, blog rendering, organization info, and certificate verification with badge-style JSON responses. The project was developed collaboratively by a 4-5 person team with frontend and backend contributions.",
+    tags: [
+      "React",
+      "Vite",
+      "TypeScript",
+      "Django",
+      "Django REST Framework",
+      "Content Platform",
+      "Team Project",
+      "Certificate Verification"
+    ],
+    metrics: [
+      { label: "Team", value: "4-5", context: "Collaborative development team" },
+      { label: "Role", value: "Full-stack", context: "Frontend and backend contribution" },
+      { label: "Modules", value: "8", context: "Projects, team, blog, sponsors, info, courses, certificates, admin" },
+      { label: "API", value: "REST", context: "Structured content consumed by frontend" }
+    ],
+    demoUrl: "https://vcamp.tech",
+    featured: false
+  },
+  {
     title: "Intermittent Demand Forecasting System",
     slug: "intermittent-demand-forecasting-system",
     summary:

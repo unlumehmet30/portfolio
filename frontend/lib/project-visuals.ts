@@ -27,6 +27,15 @@ const projectVisuals: Record<string, ProjectVisual> = {
       tr: "Admin paneli ve içerik API'leri olan full-stack portfolyo platformu"
     }
   },
+  "vcamp-website-content-platform": {
+    src: null,
+    suggestedFile: "/projects/vcamp-website-content-platform.png",
+    kind: "web-platform",
+    alt: {
+      en: "Team-built content platform with project, blog, sponsor, and certificate pages",
+      tr: "Proje, blog, sponsor ve sertifika sayfaları olan ekip yapımı içerik platformu"
+    }
+  },
   "intermittent-demand-forecasting-system": {
     src: null,
     suggestedFile: "/projects/demand-forecasting-overview.png",

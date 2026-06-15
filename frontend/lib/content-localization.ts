@@ -66,6 +66,64 @@ const projectTranslations: Record<string, ProjectTranslation> = {
       diagram: "web-platform"
     }
   },
+  "vcamp-website-content-platform": {
+    title: "VCAMP Website ve İçerik Platformu",
+    summary:
+      "İTÜ VCAMP proje takımı için ekipçe geliştirilen; public web sitesi, içerik API'leri, proje sayfaları, ekip profilleri, bloglar, sponsorlar ve sertifika doğrulama akışlarını birleştiren web platformu.",
+    description:
+      "4-5 kişilik ekipte VCAMP web sitesi ve içerik platformunun frontend ve backend geliştirmelerine katkı verdim. Sistem; takım projelerini, üyeleri, sponsorları, blog içeriklerini, kurum bilgilerini ve sertifika doğrulama akışlarını Django REST API ile beslenen React frontend üzerinden sunar.",
+    problem:
+      "Takımın proje, ekip, sponsor, blog ve sertifika içeriklerini statik sayfalara gömmek yerine admin arayüzünden yönetebileceği sürdürülebilir bir web sitesine ihtiyacı vardı.",
+    challenge:
+      "Temel zorluk; zengin public frontend deneyimini yapılandırılmış backend içerik modellerine bağlamak ve proje detay sayfaları, medya, dokümanlar, ekip ilişkileri, blog içerikleri, sponsorlar ve sertifika doğrulama akışını tutarlı bir kullanıcı deneyiminde birleştirmekti.",
+    architecture:
+      "Frontend; ana sayfa, projeler, ekip, blog, iletişim, sponsorluk, arama ve sertifika doğrulama için rotalara sahip Vite ve React tabanlı bir single-page application olarak çalışır. Backend; Django, Django REST Framework, ilişkisel içerik modelleri, Django admin, zengin metin blog düzenleme, medya/doküman yüklemeleri ve frontend tarafından tüketilen read-only public API endpoint'leri kullanır.",
+    results:
+      "Platform; admin kontrollü içerik yönetimini, teknik özellikler/zaman çizelgesi/galeri/doküman/test/ekip/sponsor ilişkileri olan proje detay sayfalarını, blog render'ını, kurum bilgilerini ve badge-style JSON cevaplarıyla sertifika doğrulamayı destekler. Proje 4-5 kişilik ekip tarafından frontend ve backend katkılarıyla geliştirildi.",
+    tags: [
+      "React",
+      "Vite",
+      "TypeScript",
+      "Django",
+      "Django REST Framework",
+      "İçerik Platformu",
+      "Ekip Projesi",
+      "Sertifika Doğrulama"
+    ],
+    metrics: [
+      { label: "Ekip", value: "4-5", context: "Ortak geliştirme ekibi" },
+      { label: "Rol", value: "Full-stack", context: "Frontend ve backend katkısı" },
+      { label: "Modül", value: "8", context: "Projeler, ekip, blog, sponsorlar, info, kurslar, sertifikalar, admin" },
+      { label: "API", value: "REST", context: "Frontend tarafından tüketilen yapılandırılmış içerik" }
+    ],
+    caseStudy: {
+      dataset:
+        "Web sitesi backend'i üzerinden yönetilen kurum profili, ekip üyeleri, sponsorlar, proje sayfaları, proje medyaları, teknik dokümanlar, blog yazıları, kurslar ve sertifika kayıtları.",
+      technicalDecisions: [
+        "Developer olmayan güncellemeler için Django admin'i içerik yönetim yüzeyi olarak kullandık.",
+        "Public web sitesi içerikleri için read-only REST API endpoint'leri sunduk.",
+        "Proje detay sayfalarını tek büyük statik sayfa yerine ilişkili ve yapılandırılmış veri olarak modelledik.",
+        "Sertifika doğrulama akışını kod bazlı arama ve badge-style JSON cevapları olan ayrı bir workflow olarak ele aldık."
+      ],
+      implementationDetails: [
+        "React ve Vite; ana sayfa, projeler, ekip, blog, sponsorluk, arama ve sertifika sayfaları için rotalı public frontend'i yönetir.",
+        "Django REST Framework; teknik özellikler, zaman çizelgesi, medya, dokümanlar, testler, ekip ve sponsor ilişkilerini içeren nested proje verisini serialize eder.",
+        "Frontend, ham API payload'larını proje özetleri, detay sayfaları, blog içerikleri ve sertifika doğrulama ekranları için stable view model'lara dönüştürür.",
+        "Backend admin kontrollü zengin metin içeriklerini, medya yüklemelerini, doküman eklerini ve kurum bilgisi kayıtlarını içerir."
+      ],
+      lessonsLearned: [
+        "Takım web siteleri, proje ve üye verisi açık şekilde modellendiğinde daha sürdürülebilir olur.",
+        "Frontend deneyimi, backend API cevaplarını kararlı view model'lara dönüştürmeye çok bağlıdır.",
+        "Ekip projelerinde bireysel katkıyı net anlatmak, projeyi tek başına sahiplenmiş gibi göstermeden değer üretir."
+      ],
+      futureImprovements: [
+        "Public config ve secret yönetimini tamamen environment-managed hale getirmek.",
+        "Kaynak kod paylaşılmadan önce production odaklı güvenlik hardening yapmak.",
+        "API serializer'ları ve sertifika doğrulama akışları için otomatik test kapsamını genişletmek."
+      ],
+      diagram: "web-platform"
+    }
+  },
   "intermittent-demand-forecasting-system": {
     title: "Seyrek Talep Tahminleme Sistemi",
     summary:
