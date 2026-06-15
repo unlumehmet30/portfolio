@@ -15,14 +15,14 @@ export const caseStudyDetails: Record<
     technicalDecisions: [
       "Use a full-stack architecture instead of a static-only portfolio so content can be managed without code changes.",
       "Keep public content cached with ISR while preserving no-store behavior for authenticated admin workflows.",
-      "Store uploaded media on a persistent Docker volume and reference files through controlled API paths.",
-      "Put Caddy in front of the Docker services for HTTPS, reverse proxying, and centralized security headers."
+      "Store uploaded media persistently and reference files through controlled API paths.",
+      "Place the app behind an HTTPS edge layer and keep administrative workflows separated from public content."
     ],
     implementationDetails: [
       "Next.js renders the public portfolio, localized routes, project pages, notes, and resume views.",
       "Express and Prisma expose REST endpoints for projects, notes, uploads, profile data, contact messages, and admin actions.",
       "The admin dashboard supports project galleries, cover images, image cropping, PDF/HTML note files, and Markdown content.",
-      "Production runs as Docker services behind Caddy, with backend and frontend ports kept internal."
+      "Production is deployed as separated application services behind a public HTTPS entry point."
     ],
     lessonsLearned: [
       "A portfolio becomes more useful when content operations are part of the system, not manual code edits.",

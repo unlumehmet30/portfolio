@@ -49,7 +49,7 @@ const diagramCopy = {
       ["Next.js Frontend", "Public portfolio, notes, projects, resume, and localized routes."],
       ["Express API", "REST endpoints for content, uploads, contact messages, and admin actions."],
       ["Admin CMS", "Project galleries, note files, image cropping, and dynamic updates."],
-      ["Caddy + Docker", "HTTPS reverse proxy and isolated production services."]
+      ["HTTPS Edge", "Public entry point with separated production services."]
     ]
   },
   tr: {
@@ -92,7 +92,7 @@ const diagramCopy = {
       ["Next.js Frontend", "Public portfolyo, notlar, projeler, özgeçmiş ve yerelleştirilmiş rotalar."],
       ["Express API", "İçerik, yüklemeler, iletişim mesajları ve admin işlemleri için REST endpoint'leri."],
       ["Admin CMS", "Proje galerileri, not dosyaları, görsel kırpma ve dinamik güncellemeler."],
-      ["Caddy + Docker", "HTTPS reverse proxy ve izole production servisleri."]
+      ["HTTPS Edge", "Public giriş noktası ve ayrılmış production servisleri."]
     ]
   }
 } as const;

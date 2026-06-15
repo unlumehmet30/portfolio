@@ -66,20 +66,20 @@ export const projects: SeedProject[] = [
     summary:
       "A full-stack portfolio platform with dynamic projects, notes, media uploads, admin tools, and secure self-hosted deployment. Active feature development continues.",
     description:
-      "Built and operate a personal portfolio platform that combines a Next.js frontend, an Express/Prisma backend, admin-managed content, project galleries, notes with file uploads, contact handling, and Docker/Caddy deployment.",
+      "Built and operate a personal portfolio platform that combines a Next.js frontend, an API backend, admin-managed content, project galleries, notes with file uploads, contact handling, and a self-hosted production deployment.",
     problem:
       "A static portfolio would require code changes for every new project, note, image, or resume update, and it would not show the engineering work behind content management and deployment.",
     challenge:
       "The challenge was turning a personal website into a maintainable product: secure admin access, durable uploads, dynamic content, rich note rendering, responsive galleries, caching, and production hardening without making the system heavy.",
     architecture:
-      "The frontend uses Next.js App Router with ISR caching. The backend exposes a REST API with Express, Prisma, and SQLite. Admin routes manage projects, notes, uploads, resume content, and contact messages, while Caddy terminates HTTPS and reverse-proxies Docker services.",
+      "The frontend uses Next.js App Router with ISR caching. A typed API layer manages projects, notes, uploads, resume content, and contact messages, while the production environment runs behind an HTTPS edge layer with separated public and administrative workflows.",
     results:
-      "The site supports dynamic projects, gallery uploads, image cropping, PDF/HTML note attachments, Markdown and KaTeX rendering, contact messages, security headers, rate limiting, Dockerized deployment, and is still actively being expanded.",
-    tags: ["Next.js", "TypeScript", "Express", "Prisma", "Docker", "Caddy", "Admin CMS", "Active Development"],
+      "The site supports dynamic projects, gallery uploads, image cropping, PDF/HTML note attachments, Markdown and KaTeX rendering, contact messages, hardened admin flows, self-hosted deployment, and is still actively being expanded.",
+    tags: ["Next.js", "TypeScript", "Express", "Prisma", "Admin CMS", "Media Uploads", "Self-Hosted", "Active Development"],
     metrics: [
       { label: "Stack", value: "Next.js + API", context: "Frontend and backend platform" },
       { label: "Content", value: "Dynamic", context: "Projects, notes, resume, uploads" },
-      { label: "Deploy", value: "Docker/Caddy", context: "HTTPS reverse proxy on VPS" },
+      { label: "Deploy", value: "Self-hosted", context: "HTTPS production environment" },
       { label: "Status", value: "In progress", context: "Features are still being added" }
     ],
     githubUrl: "https://github.com/unlumehmet30/portfolio",

@@ -21,20 +21,20 @@ const projectTranslations: Record<string, ProjectTranslation> = {
     summary:
       "Dinamik projeler, notlar, medya yüklemeleri, admin araçları ve güvenli self-hosted dağıtım içeren full-stack portfolyo platformu. Özellik geliştirme aktif olarak devam ediyor.",
     description:
-      "Next.js frontend, Express/Prisma backend, admin kontrollü içerik yönetimi, proje galerileri, dosya yüklemeli notlar, iletişim akışı ve Docker/Caddy dağıtımını birleştiren kişisel portfolyo platformunu geliştirdim ve canlıda yönetiyorum.",
+      "Next.js frontend, API backend, admin kontrollü içerik yönetimi, proje galerileri, dosya yüklemeli notlar, iletişim akışı ve self-hosted production dağıtımını birleştiren kişisel portfolyo platformunu geliştirdim ve canlıda yönetiyorum.",
     problem:
       "Statik bir portfolyo; her yeni proje, not, görsel veya özgeçmiş güncellemesi için kod değişikliği gerektirirdi ve içerik yönetimi ile dağıtım tarafındaki mühendisliği görünür kılmazdı.",
     challenge:
       "Temel zorluk, kişisel web sitesini sürdürülebilir bir ürüne dönüştürmekti: güvenli admin erişimi, kalıcı yüklemeler, dinamik içerik, zengin not render'ı, responsive galeriler, cache ve production hardening aynı sistemde hafif kalmalıydı.",
     architecture:
-      "Frontend Next.js App Router ve ISR cache kullanır. Backend Express, Prisma ve SQLite ile REST API sunar. Admin rotaları projeleri, notları, yüklemeleri, özgeçmiş içeriğini ve iletişim mesajlarını yönetir; Caddy ise HTTPS'i sonlandırır ve Docker servislerini reverse proxy arkasında çalıştırır.",
+      "Frontend Next.js App Router ve ISR cache kullanır. Tipli API katmanı projeleri, notları, yüklemeleri, özgeçmiş içeriğini ve iletişim mesajlarını yönetir; production ortamı ise public ve admin iş akışlarını ayıran HTTPS edge katmanı arkasında çalışır.",
     results:
-      "Site dinamik projeleri, galeri yüklemelerini, görsel kırpmayı, PDF/HTML not eklerini, Markdown ve KaTeX render'ını, iletişim mesajlarını, güvenlik başlıklarını, rate limiting'i ve Docker tabanlı dağıtımı destekliyor; özellikler hâlâ aktif olarak geliştiriliyor.",
-    tags: ["Next.js", "TypeScript", "Express", "Prisma", "Docker", "Caddy", "Admin CMS", "Aktif Geliştirme"],
+      "Site dinamik projeleri, galeri yüklemelerini, görsel kırpmayı, PDF/HTML not eklerini, Markdown ve KaTeX render'ını, iletişim mesajlarını, güçlendirilmiş admin akışlarını ve self-hosted dağıtımı destekliyor; özellikler hâlâ aktif olarak geliştiriliyor.",
+    tags: ["Next.js", "TypeScript", "Express", "Prisma", "Admin CMS", "Medya Yükleme", "Self-Hosted", "Aktif Geliştirme"],
     metrics: [
       { label: "Teknoloji", value: "Next.js + API", context: "Frontend ve backend platformu" },
       { label: "İçerik", value: "Dinamik", context: "Projeler, notlar, özgeçmiş, yüklemeler" },
-      { label: "Dağıtım", value: "Docker/Caddy", context: "VPS üzerinde HTTPS reverse proxy" },
+      { label: "Dağıtım", value: "Self-hosted", context: "HTTPS production ortamı" },
       { label: "Durum", value: "Gelişiyor", context: "Özellikler hâlâ ekleniyor" }
     ],
     caseStudy: {
@@ -43,14 +43,14 @@ const projectTranslations: Record<string, ProjectTranslation> = {
       technicalDecisions: [
         "İçerik kod değişikliği olmadan yönetilebilsin diye statik-only portfolyo yerine full-stack mimari kullandım.",
         "Public içeriği ISR ile cache'ledim, kimlik doğrulamalı admin akışlarını ise no-store davranışında tuttum.",
-        "Yüklenen medyaları kalıcı Docker volume üzerinde sakladım ve dosyalara kontrollü API path'leriyle eriştirdim.",
-        "HTTPS, reverse proxy ve merkezi güvenlik başlıkları için Docker servislerinin önüne Caddy koydum."
+        "Yüklenen medyaları kalıcı şekilde sakladım ve dosyalara kontrollü API path'leriyle eriştirdim.",
+        "Uygulamayı HTTPS edge katmanı arkasına aldım ve admin iş akışlarını public içerikten ayırdım."
       ],
       implementationDetails: [
         "Next.js public portfolyo, lokalize rotalar, proje sayfaları, notlar ve özgeçmiş görünümlerini render eder.",
         "Express ve Prisma; projeler, notlar, yüklemeler, profil verisi, iletişim mesajları ve admin işlemleri için REST endpoint'leri sunar.",
         "Admin paneli proje galerilerini, kapak görsellerini, görsel kırpmayı, PDF/HTML not dosyalarını ve Markdown içeriği destekler.",
-        "Production ortamı Caddy arkasında Docker servisleri olarak çalışır; backend ve frontend portları dışarıya kapalıdır."
+        "Production ortamı public HTTPS giriş noktası arkasında ayrılmış uygulama servisleriyle çalışır."
       ],
       lessonsLearned: [
         "Bir portfolyo, içerik operasyonları manuel kod düzenleme olmaktan çıktığında çok daha kullanışlı hale gelir.",
