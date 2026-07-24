@@ -68,6 +68,17 @@ const projectGalleryImageSchema = z.object({
   sortOrder: z.number().int().nonnegative().optional()
 });
 
+const projectOrderSchema = z.object({
+  projects: z
+    .array(
+      z.object({
+        id: z.coerce.number().int().positive(),
+        sortOrder: z.coerce.number().int().nonnegative()
+      })
+    )
+    .min(1)
+});
+
 const postTypeSchema = z.enum(["blog", "course-note", "visual-note", "cheatsheet"]);
 
 const postImageSchema = z.object({
@@ -104,7 +115,8 @@ export const projectSchema = z.object({
   galleryImages: z.array(projectGalleryImageSchema).default([]),
   githubUrl: optionalUrl,
   demoUrl: optionalUrl,
-  featured: z.boolean().default(false)
+  featured: z.boolean().default(false),
+  sortOrder: z.coerce.number().int().nonnegative().default(0)
 });
 
 export const postSchema = z.object({
@@ -192,6 +204,7 @@ function serializeProject(project: {
   githubUrl: string | null;
   demoUrl: string | null;
   featured: boolean;
+  sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
   projectImages?: ProjectImageRecord[];
@@ -323,7 +336,7 @@ export async function adminListProjects() {
         orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
       }
     },
-    orderBy: [{ featured: "desc" }, { id: "asc" }]
+    orderBy: [{ sortOrder: "asc" }, { featured: "desc" }, { id: "asc" }]
   });
 
   return projects.map(serializeProject);
@@ -379,6 +392,38 @@ export async function adminUpdateProject(id: number, input: unknown) {
   });
 
   return serializeProject(project);
+}
+
+export async function adminReorderProjects(input: unknown) {
+  const { projects } = projectOrderSchema.parse(input);
+  const ids = projects.map((project) => project.id);
+
+  if (new Set(ids).size !== ids.length) {
+    throw new HttpError("Project ids must be unique", 400, "BAD_REQUEST");
+  }
+
+  const existingProjectCount = await prisma.project.count({
+    where: {
+      id: {
+        in: ids
+      }
+    }
+  });
+
+  if (existingProjectCount !== ids.length) {
+    throw new HttpError("One or more projects could not be found", 404, "NOT_FOUND");
+  }
+
+  await prisma.$transaction(
+    projects.map((project) =>
+      prisma.project.update({
+        where: { id: project.id },
+        data: { sortOrder: project.sortOrder }
+      })
+    )
+  );
+
+  return adminListProjects();
 }
 
 export async function adminDeleteProject(id: number) {

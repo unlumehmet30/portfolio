@@ -17,6 +17,7 @@ import {
   adminProjectImageUploadController,
   adminProjectCreateController,
   adminProjectDeleteController,
+  adminProjectReorderController,
   adminProjectsController,
   adminProjectUpdateController,
   adminResumeController,
@@ -70,6 +71,7 @@ adminRouter.put("/profile", adminProfileUpdateController);
 
 adminRouter.get("/projects", adminProjectsController);
 adminRouter.post("/projects", adminProjectCreateController);
+adminRouter.put("/projects/order", adminProjectReorderController);
 adminRouter.put("/projects/:id", adminProjectUpdateController);
 adminRouter.delete("/projects/:id", adminProjectDeleteController);
 adminRouter.post(

@@ -43,7 +43,7 @@ export async function getProjects() {
         orderBy: [{ sortOrder: "asc" }, { id: "asc" }]
       }
     },
-    orderBy: [{ featured: "desc" }, { id: "asc" }]
+    orderBy: [{ sortOrder: "asc" }, { featured: "desc" }, { id: "asc" }]
   });
 
   return projects.map(serializeProject);

@@ -85,6 +85,7 @@ export type Project = {
   githubUrl?: string | null;
   demoUrl?: string | null;
   featured: boolean;
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
   caseStudy: CaseStudy | null;

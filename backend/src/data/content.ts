@@ -23,6 +23,7 @@ export type SeedProject = {
   githubUrl?: string;
   demoUrl?: string;
   featured: boolean;
+  sortOrder?: number;
 };
 
 export type SeedPost = {
@@ -84,7 +85,8 @@ export const projects: SeedProject[] = [
     ],
     githubUrl: "https://github.com/unlumehmet30/portfolio",
     demoUrl: "https://165.232.45.167.sslip.io",
-    featured: true
+    featured: true,
+    sortOrder: 0
   },
   {
     title: "VCAMP Website & Content Platform",
@@ -118,7 +120,8 @@ export const projects: SeedProject[] = [
       { label: "API", value: "REST", context: "Structured content consumed by frontend" }
     ],
     demoUrl: "https://vcamp.tech",
-    featured: false
+    featured: false,
+    sortOrder: 10
   },
   {
     title: "Intermittent Demand Forecasting System",

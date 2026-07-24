@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, DragEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Crop,
   FileText,
+  GripVertical,
   Inbox,
   Layers3,
   LogOut,
@@ -40,6 +41,7 @@ import {
   getAdminProjects,
   getAdminResume,
   markAdminContactMessageHandled,
+  reorderAdminProjects,
   uploadAdminPostFile,
   uploadAdminPostImage,
   uploadAdminProjectImage,
@@ -104,7 +106,8 @@ const emptyProject: ProjectDraft = {
   galleryImages: [],
   githubUrl: "",
   demoUrl: "",
-  featured: false
+  featured: false,
+  sortOrder: 0
 };
 
 const emptyPost: PostDraft = {
@@ -156,6 +159,18 @@ function normalizeGalleryImages(images: ProjectImage[]) {
       alt: image.alt?.trim() || null,
       sortOrder: index
     }));
+}
+
+function toNonNegativeInt(value: string | number) {
+  const parsed = typeof value === "number" ? value : Number.parseInt(value || "0", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function withProjectSortOrders(projects: Project[]) {
+  return projects.map((project, index) => ({
+    ...project,
+    sortOrder: index * 10
+  }));
 }
 
 function normalizePostImages(images: PostImage[]) {
@@ -322,6 +337,8 @@ export function AdminDashboard() {
   const [status, setStatus] = useState("Loading admin session...");
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [draggedProjectId, setDraggedProjectId] = useState<number | null>(null);
+  const [projectOrderSaving, setProjectOrderSaving] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [resumeJson, setResumeJson] = useState("");
   const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -628,7 +645,8 @@ export function AdminDashboard() {
       galleryImages: project.galleryImages ?? [],
       githubUrl: project.githubUrl ?? "",
       demoUrl: project.demoUrl ?? "",
-      featured: project.featured
+      featured: project.featured,
+      sortOrder: project.sortOrder ?? 0
     });
     setProjectTags(tagsToText(project.tags));
     setProjectMetrics(metricsToText(project.metrics));
@@ -719,6 +737,70 @@ export function AdminDashboard() {
     await deleteAdminProject(token, id);
     await loadData(token);
     setStatus("Project deleted.");
+  }
+
+  async function saveProjectOrder(nextProjects: Project[]) {
+    const orderedProjects = withProjectSortOrders(nextProjects);
+    const previousProjects = projects;
+
+    setProjects(orderedProjects);
+    setProjectOrderSaving(true);
+    setStatus("Saving project order...");
+
+    setProjectDraft((draft) => {
+      if (!draft.id) return draft;
+      const orderedProject = orderedProjects.find((project) => project.id === draft.id);
+      return orderedProject ? { ...draft, sortOrder: orderedProject.sortOrder } : draft;
+    });
+
+    try {
+      const savedProjects = await reorderAdminProjects(
+        token,
+        orderedProjects.map((project) => ({
+          id: project.id,
+          sortOrder: project.sortOrder
+        }))
+      );
+
+      setProjects(savedProjects);
+      setStatus("Project order saved.");
+    } catch (error) {
+      setProjects(previousProjects);
+      await loadData(token);
+      setStatus(error instanceof Error ? error.message : "Project order save failed.");
+    } finally {
+      setProjectOrderSaving(false);
+    }
+  }
+
+  function startProjectDrag(event: DragEvent<HTMLButtonElement>, projectId: number) {
+    setDraggedProjectId(projectId);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(projectId));
+  }
+
+  function allowProjectDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }
+
+  function dropProject(event: DragEvent<HTMLDivElement>, targetProjectId: number) {
+    event.preventDefault();
+    const sourceProjectId = draggedProjectId ?? Number(event.dataTransfer.getData("text/plain"));
+    setDraggedProjectId(null);
+
+    if (!sourceProjectId || sourceProjectId === targetProjectId) return;
+
+    const sourceIndex = projects.findIndex((project) => project.id === sourceProjectId);
+    const targetIndex = projects.findIndex((project) => project.id === targetProjectId);
+
+    if (sourceIndex < 0 || targetIndex < 0) return;
+
+    const nextProjects = [...projects];
+    const [movedProject] = nextProjects.splice(sourceIndex, 1);
+    nextProjects.splice(targetIndex, 0, movedProject);
+
+    void saveProjectOrder(nextProjects);
   }
 
   function editPost(post: Post) {
@@ -967,6 +1049,21 @@ export function AdminDashboard() {
             <form onSubmit={saveProject} className="grid gap-4">
               <Field label="Title" value={projectDraft.title} onChange={(value) => setProjectDraft({ ...projectDraft, title: value })} />
               <Field label="Slug" value={projectDraft.slug} onChange={(value) => setProjectDraft({ ...projectDraft, slug: value })} />
+              <label className="block space-y-2 text-sm">
+                <span className="text-muted-foreground">Sort order</span>
+                <Input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={projectDraft.sortOrder}
+                  onChange={(event) =>
+                    setProjectDraft({
+                      ...projectDraft,
+                      sortOrder: toNonNegativeInt(event.target.value)
+                    })
+                  }
+                />
+              </label>
               <div className="grid gap-4 md:grid-cols-[1fr_220px]">
                 <Field label="Image URL" value={projectDraft.imageUrl ?? ""} onChange={(value) => setProjectDraft({ ...projectDraft, imageUrl: value })} />
                 <label className="block space-y-2 text-sm">
@@ -1155,14 +1252,40 @@ export function AdminDashboard() {
             </form>
           </Card>
           <Card className="p-5">
-            <h2 className="text-xl font-semibold">Projects</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold">Projects</h2>
+              {projectOrderSaving ? <p className="text-xs text-muted-foreground">Saving order...</p> : null}
+            </div>
             <div className="mt-4 space-y-3">
               {projects.map((project) => (
-                <div key={project.id} className="rounded-lg border border-border p-4">
+                <div
+                  key={project.id}
+                  className={`rounded-lg border border-border p-4 transition ${
+                    draggedProjectId === project.id ? "opacity-60 ring-1 ring-accent" : ""
+                  }`}
+                  onDragOver={allowProjectDrop}
+                  onDrop={(event) => dropProject(event, project.id)}
+                >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold">{project.title}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{project.slug}</p>
+                    <div className="flex min-w-0 items-start gap-3">
+                      <button
+                        type="button"
+                        draggable
+                        title="Drag to reorder"
+                        aria-label={`Drag ${project.title} to reorder`}
+                        className="mt-0.5 cursor-grab rounded-md border border-border p-2 text-muted-foreground transition hover:bg-muted active:cursor-grabbing"
+                        onDragStart={(event) => startProjectDrag(event, project.id)}
+                        onDragEnd={() => setDraggedProjectId(null)}
+                      >
+                        <GripVertical size={16} />
+                      </button>
+                      <div className="min-w-0">
+                        <p className="font-semibold">{project.title}</p>
+                        <p className="mt-1 break-all text-sm text-muted-foreground">
+                          {project.slug} · order {project.sortOrder}
+                          {project.featured ? " · featured" : ""}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <Button type="button" variant="outline" size="sm" onClick={() => editProject(project)}>Edit</Button>
@@ -1550,7 +1673,9 @@ export function AdminDashboard() {
                   <div>
                     <p className="font-semibold">{message.subject}</p>
                     <p className="mt-1 text-sm text-muted-foreground">{message.name} · {message.email}</p>
-                    <p className="mt-3 text-sm leading-6 text-muted-foreground" dangerouslySetInnerHTML={{ __html: message.message }}></p>
+                    <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground">
+                      {message.message}
+                    </p>
                     <p className="mt-3 text-xs text-muted-foreground">
                       Received {new Date(message.createdAt).toLocaleString()}
                       {message.reminderCount ? ` · ${message.reminderCount} reminder${message.reminderCount > 1 ? "s" : ""} sent` : ""}
@@ -1582,7 +1707,9 @@ export function AdminDashboard() {
                       <div>
                         <p className="font-semibold">{message.subject}</p>
                         <p className="mt-1 text-sm text-muted-foreground">{message.name} · {message.email}</p>
-                        <p className="mt-3 text-sm leading-6 text-muted-foreground">{message.message}</p>
+                        <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground">
+                          {message.message}
+                        </p>
                         <p className="mt-3 text-xs text-muted-foreground">
                           Handled {message.handledAt ? new Date(message.handledAt).toLocaleString() : "date unknown"}
                           {message.reminderCount ? ` · ${message.reminderCount} reminder${message.reminderCount > 1 ? "s" : ""} sent` : ""}

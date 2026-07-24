@@ -10,6 +10,7 @@ import {
   adminListPosts,
   adminListProjects,
   adminMarkContactMessageHandled,
+  adminReorderProjects,
   adminUpdatePost,
   adminUpdateProfile,
   adminUpdateProject,
@@ -66,6 +67,11 @@ export const adminProjectCreateController = asyncHandler(async (req, res) => {
 export const adminProjectUpdateController = asyncHandler(async (req, res) => {
   const project = await adminUpdateProject(parseId(req.params.id), req.body);
   sendSuccess(res, project);
+});
+
+export const adminProjectReorderController = asyncHandler(async (req, res) => {
+  const projects = await adminReorderProjects(req.body);
+  sendSuccess(res, projects);
 });
 
 export const adminProjectDeleteController = asyncHandler(async (req, res) => {

@@ -148,6 +148,13 @@ export async function updateAdminProject(
   });
 }
 
+export async function reorderAdminProjects(token: string, projects: Array<{ id: number; sortOrder: number }>) {
+  return adminRequest<Project[]>("/projects/order", token, {
+    method: "PUT",
+    body: JSON.stringify({ projects })
+  });
+}
+
 export async function uploadAdminProjectImage(token: string, file: File) {
   const formData = new FormData();
   formData.append("image", file);

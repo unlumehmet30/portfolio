@@ -13,7 +13,7 @@ export async function seedDatabase(prisma: PrismaClient) {
     }
   });
 
-  for (const project of projects) {
+  for (const [index, project] of projects.entries()) {
     const { tags, metrics, galleryImages = [], ...projectData } = project;
 
     await prisma.project.upsert({
@@ -21,6 +21,7 @@ export async function seedDatabase(prisma: PrismaClient) {
       update: {},
       create: {
         ...projectData,
+        sortOrder: projectData.sortOrder ?? index,
         tags: JSON.stringify(tags),
         metrics: JSON.stringify(metrics),
         projectImages: {
