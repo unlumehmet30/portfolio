@@ -1550,7 +1550,7 @@ export function AdminDashboard() {
                   <div>
                     <p className="font-semibold">{message.subject}</p>
                     <p className="mt-1 text-sm text-muted-foreground">{message.name} · {message.email}</p>
-                    <p className="mt-3 text-sm leading-6 text-muted-foreground">{message.message}</p>
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground" dangerouslySetInnerHTMl>{{ __html:message.message}}</p>
                     <p className="mt-3 text-xs text-muted-foreground">
                       Received {new Date(message.createdAt).toLocaleString()}
                       {message.reminderCount ? ` · ${message.reminderCount} reminder${message.reminderCount > 1 ? "s" : ""} sent` : ""}
