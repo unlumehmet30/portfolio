@@ -341,6 +341,7 @@ export function AdminDashboard() {
   const [projectOrderSaving, setProjectOrderSaving] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [resumeJson, setResumeJson] = useState("");
+  const [resumeSaving, setResumeSaving] = useState(false);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [projectDraft, setProjectDraft] = useState<ProjectDraft>(emptyProject);
   const [projectTags, setProjectTags] = useState("");
@@ -987,10 +988,24 @@ export function AdminDashboard() {
   async function saveResume(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("Saving resume...");
-    const parsed = JSON.parse(resumeJson) as Resume;
-    const updated = await updateAdminResume(token, parsed);
-    setResumeJson(JSON.stringify(updated, null, 2));
-    setStatus("Resume saved.");
+    setResumeSaving(true);
+
+    try {
+      const parsed = JSON.parse(resumeJson) as Resume;
+      const updated = await updateAdminResume(token, parsed);
+      setResumeJson(JSON.stringify(updated, null, 2));
+      setStatus("Resume saved.");
+    } catch (error) {
+      const message =
+        error instanceof SyntaxError
+          ? `Resume JSON is invalid: ${error.message}`
+          : error instanceof Error
+            ? error.message
+            : "Resume save failed.";
+      setStatus(message);
+    } finally {
+      setResumeSaving(false);
+    }
   }
 
   async function removeMessage(id: number) {
@@ -1645,9 +1660,9 @@ export function AdminDashboard() {
               <p className="mt-2 text-sm text-muted-foreground">Edit structured resume data. Invalid JSON will not be saved.</p>
             </div>
             <Textarea value={resumeJson} onChange={(event) => setResumeJson(event.target.value)} className="min-h-[560px] font-mono text-xs" />
-            <Button type="submit" className="mt-4">
+            <Button type="submit" className="mt-4" disabled={resumeSaving}>
               <Save size={17} />
-              Save resume
+              {resumeSaving ? "Saving resume..." : "Save resume"}
             </Button>
           </form>
         </Card>

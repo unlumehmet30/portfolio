@@ -83,24 +83,38 @@ export async function submitContact(payload: ContactPayload) {
 }
 
 async function adminRequest<T>(path: string, token: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${getApiBaseUrl()}/admin${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(init?.headers ?? {})
-    },
-    cache: "no-store"
-  });
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 15_000);
 
-  const payload = (await response.json()) as ApiEnvelope<T>;
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/admin${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        ...(init?.headers ?? {})
+      },
+      cache: "no-store",
+      signal: controller.signal
+    });
 
-  if (!response.ok || !payload.success) {
-    const message = payload.success ? "Admin request failed" : payload.error.message;
-    throw new Error(message);
+    const payload = (await response.json()) as ApiEnvelope<T>;
+
+    if (!response.ok || !payload.success) {
+      const message = payload.success ? "Admin request failed" : payload.error.message;
+      throw new Error(message);
+    }
+
+    return payload.data;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Backend did not respond within 15 seconds.");
+    }
+
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-
-  return payload.data;
 }
 
 export async function loginAdmin(credentials: { username: string; password: string }) {

@@ -14,7 +14,10 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   }
 
   if (error instanceof ZodError) {
-    sendError(res, error.errors[0]?.message ?? "Invalid request", "VALIDATION_ERROR", 400);
+    const issue = error.errors[0];
+    const field = issue?.path.join(".");
+    const message = issue ? `${field ? `${field}: ` : ""}${issue.message}` : "Invalid request";
+    sendError(res, message, "VALIDATION_ERROR", 400);
     return;
   }
 
