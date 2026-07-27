@@ -51,7 +51,7 @@ import {
   updateAdminResume
 } from "@/lib/api";
 import { defaultProfile } from "@/lib/site";
-import type { ContactMessage, Metric, Post, PostFile, PostFileType, PostImage, PostType, Profile, Project, ProjectImage, Resume } from "@/types/content";
+import type { ContactMessage, Contributor, Metric, Post, PostFile, PostFileType, PostImage, PostType, Profile, Project, ProjectImage, Resume } from "@/types/content";
 
 type TabKey = "profile" | "projects" | "posts" | "resume" | "contacts";
 
@@ -102,6 +102,7 @@ const emptyProject: ProjectDraft = {
   results: "",
   tags: [],
   metrics: [],
+  contributors: [],
   imageUrl: "",
   galleryImages: [],
   githubUrl: "",
@@ -148,6 +149,28 @@ function textToMetrics(value: string): Metric[] {
       return { label, value: metricValue, context };
     })
     .filter((metric) => metric.label && metric.value && metric.context);
+}
+
+function contributorsToText(contributors: Contributor[]) {
+  return contributors
+    .map((contributor) => `${contributor.name} | ${contributor.githubUrl ?? ""} | ${contributor.linkedinUrl ?? ""}`)
+    .join("\n");
+}
+
+function textToContributors(value: string): Contributor[] {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name = "", githubUrl = "", linkedinUrl = ""] = line.split("|").map((part) => part.trim());
+      return {
+        name,
+        githubUrl: githubUrl || null,
+        linkedinUrl: linkedinUrl || null
+      };
+    })
+    .filter((contributor) => contributor.name);
 }
 
 function normalizeGalleryImages(images: ProjectImage[]) {
@@ -346,6 +369,7 @@ export function AdminDashboard() {
   const [projectDraft, setProjectDraft] = useState<ProjectDraft>(emptyProject);
   const [projectTags, setProjectTags] = useState("");
   const [projectMetrics, setProjectMetrics] = useState("");
+  const [projectContributors, setProjectContributors] = useState("");
   const [projectImageUploading, setProjectImageUploading] = useState(false);
   const [projectGalleryUploading, setProjectGalleryUploading] = useState(false);
   const [postDraft, setPostDraft] = useState<PostDraft>(emptyPost);
@@ -642,6 +666,7 @@ export function AdminDashboard() {
       results: project.results,
       tags: project.tags,
       metrics: project.metrics,
+      contributors: project.contributors ?? [],
       imageUrl: project.imageUrl ?? "",
       galleryImages: project.galleryImages ?? [],
       githubUrl: project.githubUrl ?? "",
@@ -651,6 +676,7 @@ export function AdminDashboard() {
     });
     setProjectTags(tagsToText(project.tags));
     setProjectMetrics(metricsToText(project.metrics));
+    setProjectContributors(contributorsToText(project.contributors ?? []));
   }
 
   async function saveProject(event: FormEvent<HTMLFormElement>) {
@@ -660,6 +686,7 @@ export function AdminDashboard() {
       ...projectDraft,
       tags: textToTags(projectTags),
       metrics: textToMetrics(projectMetrics),
+      contributors: textToContributors(projectContributors),
       imageUrl: projectDraft.imageUrl || null,
       galleryImages: normalizeGalleryImages(projectDraft.galleryImages ?? []),
       githubUrl: projectDraft.githubUrl || null,
@@ -676,6 +703,7 @@ export function AdminDashboard() {
       setProjectDraft(emptyProject);
       setProjectTags("");
       setProjectMetrics("");
+      setProjectContributors("");
       await loadData(token);
       setStatus("Project saved.");
     } catch (error) {
@@ -1056,7 +1084,7 @@ export function AdminDashboard() {
           <Card className="p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-semibold">{selectedProjectTitle}</h2>
-              <Button type="button" variant="outline" onClick={() => { setProjectDraft(emptyProject); setProjectTags(""); setProjectMetrics(""); }}>
+              <Button type="button" variant="outline" onClick={() => { setProjectDraft(emptyProject); setProjectTags(""); setProjectMetrics(""); setProjectContributors(""); }}>
                 <Plus size={17} />
                 New
               </Button>
@@ -1248,6 +1276,12 @@ export function AdminDashboard() {
               <Field label="Results" value={projectDraft.results} onChange={(value) => setProjectDraft({ ...projectDraft, results: value })} multiline />
               <Field label="Tags comma separated" value={projectTags} onChange={setProjectTags} />
               <Field label="Metrics: label | value | context" value={projectMetrics} onChange={setProjectMetrics} multiline />
+              <Field
+                label="Contributors: name | GitHub URL | LinkedIn URL"
+                value={projectContributors}
+                onChange={setProjectContributors}
+                multiline
+              />
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="GitHub URL" value={projectDraft.githubUrl ?? ""} onChange={(value) => setProjectDraft({ ...projectDraft, githubUrl: value })} />
                 <Field label="Demo URL" value={projectDraft.demoUrl ?? ""} onChange={(value) => setProjectDraft({ ...projectDraft, demoUrl: value })} />

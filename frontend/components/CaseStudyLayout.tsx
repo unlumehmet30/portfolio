@@ -1,4 +1,4 @@
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink, Github, Linkedin } from "lucide-react";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
 import { MetricCard } from "@/components/MetricCard";
 import { ProjectGallery } from "@/components/ProjectGallery";
@@ -47,6 +47,7 @@ export function CaseStudyLayout({ project, locale = "en" }: { project: Project; 
   const copy = getUiCopy(locale).caseStudy;
   const details = project.caseStudy;
   const galleryImages = getProjectGalleryImages(project);
+  const contributors = project.contributors ?? [];
   const galleryTitle = locale === "tr" ? "Proje Galerisi" : "Project Gallery";
 
   return (
@@ -113,6 +114,46 @@ export function CaseStudyLayout({ project, locale = "en" }: { project: Project; 
           <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.challenge}</p>
         </div>
       </div>
+
+      {contributors.length ? (
+        <section className="mt-12">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            {copy.contributors}
+          </h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {contributors.map((contributor) => (
+              <div
+                key={`${contributor.name}-${contributor.githubUrl ?? ""}-${contributor.linkedinUrl ?? ""}`}
+                className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3"
+              >
+                <span className="text-sm font-medium">{contributor.name}</span>
+                {contributor.githubUrl ? (
+                  <a
+                    href={contributor.githubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`${contributor.name} GitHub`}
+                    className="text-muted-foreground transition hover:text-foreground"
+                  >
+                    <Github size={17} />
+                  </a>
+                ) : null}
+                {contributor.linkedinUrl ? (
+                  <a
+                    href={contributor.linkedinUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`${contributor.name} LinkedIn`}
+                    className="text-muted-foreground transition hover:text-foreground"
+                  >
+                    <Linkedin size={17} />
+                  </a>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="mt-16">
         <SectionHeader

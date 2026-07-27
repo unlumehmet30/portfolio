@@ -1,0 +1,93 @@
+{
+  "summary": "Electronics and Communication Engineering student at Istanbul Technical University specializing in scalable machine learning systems, intermittent demand forecasting, computer vision, and optimization-focused AI engineering. Experienced in designing recursive forecasting architectures, autonomous perception systems, and large-scale ML pipelines using PyTorch, TensorFlow, and LightGBM. Strong interest in research engineering, sequential decision systems, and autonomous AI systems.",
+  "experience": [
+    {
+      "role": "AI Specialist Assistant",
+      "organization": "Ravelos",
+      "period": "Dec 2025 - Present",
+      "highlights": [
+        "Developed intermittent demand forecasting systems for retail-like datasets containing 20K+ products, 3M+ rows, and approximately 85% zero-demand observations.",
+        "Designed a two-stage forecasting architecture using classification and LightGBM-based regression pipelines for sparse demand modeling.",
+        "Built fully recursive inference workflows where future predictions were generated without access to unavailable future information, preventing data leakage.",
+        "Improved forecasting accuracy from approximately 40% to 65-70% using custom business-oriented evaluation metrics and advanced feature engineering.",
+        "Reduced end-to-end ML pipeline runtime from 40 minutes to 4 minutes through vectorization, parallelization, memory optimization, and matrix-based computation."
+      ]
+    },
+    {
+      "role": "Full-Stack / AI Engineer",
+      "organization": "Vcamp",
+      "period": "Dec 2025 - Present",
+      "highlights": [
+        "Served as team captain for the TEKNOFEST Aviation AI Competition, defining the overall architecture and directing parallel workstreams across object detection, position estimation, and reference-object matching.",
+        "Designed and implemented a hybrid visual odometry pipeline combining ORB and optical flow with RAFT-based motion estimation, confidence-aware arbitration, and an iterative extended Kalman filter, achieving approximately 7.5 FPS on custom drone footage.",
+        "Built an end-to-end reference-object matching pipeline for aerial RGB and thermal imagery, fine-tuning YOLOv8 across seven training rounds and reaching 0.749 mAP50 at approximately 36 ms per frame.",
+        "Directed a four-class UAV object-detection subsystem and defined its dataset architecture, training strategy, and validation criteria for a dataset containing more than 35K images.",
+        "Architected a unified real-time competition client that integrated all three subsystems behind a modular inference pipeline and produced JSON submissions compatible with the competition API.",
+        "Built iteration tooling including a browser-based annotation editor and a temporal label-densification technique for scaling small hand-labeled datasets.",
+        "Co-developed the Vcamp website in a five-person engineering team, building Python data models and REST APIs and integrating them with a React and Next.js frontend.",
+        "Implemented multilingual content, pagination, certificate validation, a dynamic team gallery, responsive UI improvements, and fixes for more than 30 tracked issues."
+      ]
+    }
+  ],
+  "projects": [
+    "Intermittent Demand Forecasting Research - Exploring reinforcement learning-enhanced forecasting systems in which agents learn dynamic trust levels for ML forecasts under changing demand regimes, with a focus on hybrid ML architectures and sequential decision systems.",
+    "Whisper-Based Subtitle and Speech Processing System - Developed multilingual speech-to-text workflows using Whisper and Hugging Face, including subtitle generation, prompt-enhanced NLP processing, and audio transcription."
+  ],
+  "education": [
+    {
+      "degree": "B.Sc. Electronics and Communication Engineering (GPA: 3.29/4.00)",
+      "school": "Istanbul Technical University (ITU)",
+      "period": "Expected Graduation: 2028"
+    }
+  ],
+  "skills": [
+    "Machine Learning",
+    "Deep Learning",
+    "Time Series Forecasting",
+    "Intermittent Demand Forecasting",
+    "Feature Engineering",
+    "Sequential Decision Systems",
+    "Reinforcement Learning",
+    "Natural Language Processing",
+    "Computer Vision",
+    "MLOps"
+  ],
+  "tools": [
+    "Python",
+    "C",
+    "C#",
+    "Dart",
+    "SQL",
+    "PyTorch",
+    "TensorFlow",
+    "Scikit-learn",
+    "LightGBM",
+    "NumPy",
+    "Pandas",
+    "OpenCV",
+    "Hugging Face",
+    "Whisper",
+    "Flutter",
+    "Firebase",
+    "Git",
+    "Linux",
+    "VS Code"
+  ],
+  "researchInterests": [
+    "Machine Learning Systems",
+    "Intermittent Demand Forecasting",
+    "Sequential Decision Systems and Reinforcement Learning",
+    "Autonomous Perception Systems",
+    "Edge AI and Embedded Intelligence",
+    "Graph-Sheaf Neural Networks"
+  ],
+  "certifications": [
+    "Deep Learning Algorithm with PyTorch - BTK Akademi, June 2025",
+    "Natural Language Processing with Deep Learning - BTK Akademi, July 2025"
+  ],
+  "contact": {
+    "email": "unlu.mehmett1@gmail.com",
+    "githubUrl": "https://github.com/unlumehmet30",
+    "linkedinUrl": "https://www.linkedin.com/in/unlumehmett1"
+  }
+}

@@ -46,6 +46,12 @@ export type ProjectImage = {
   createdAt?: string;
 };
 
+export type Contributor = {
+  name: string;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+};
+
 export type PostType = "blog" | "course-note" | "visual-note" | "cheatsheet";
 export type PostFileType = "pdf" | "html";
 
@@ -80,6 +86,7 @@ export type Project = {
   results: string;
   tags: string[];
   metrics: Metric[];
+  contributors: Contributor[];
   imageUrl?: string | null;
   galleryImages: ProjectImage[];
   githubUrl?: string | null;

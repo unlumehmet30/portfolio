@@ -14,7 +14,7 @@ export async function seedDatabase(prisma: PrismaClient) {
   });
 
   for (const [index, project] of projects.entries()) {
-    const { tags, metrics, galleryImages = [], ...projectData } = project;
+    const { tags, metrics, contributors = [], galleryImages = [], ...projectData } = project;
 
     await prisma.project.upsert({
       where: { slug: project.slug },
@@ -24,6 +24,7 @@ export async function seedDatabase(prisma: PrismaClient) {
         sortOrder: projectData.sortOrder ?? index,
         tags: JSON.stringify(tags),
         metrics: JSON.stringify(metrics),
+        contributors: JSON.stringify(contributors),
         projectImages: {
           create: galleryImages.map((image, index) => ({
             url: image.url,

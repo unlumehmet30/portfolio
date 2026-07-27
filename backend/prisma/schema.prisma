@@ -31,6 +31,7 @@ model Project {
   results       String
   tags          String         @default("[]")
   metrics       String         @default("[]")
+  contributors  String         @default("[]")
   imageUrl      String?
   githubUrl     String?
   demoUrl       String?

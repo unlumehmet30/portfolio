@@ -15,6 +15,11 @@ export type SeedProject = {
   results: string;
   tags: string[];
   metrics: SeedMetric[];
+  contributors?: Array<{
+    name: string;
+    githubUrl?: string;
+    linkedinUrl?: string;
+  }>;
   imageUrl?: string;
   galleryImages?: Array<{
     url: string;

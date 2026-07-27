@@ -100,6 +100,12 @@ const postFileSchema = z.object({
   sortOrder: z.number().int().nonnegative().optional()
 });
 
+const contributorSchema = z.object({
+  name: z.string().trim().min(1),
+  githubUrl: optionalUrl,
+  linkedinUrl: optionalUrl
+});
+
 export const projectSchema = z.object({
   title: z.string().trim().min(1),
   slug: z.string().trim().optional(),
@@ -111,6 +117,7 @@ export const projectSchema = z.object({
   results: z.string().trim().min(1),
   tags: z.array(z.string().trim().min(1)).default([]),
   metrics: z.array(metricSchema).default([]),
+  contributors: z.array(contributorSchema).default([]),
   imageUrl: optionalImageUrl,
   galleryImages: z.array(projectGalleryImageSchema).default([]),
   githubUrl: optionalUrl,
@@ -200,6 +207,7 @@ function serializeProject(project: {
   results: string;
   tags: string;
   metrics: string;
+  contributors: string;
   imageUrl: string | null;
   githubUrl: string | null;
   demoUrl: string | null;
@@ -215,6 +223,7 @@ function serializeProject(project: {
     ...projectData,
     tags: parseJsonField<string[]>(project.tags, []),
     metrics: parseJsonField<z.infer<typeof metricSchema>[]>(project.metrics, []),
+    contributors: parseJsonField<z.infer<typeof contributorSchema>[]>(project.contributors, []),
     galleryImages: projectImages.map((image) => ({
       id: image.id,
       url: image.url,
@@ -353,6 +362,7 @@ export async function adminCreateProject(input: unknown) {
       slug,
       tags: JSON.stringify(projectData.tags),
       metrics: JSON.stringify(projectData.metrics),
+      contributors: JSON.stringify(projectData.contributors),
       projectImages: {
         create: normalizeProjectImages(galleryImages)
       }
@@ -379,6 +389,7 @@ export async function adminUpdateProject(id: number, input: unknown) {
       slug,
       tags: JSON.stringify(projectData.tags),
       metrics: JSON.stringify(projectData.metrics),
+      contributors: JSON.stringify(projectData.contributors),
       projectImages: {
         deleteMany: {},
         create: normalizeProjectImages(galleryImages)

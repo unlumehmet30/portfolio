@@ -9,6 +9,12 @@ type Metric = {
   context: string;
 };
 
+type Contributor = {
+  name: string;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+};
+
 type ProjectRecord = Awaited<ReturnType<typeof prisma.project.findFirst>>;
 type ProjectImageRecord = {
   id: number;
@@ -25,6 +31,7 @@ function serializeProject(project: NonNullable<ProjectRecord> & { projectImages?
     ...projectData,
     tags: parseJsonField<string[]>(project.tags, []),
     metrics: parseJsonField<Metric[]>(project.metrics, []),
+    contributors: parseJsonField<Contributor[]>(project.contributors, []),
     galleryImages: projectImages.map((image) => ({
       id: image.id,
       url: image.url,

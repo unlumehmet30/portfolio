@@ -160,6 +160,7 @@ type UiCopy = {
     metricsResults: string;
     lessonsLearned: string;
     futureImprovements: string;
+    contributors: string;
     demo: string;
   };
 };
@@ -368,6 +369,7 @@ const uiCopy: Record<Locale, UiCopy> = {
       metricsResults: "Metrics / Results",
       lessonsLearned: "Lessons Learned",
       futureImprovements: "Future Improvements",
+      contributors: "Contributors",
       demo: "Demo"
     }
   },
@@ -574,6 +576,7 @@ const uiCopy: Record<Locale, UiCopy> = {
       metricsResults: "Metrikler / Sonuçlar",
       lessonsLearned: "Çıkarımlar",
       futureImprovements: "Gelecek İyileştirmeler",
+      contributors: "Katkıda Bulunanlar",
       demo: "Demo"
     }
   }
