@@ -1,0 +1,145 @@
+[
+  {
+    "id": 7,
+    "title": "Her Komşu Aynı Dili Konuşmaz: Sheaf Neural Networks",
+    "slug": "sheaf-neural-networks-gnnlerin-sinirlarini-asmak",
+    "excerpt": "Sheaf Neural Networks, klasik GNN’lerin komşu bilgilerini aynı uzayda birleştirme varsayımını sorgular. Bu yazı; yerel bilgi uzayları, restriction map’ler ve Sheaf Laplacian üzerinden heterojen grafiklerde daha esnek bilgi aktarımını inceliyor.",
+    "content": "GRAPH NEURAL NETWORKS · GEOMETRIC DEEP LEARNING\n\nSheaf Neural Networks ile GNN’lerin Sınırlarını Aşmak\n\nVCAMP Research & Innovation Team\n\nBirbirine bağlı verilerle çalışırken ilk akla gelen yaklaşımlardan biri Graph Neural Networks, yani GNN’lerdir. Sosyal ağlardan moleküllere, ulaşım sistemlerinden bilgi ağlarına kadar pek çok problemde GNN’ler, düğümler arasındaki ilişkileri kullanarak güçlü temsiller öğrenebilir.\n\nAncak burada çoğu zaman fark edilmeyen bir varsayım vardır: Komşu düğümlerin bilgilerini doğrudan karşılaştırabileceğimizi ve aynı temsil uzayında birleştirebileceğimizi kabul ederiz.\n\nPeki ya her düğüm kendi yerel koordinat sistemine, özellik uzayına veya bilgiyi yorumlama biçimine sahipse?\n\nİşte Sheaf Neural Networks bu sorudan doğar. Bu yaklaşım, grafik üzerindeki bilgiyi yalnızca komşudan komşuya mesaj göndermek olarak görmek yerine, farklı yerel bilgi uzayları arasındaki uyumu ve dönüşümü modellemeyi hedefler.\n\nKlasik GNN’lerin sorduğu “Komşumdan ne öğrenebilirim?” sorusuna ek olarak Sheaf Neural Networks şu soruyu sorar:\n\n“Komşumun bilgisini kendi dünyamda nasıl yorumlamalıyım?”\n\nGNN’LER GRAFİKLERİ NASIL ANLAR?\n\nBir sosyal ağ düşünelim:\n\nİnsanlar → düğümler\nArkadaşlık ilişkileri → bağlantılar\nİnsanların özellikleri → düğüm özellikleri\n\nBir GNN, bir kişinin yalnızca kendi özelliklerine bakmaz. Komşularından gelen bilgileri de kullanarak yeni bir temsil üretir. Bu fikir basitleştirilmiş biçimde şöyle yazılabilir:\n\nhᵥ⁽ˡ⁺¹⁾ = UPDATE(hᵥ⁽ˡ⁾, AGGREGATE({hᵤ⁽ˡ⁾ : u ∈ N(v)}))\n\nBurada hᵥ bir düğümün temsilini, N(v) ise o düğümün komşularını ifade eder.\n\nMantık sezgiseldir: Bir düğümün kim olduğunu anlamak için, kimlerle bağlantılı olduğuna da bakmak gerekir. Fakat bu yaklaşımın arkasında önemli bir soru saklıdır:\n\nKomşulardan gelen bilgiler gerçekten aynı temsil uzayında mı bulunuyor?\n\nBÜTÜN DÜĞÜMLER AYNI DİLİ Mİ KONUŞUYOR?\n\nBir mühendis, doktor ve ekonomistin aynı probleme baktığını düşünün. Üçünün de değerli bilgisi vardır; fakat kullandıkları kavramlar, ölçüm yöntemleri ve yorumlama biçimleri farklıdır.\n\nBu üç kişinin bilgisini doğrudan toplayıp ortalamasını almak çoğu zaman anlamlı bir sonuç üretmez. Sorun bilginin eksik olması değil, farklı uzaylarda temsil edilmesidir.\n\nGrafiklerde de benzer bir durum oluşabilir. Bir düğümden diğerine bilgi aktarılırken ölçek, yön, koordinat sistemi, temsil uzayı veya ilişkinin anlamı değişebilir. Dolayısıyla asıl soru yalnızca “Hangi bilgi geliyor?” değildir.\n\n“Bu bilgi geldiğinde onu nasıl yorumlamalıyım?”\n\nSHEAF NEDİR?\n\nSheaf, farklı yerel alanlarda bulunan bilgilerin nasıl ilişkilendirileceğini ve tutarlı hâle getirileceğini modelleyen matematiksel bir yapıdır.\n\nBir sheaf yapısında her düğümün kendi yerel bilgi uzayı bulunur. Buna stalk adı verilir. Düğümler arasındaki bağlantılar üzerinden bilgi aktarılırken ise restriction map adı verilen dönüşümler devreye girer.\n\nBasitleştirilmiş biçimde:\n\nρᵤ→ₑ : ℱ(u) → ℱ(e)\nρᵥ→ₑ : ℱ(v) → ℱ(e)\n\nBurada ℱ(u) ve ℱ(v), düğümlerin yerel bilgi uzaylarını; ℱ(e) ise bağlantı üzerinde bilgilerin karşılaştırılabildiği ortak uzayı temsil eder.\n\nTemel fikir şudur: Bilgiyi doğrudan birleştirmek yerine, önce karşılaştırılabilir hâle getiririz.\n\nGNN’DEN SHEAF NEURAL NETWORK’E GEÇİŞ\n\nKlasik bir GNN’in yaklaşımı şöyledir:\n\nDüğüm → Mesaj → Birleştirme → Güncellenmiş düğüm\n\nSheaf Neural Network yaklaşımında ise süreç daha zengindir:\n\nDüğüm → Yerel bilgi → Bağlantı üzerinden dönüşüm → Uyumlaştırma → Güncellenmiş düğüm\n\nBu yaklaşımda bağlantı yalnızca “iki düğüm arasında ilişki var” anlamına gelmez. Aynı zamanda şu soruya da cevap verir:\n\n“Bu iki düğümün bilgisi birbirine nasıl dönüştürülmeli?”\n\nRESTRICTION MAP: BAĞLANTILAR ARTIK SADECE BAĞLANTI DEĞİL\n\nRestriction map’leri bir çeviri mekanizması gibi düşünebiliriz.\n\nBir düğümün temsili xᵤ olsun. Bu bilgi bağlantı üzerinden ortak bir bağlama taşındığında ρᵤ,ₑ(xᵤ) biçimine dönüşür. Diğer düğümün bilgisi de aynı ortak bağlama taşınır.\n\nBöylece iki farklı yerel uzayda bulunan bilgi, karşılaştırılabilir hâle gelir.\n\nGNN komşular arasında bilgi taşır. Sheaf Neural Network ise bu bilginin taşınırken nasıl dönüştürüleceğini de öğrenmeye çalışır.\n\nSHEAF NEURAL NETWORK’LER NE KAZANDIRIR?\n\nYerel temsilleri modelleme\n\nKlasik GNN’lerde düğüm gömmelerinin aynı genel temsil uzayında ele alınması yaygındır. Sheaf yaklaşımı ise her düğümün kendi yerel bilgi uzayına sahip olmasına izin verir.\n\nBağlantılara daha fazla anlam kazandırma\n\nKlasik bir grafikte bağlantı çoğu zaman yalnızca ilişkiyi gösterir. Sheaf yaklaşımında bağlantı, bir düğümün bilgisinin diğeriyle karşılaştırılırken hangi dönüşümün kullanılacağını da taşıyabilir.\n\nHeterophily için daha esnek bir bakış\n\nHeterophily, komşu düğümlerin birbirine benzemediği durumları ifade eder. Bu tür grafiklerde doğrudan komşu bilgisini birleştirmek yeterli olmayabilir.\n\nSheaf yaklaşımı, komşuların aynı olmasını beklemek yerine aralarındaki ilişkinin nasıl dönüştürülmesi gerektiğini modellemeye odaklanır.\n\nSHEAF LAPLACIAN\n\nSheaf yaklaşımı yalnızca message-passing mekanizmasına ek bir katman koymaz. Grafik yapısının matematiksel analizini de genişletir.\n\nKlasik grafiklerde Laplacian, düğümler arasındaki ilişkileri incelemek için kullanılır. Sheaf Laplacian ise bağlantılar üzerindeki bilgi dönüşümlerini de hesaba katar:\n\nLℱ = δᵀδ\n\nBu ifade, yalnızca “Kim kime bağlı?” sorusunu değil, “Bu bağlantı üzerindeki bilgiler ne kadar tutarlı?” sorusunu da sormamızı sağlar.\n\nMODEL BU DÖNÜŞÜMLERİ NASIL ÖĞRENİR?\n\nRestriction map’ler sabit olmak zorunda değildir. Model, eğitim sırasında bu dönüşümlerin parametrelerini öğrenebilir.\n\nÖrneğin bir bağlantı için şu tür bir dönüşüm düşünülebilir:\n\nρᵤ,ₑ(x) = Wᵤ,ₑx\n\nBuradaki Wᵤ,ₑ öğrenilebilir bir dönüşüm matrisidir. Böylece model yalnızca komşudan gelen bilgiyi nasıl birleştireceğini değil, bu bilginin hangi dönüşümle anlamlı hâle geleceğini de veriden öğrenir.\n\nHER ŞEYİN BİR BEDELİ VAR\n\nSheaf Neural Networks, GNN’lerin her problemini otomatik olarak çözmez. Daha zengin modelleme gücü, daha fazla karmaşıklığı da beraberinde getirir.\n\nÖğrenilecek dönüşümlerin sayısı artabilir. Eğitim ve optimizasyon süreçleri daha zor hâle gelebilir. Ayrıca düğümlerin zaten doğal olarak aynı temsil uzayında bulunduğu problemlerde, sheaf yapısının getirdiği ek maliyet gerekli olmayabilir.\n\nBu nedenle asıl soru şudur:\n\n“Problemimde yerel temsil farklılıklarını ve bağlantı bazlı dönüşümleri modellemeye gerçekten ihtiyaç var mı?”\n\nSONUÇ\n\nSheaf Neural Networks’ü anlamanın en kolay yolu şu soruda saklıdır:\n\n“Komşumun bilgisini neden olduğu gibi almak zorundayım?”\n\nKlasik GNN’ler, grafik üzerindeki bağlantılardan öğrenmeyi sağladı. Sheaf Neural Networks ise bu sürece daha ince bir yorum katıyor:\n\n“Bu bilgi benim bulunduğum yerde ne anlama geliyor?”\n\nDüğümler kendi yerel bilgi uzaylarına sahip olabilir. Bağlantılar yalnızca ilişkiyi değil, dönüşüm bilgisini de taşıyabilir. Bu bakış açısı; heterojen, geometrik ve ilişkisel yapısı karmaşık veri kümelerinde yeni modelleme olanakları sunar.\n\nGerçek dünyada insanlar, şehirler, moleküller ve sistemler yalnızca birbirine bağlı değildir. Birbirlerini dönüştürürler.\n\nSheaf Neural Networks’ün sorduğu temel soru da tam olarak budur:\n\n“Bir bilgiyi başka bir yere taşıdığımızda, o bilgi hâlâ aynı bilgi midir?”",
+    "type": "blog",
+    "tags": [
+      "Sheaf Neural Networks",
+      "Graph Neural Networks",
+      "GNN",
+      "Geometric Deep Learning",
+      "Yapay Zekâ",
+      "Derin Öğrenme",
+      "Heterophily",
+      "Sheaf Laplacian"
+    ],
+    "coverImageUrl": "/api/uploads/posts/9118fd06-8d3b-40c9-bfd8-7ac5720b7ff5.jpg",
+    "published": true,
+    "createdAt": "2026-09-05T08:00:48.169Z",
+    "updatedAt": "2026-09-05T08:00:48.169Z",
+    "images": [
+      {
+        "id": 1,
+        "url": "/api/uploads/posts/ed6f9fe0-3891-4ded-bf6e-0529f56309a2.jpg",
+        "alt": "Her Komşu Aynı Dili Konuşmaz: Sheaf Neural Networks visual 1",
+        "sortOrder": 0,
+        "createdAt": "2026-09-05T08:00:48.169Z"
+      }
+    ],
+    "files": []
+  },
+  {
+    "id": 6,
+    "title": "Building Self-Hosted Whisper Pipelines",
+    "slug": "building-self-hosted-whisper-pipelines",
+    "excerpt": "Whisper becomes more useful when transcription is treated as one stage in a larger NLP system.",
+    "content": "A self-hosted Whisper pipeline can handle transcription, language-aware cleanup, summarization, and task-specific NLP adapters. Keeping stages modular makes the system easier to deploy and improve.\n\nFor Turkish and English workflows, explicit language handling and prompt templates help keep downstream outputs more predictable.",
+    "type": "blog",
+    "tags": [
+      "Whisper",
+      "NLP",
+      "Deployment"
+    ],
+    "coverImageUrl": null,
+    "published": true,
+    "createdAt": "2026-09-05T07:48:24.886Z",
+    "updatedAt": "2026-09-05T07:48:24.886Z",
+    "images": [],
+    "files": []
+  },
+  {
+    "id": 5,
+    "title": "Hybrid Visual Odometry: RAFT + ORB",
+    "slug": "hybrid-visual-odometry-raft-orb",
+    "excerpt": "A confidence selector can turn deep and classical visual odometry branches into a more robust research architecture.",
+    "content": "RAFT provides dense optical flow, while ORB provides a classic feature-based signal. A hybrid visual odometry system can compare confidence and consistency across both branches before selecting a pose estimate.\n\nThe interesting engineering problem is not just model accuracy; it is deciding when each branch should be trusted.",
+    "type": "visual-note",
+    "tags": [
+      "Computer Vision",
+      "Visual Odometry"
+    ],
+    "coverImageUrl": null,
+    "published": true,
+    "createdAt": "2026-09-05T07:48:24.875Z",
+    "updatedAt": "2026-09-05T07:48:24.875Z",
+    "images": [],
+    "files": []
+  },
+  {
+    "id": 4,
+    "title": "Vectorization vs Python Loops in ML Pipelines",
+    "slug": "vectorization-vs-python-loops-in-ml-pipelines",
+    "excerpt": "The fastest pipeline improvement is often moving repeated Python-level work into vectorized array operations.",
+    "content": "Python loops are easy to write, but expensive in large feature pipelines. NumPy and Pandas vectorization move computation closer to optimized C-level paths and reduce interpreter overhead.\n\nThe best optimization work starts with profiling, then removes repeated allocations and row-wise operations from the hottest path.",
+    "type": "cheatsheet",
+    "tags": [
+      "Optimization",
+      "NumPy",
+      "Pandas"
+    ],
+    "coverImageUrl": null,
+    "published": true,
+    "createdAt": "2026-09-05T07:48:24.866Z",
+    "updatedAt": "2026-09-05T07:48:24.866Z",
+    "images": [],
+    "files": []
+  },
+  {
+    "id": 3,
+    "title": "Two-Stage Modeling for Intermittent Demand",
+    "slug": "two-stage-modeling-for-intermittent-demand",
+    "excerpt": "Separating sale occurrence from sale magnitude can make sparse forecasting systems easier to reason about.",
+    "content": "A two-stage demand model first estimates whether a sale will happen, then estimates the magnitude conditional on sale. This separation gives clearer diagnostics when most rows are zero.\n\nIt also lets the model optimize different objectives for occurrence and amount, which is often useful in product-level daily data.",
+    "type": "course-note",
+    "tags": [
+      "Intermittent Demand",
+      "LightGBM"
+    ],
+    "coverImageUrl": null,
+    "published": true,
+    "createdAt": "2026-09-05T07:48:24.856Z",
+    "updatedAt": "2026-09-05T07:48:24.856Z",
+    "images": [],
+    "files": []
+  },
+  {
+    "id": 2,
+    "title": "Why WAPE Alone Can Be Misleading",
+    "slug": "why-wape-alone-can-be-misleading",
+    "excerpt": "WAPE is useful, but sparse demand and high zero ratios can hide important failure modes.",
+    "content": "WAPE summarizes aggregate absolute error, but it can underexpose no-sale classification behavior in intermittent demand. Pairing WAPE with RMSSE, MAE, RMSE, and zero-demand precision/recall gives a more complete view.\n\nThe goal is not one perfect metric; it is a metric set that reflects the real business and modeling risks.",
+    "type": "cheatsheet",
+    "tags": [
+      "Metrics",
+      "Forecasting"
+    ],
+    "coverImageUrl": null,
+    "published": true,
+    "createdAt": "2026-09-05T07:48:24.850Z",
+    "updatedAt": "2026-09-05T07:48:24.850Z",
+    "images": [],
+    "files": []
+  },
+  {
+    "id": 1,
+    "title": "Avoiding Data Leakage in Recursive Forecasting",
+    "slug": "avoiding-data-leakage-in-recursive-forecasting",
+    "excerpt": "A practical note on preserving temporal integrity when lagged features depend on previous predictions.",
+    "content": "Recursive forecasting breaks quickly when validation features accidentally see the future. A leakage-free setup recomputes lag and rolling features at each horizon step using only observed history and prior predictions.\n\nThe safest mental model is to treat validation like production: every feature must be available at the exact timestamp where the prediction is made.",
+    "type": "course-note",
+    "tags": [
+      "Forecasting",
+      "Validation",
+      "ML Systems"
+    ],
+    "coverImageUrl": null,
+    "published": true,
+    "createdAt": "2026-09-05T07:48:24.841Z",
+    "updatedAt": "2026-09-05T07:48:24.841Z",
+    "images": [],
+    "files": []
+  }
+]

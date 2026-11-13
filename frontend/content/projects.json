@@ -1,0 +1,561 @@
+[
+  {
+    "id": 3,
+    "title": "Intermittent Demand Forecasting System",
+    "slug": "intermittent-demand-forecasting-system",
+    "summary": "A two-stage machine learning system for intermittent demand forecasting on daily product-level sales data.",
+    "description": "Designed a production-oriented forecasting workflow for sparse product demand, combining sale/no-sale classification with magnitude regression and recursive multi-step inference.",
+    "problem": "Daily product demand was dominated by zero-sales records, making direct regression unstable and difficult to validate without leakage.",
+    "challenge": "The core challenge was preserving temporal integrity while forecasting many product horizons recursively across rolling validation windows.",
+    "architecture": "Stage 1 predicts sale probability with binary classification. Stage 2 estimates conditional sales magnitude using LightGBM Tweedie regression. The recursive inference loop feeds prior predictions into lag and rolling features.",
+    "results": "The system produced interpretable demand/no-demand decisions, tracked WAPE and RMSSE across rolling windows, and separated zero-demand precision/recall from magnitude error.",
+    "tags": [
+      "Forecasting",
+      "LightGBM",
+      "Tweedie",
+      "Recursive Inference",
+      "Leakage-Free Validation",
+      "Time Series"
+    ],
+    "metrics": [
+      {
+        "label": "Products",
+        "value": "20k",
+        "context": "Daily item-level series"
+      },
+      {
+        "label": "History",
+        "value": "3 yrs",
+        "context": "Rolling temporal windows"
+      },
+      {
+        "label": "Zero demand",
+        "value": "85%",
+        "context": "Sparse target records"
+      },
+      {
+        "label": "Metrics",
+        "value": "WAPE / RMSSE",
+        "context": "Forecast quality"
+      }
+    ],
+    "contributors": [],
+    "imageUrl": "/api/uploads/projects/2ac2b8d7-cfd4-4637-8892-8ca8c0931f49.jpg",
+    "githubUrl": "https://github.com/mehmetunlu/intermittent-demand-forecasting",
+    "demoUrl": null,
+    "featured": true,
+    "sortOrder": 1,
+    "createdAt": "2026-09-05T07:48:24.758Z",
+    "updatedAt": "2026-09-05T08:58:11.149Z",
+    "galleryImages": [],
+    "caseStudy": {
+      "dataset": "20k products, three years of daily sales, strongly sparse product-level targets, and approximately 85% zero-demand rows.",
+      "technicalDecisions": [
+        "Split sale occurrence and magnitude into separate modeling stages.",
+        "Use LightGBM Tweedie regression for non-negative sparse magnitude prediction.",
+        "Treat recursive inference as production simulation during validation.",
+        "Track zero-demand precision, recall, and F1 separately from aggregate forecast error."
+      ],
+      "implementationDetails": [
+        "Lag and rolling features are recomputed step by step during multi-horizon inference.",
+        "Rolling validation windows preserve time order and prevent future leakage.",
+        "Metric reporting includes WAPE, RMSSE, MAE, RMSE, and classification diagnostics.",
+        "Feature computation is organized around product-level daily state updates."
+      ],
+      "lessonsLearned": [
+        "Sparse demand forecasting is partly a classification problem.",
+        "Validation code has to look like inference code when recursive features are used.",
+        "A single metric cannot explain both no-sale decisions and magnitude quality."
+      ],
+      "futureImprovements": [
+        "Add probabilistic calibration for sale/no-sale thresholds.",
+        "Benchmark hierarchical aggregation across product categories.",
+        "Introduce drift monitoring for seasonal product behavior."
+      ],
+      "diagram": "forecasting"
+    }
+  },
+  {
+    "id": 8,
+    "title": "ARIVC Computer Vision System",
+    "slug": "arivc-computer-vision-system",
+    "summary": "Veri hazırlama, görsel odometri ve görüntü eşleme görevlerini tek bir modüler bilgisayarlı görü sistemi altında birleştiren yapı.",
+    "description": "ARIVC Computer Vision System; ham görüntülerin eğitim verisine dönüştürülmesinden hareket kestirimine ve nesne eşlemeye kadar uzanan üç aşamalı bir bilgisayarlı görü yapısıdır. Task 1 veri setini hazırlar, Task 2 kamera hareketini RAFT, klasik görsel odometri ve IEKF ile kestirir, Task 3 ise referans görüntüler üzerinden nesne eşleme yaparak standart JSON çıktısı üretir.",
+    "problem": "Veri hazırlama, konum kestirimi ve görüntü eşleme süreçlerinin birbirinden kopuk ilerlemesi; veri kalitesi, tekrar kullanılabilirlik ve çıktıların tutarlılığı açısından sorun oluşturuyordu.",
+    "challenge": "Farklı görevleri ortak bir veri akışı altında birleştirmek, her modülün bağımsız çalışmasını sağlamak ve tüm sistemden güvenilir, standartlaştırılmış çıktılar üretmek.",
+    "architecture": "Kaynak görüntüler → Task 1 veri hazırlama → Task 2 görsel odometri → Task 3 görüntü eşleme → API ve JSON çıktıları",
+    "results": "Üç ayrı bilgisayarlı görü görevi, modüler ve takip edilebilir tek bir sistem yapısında birleştirildi. Sistem; temiz veri seti, hareket kestirimi ve nesne eşleme çıktıları üretiyor.",
+    "tags": [
+      "computer vision",
+      "machine learning",
+      "object detection",
+      "visual odometry",
+      "image matching",
+      "YOLOv8",
+      "IEKF",
+      "SIFT",
+      "ORB"
+    ],
+    "metrics": [
+      {
+        "label": "Modularity",
+        "value": "3 core tasks",
+        "context": "Veri hazırlama, odometri ve görüntü eşleme ayrı modüller olarak çalışır"
+      },
+      {
+        "label": "Output consistency",
+        "value": "Standard JSON responses",
+        "context": "Modüller arası çıktı formatı tutarlıdır"
+      },
+      {
+        "label": "Pipeline coverage",
+        "value": "End-to-end workflow",
+        "context": "Ham görüntüden analiz çıktısına kadar tam akış"
+      }
+    ],
+    "contributors": [],
+    "imageUrl": "/api/uploads/projects/c58da5a2-12eb-4112-a638-883e3e257503.jpg",
+    "githubUrl": null,
+    "demoUrl": null,
+    "featured": false,
+    "sortOrder": 1,
+    "createdAt": "2026-09-05T08:57:07.999Z",
+    "updatedAt": "2026-09-05T08:57:07.999Z",
+    "galleryImages": [
+      {
+        "id": 3,
+        "url": "/api/uploads/projects/34ff0a25-f266-4f40-8d90-464f56007047.jpg",
+        "alt": null,
+        "sortOrder": 0,
+        "createdAt": "2026-09-05T08:57:07.999Z"
+      },
+      {
+        "id": 4,
+        "url": "/api/uploads/projects/23348870-ca2d-45b9-a40c-68755ab82de2.jpg",
+        "alt": null,
+        "sortOrder": 1,
+        "createdAt": "2026-09-05T08:57:07.999Z"
+      },
+      {
+        "id": 5,
+        "url": "/api/uploads/projects/24b01c54-44e8-4745-9dde-c74a352ff6c2.jpg",
+        "alt": null,
+        "sortOrder": 2,
+        "createdAt": "2026-09-05T08:57:07.999Z"
+      },
+      {
+        "id": 6,
+        "url": "/api/uploads/projects/1ad387e7-9a60-47d4-80c4-b1fda40812b3.jpg",
+        "alt": null,
+        "sortOrder": 3,
+        "createdAt": "2026-09-05T08:57:07.999Z"
+      },
+      {
+        "id": 7,
+        "url": "/api/uploads/projects/1244b913-da16-48a6-a580-f6e351e2fd57.jpg",
+        "alt": null,
+        "sortOrder": 4,
+        "createdAt": "2026-09-05T08:57:07.999Z"
+      },
+      {
+        "id": 8,
+        "url": "/api/uploads/projects/d13d48b9-e203-4375-80c1-0ef2b4e0a977.jpg",
+        "alt": null,
+        "sortOrder": 5,
+        "createdAt": "2026-09-05T08:57:07.999Z"
+      },
+      {
+        "id": 9,
+        "url": "/api/uploads/projects/d325bc45-c9e2-4046-96d1-0b6b07d36946.jpg",
+        "alt": null,
+        "sortOrder": 6,
+        "createdAt": "2026-09-05T08:57:07.999Z"
+      }
+    ],
+    "caseStudy": null
+  },
+  {
+    "id": 4,
+    "title": "ML Pipeline Runtime Optimization",
+    "slug": "ml-pipeline-runtime-optimization",
+    "summary": "Optimized a large-scale ML feature engineering and inference pipeline by reducing unnecessary computation, memory bloat, and Python-level bottlenecks.",
+    "description": "Refactored a feature-heavy ML pipeline around vectorized operations, matrix-based computation, and memory-aware transformations.",
+    "problem": "Pipeline runtime and memory pressure made iteration slow, expensive, and difficult to scale for production-like data sizes.",
+    "challenge": "The pipeline mixed repeated dataframe operations, Python loops, redundant intermediate objects, and compute paths that did not match the shape of the data.",
+    "architecture": "The optimized workflow batches feature transforms, replaces row-wise loops with NumPy/Pandas vectorization, parallelizes independent computation, and controls temporary allocations.",
+    "results": "Runtime was reduced from 40 minutes to 4 minutes on roughly 1 GB and 3 million rows while keeping the modeling behavior intact.",
+    "tags": [
+      "Optimization",
+      "NumPy",
+      "Pandas",
+      "Vectorization",
+      "Parallelism",
+      "ML Systems"
+    ],
+    "metrics": [
+      {
+        "label": "Runtime",
+        "value": "40m -> 4m",
+        "context": "End-to-end pipeline"
+      },
+      {
+        "label": "Rows",
+        "value": "3M",
+        "context": "Feature computation scale"
+      },
+      {
+        "label": "Data",
+        "value": "~1 GB",
+        "context": "Tabular workload"
+      },
+      {
+        "label": "Speedup",
+        "value": "10x",
+        "context": "Iteration velocity"
+      }
+    ],
+    "contributors": [],
+    "imageUrl": "/api/uploads/projects/dda282ef-602c-4ebd-a98d-1b97d253f138.jpg",
+    "githubUrl": null,
+    "demoUrl": null,
+    "featured": true,
+    "sortOrder": 2,
+    "createdAt": "2026-09-05T07:48:24.770Z",
+    "updatedAt": "2026-09-05T08:58:22.627Z",
+    "galleryImages": [],
+    "caseStudy": {
+      "dataset": "Approximately 1 GB of tabular data and 3 million rows flowing through feature engineering and inference steps.",
+      "technicalDecisions": [
+        "Profile first, then optimize the hottest compute paths.",
+        "Replace row-level Python operations with vectorized NumPy/Pandas transformations.",
+        "Batch repeated feature calculations and remove redundant intermediate frames.",
+        "Use parallelism only for independent workloads with clear memory boundaries."
+      ],
+      "implementationDetails": [
+        "Converted repeated loops into matrix-oriented operations.",
+        "Reduced dataframe copies and temporary object growth.",
+        "Moved computation toward C-backed array operations.",
+        "Kept output parity checks around key feature columns."
+      ],
+      "lessonsLearned": [
+        "Runtime optimization is usually data-layout work before it is model work.",
+        "Memory bloat can hide inside convenient dataframe chains.",
+        "Small Python operations become expensive when repeated millions of times."
+      ],
+      "futureImprovements": [
+        "Add automated profiling snapshots to CI.",
+        "Explore Polars or DuckDB for larger-than-memory feature workloads.",
+        "Track memory high-water marks in production runs."
+      ],
+      "diagram": "optimization"
+    }
+  },
+  {
+    "id": 1,
+    "title": "Personal Portfolio Platform",
+    "slug": "personal-portfolio-platform",
+    "summary": "A full-stack portfolio platform with dynamic projects, notes, media uploads, admin tools, and secure self-hosted deployment. Active feature development continues.",
+    "description": "Built and operate a personal portfolio platform that combines a Next.js frontend, an API backend, admin-managed content, project galleries, notes with file uploads, contact handling, and a self-hosted production deployment.",
+    "problem": "A static portfolio would require code changes for every new project, note, image, or resume update, and it would not show the engineering work behind content management and deployment.",
+    "challenge": "The challenge was turning a personal website into a maintainable product: secure admin access, durable uploads, dynamic content, rich note rendering, responsive galleries, caching, and production hardening without making the system heavy.",
+    "architecture": "The frontend uses Next.js App Router with ISR caching. A typed API layer manages projects, notes, uploads, resume content, and contact messages, while the production environment runs behind an HTTPS edge layer with separated public and administrative workflows.",
+    "results": "The site supports dynamic projects, gallery uploads, image cropping, PDF/HTML note attachments, Markdown and KaTeX rendering, contact messages, hardened admin flows, self-hosted deployment, and is still actively being expanded.",
+    "tags": [
+      "Next.js",
+      "TypeScript",
+      "Express",
+      "Prisma",
+      "Admin CMS",
+      "Media Uploads",
+      "Self-Hosted",
+      "Active Development"
+    ],
+    "metrics": [
+      {
+        "label": "Stack",
+        "value": "Next.js + API",
+        "context": "Frontend and backend platform"
+      },
+      {
+        "label": "Content",
+        "value": "Dynamic",
+        "context": "Projects, notes, resume, uploads"
+      },
+      {
+        "label": "Deploy",
+        "value": "Self-hosted",
+        "context": "HTTPS production environment"
+      },
+      {
+        "label": "Status",
+        "value": "In progress",
+        "context": "Features are still being added"
+      }
+    ],
+    "contributors": [],
+    "imageUrl": "/api/uploads/projects/4a8ced25-afca-44a8-832f-0975dc7d507d.jpg",
+    "githubUrl": "https://github.com/unlumehmet30/portfolio",
+    "demoUrl": "https://165.232.45.167.sslip.io",
+    "featured": true,
+    "sortOrder": 3,
+    "createdAt": "2026-09-05T07:48:24.733Z",
+    "updatedAt": "2026-09-05T08:58:01.710Z",
+    "galleryImages": [],
+    "caseStudy": {
+      "dataset": "Portfolio content, uploaded project media, technical notes, resume data, contact messages, and production deployment configuration.",
+      "technicalDecisions": [
+        "Use a full-stack architecture instead of a static-only portfolio so content can be managed without code changes.",
+        "Keep public content cached with ISR while preserving no-store behavior for authenticated admin workflows.",
+        "Store uploaded media persistently and reference files through controlled API paths.",
+        "Place the app behind an HTTPS edge layer and keep administrative workflows separated from public content."
+      ],
+      "implementationDetails": [
+        "Next.js renders the public portfolio, localized routes, project pages, notes, and resume views.",
+        "Express and Prisma expose REST endpoints for projects, notes, uploads, profile data, contact messages, and admin actions.",
+        "The admin dashboard supports project galleries, cover images, image cropping, PDF/HTML note files, and Markdown content.",
+        "Production is deployed as separated application services behind a public HTTPS entry point."
+      ],
+      "lessonsLearned": [
+        "A portfolio becomes more useful when content operations are part of the system, not manual code edits.",
+        "Caching improves perceived speed, but admin routes and public routes need different freshness rules.",
+        "Upload handling has to consider persistence, validation, previews, and long-term deploy behavior together."
+      ],
+      "futureImprovements": [
+        "Move uploads to object storage for simpler backups and CDN delivery.",
+        "Add search and filtering across projects and technical notes.",
+        "Introduce richer analytics and uptime monitoring after the custom domain is attached.",
+        "Continue expanding the admin workflow as new portfolio needs appear."
+      ],
+      "diagram": "web-platform"
+    }
+  },
+  {
+    "id": 6,
+    "title": "Whisper-Based Speech & NLP System",
+    "slug": "whisper-based-speech-nlp-system",
+    "summary": "A self-hosted speech transcription and text processing system using Whisper and NLP models.",
+    "description": "Built a server-side speech and text pipeline around Whisper transcription, prompt-based summarization, and Hugging Face model integration.",
+    "problem": "Speech workflows often depend on external SaaS layers, making local experimentation, privacy-aware deployment, and custom text processing harder.",
+    "challenge": "The system had to support Turkish and English inputs while keeping transcription, summarization, and downstream NLP steps modular.",
+    "architecture": "Audio enters a Whisper transcription stage, passes into language-aware text normalization, then flows into prompt-based summarization and optional model adapters.",
+    "results": "The pipeline creates a foundation for local/server-side speech-to-text workflows with extensible NLP post-processing.",
+    "tags": [
+      "Whisper",
+      "NLP",
+      "Hugging Face",
+      "Speech-to-Text",
+      "Self-Hosted AI"
+    ],
+    "metrics": [
+      {
+        "label": "Languages",
+        "value": "TR / EN",
+        "context": "Speech support"
+      },
+      {
+        "label": "Pipeline",
+        "value": "STT + NLP",
+        "context": "Audio to text insights"
+      },
+      {
+        "label": "Deploy",
+        "value": "Self-hosted",
+        "context": "Server-side focus"
+      }
+    ],
+    "contributors": [],
+    "imageUrl": null,
+    "githubUrl": null,
+    "demoUrl": null,
+    "featured": false,
+    "sortOrder": 5,
+    "createdAt": "2026-09-05T07:48:24.810Z",
+    "updatedAt": "2026-09-05T07:48:24.810Z",
+    "galleryImages": [],
+    "caseStudy": {
+      "dataset": "Turkish and English audio inputs with downstream text processing requirements for summarization and analysis.",
+      "technicalDecisions": [
+        "Keep transcription, normalization, summarization, and model adapters modular.",
+        "Treat deployment constraints as part of the pipeline design.",
+        "Support prompt templates for repeatable NLP outputs."
+      ],
+      "implementationDetails": [
+        "Whisper handles speech-to-text on the server side.",
+        "Text is normalized before prompt-based summarization.",
+        "Hugging Face adapters can be attached for task-specific NLP processing."
+      ],
+      "lessonsLearned": [
+        "Speech-to-text quality is only one part of the user-facing workflow.",
+        "Language-aware cleanup improves downstream model behavior.",
+        "Self-hosting makes observability and customization easier."
+      ],
+      "futureImprovements": [
+        "Add diarization for multi-speaker audio.",
+        "Introduce async job queues for long transcriptions.",
+        "Store transcript versions and prompt outputs for review."
+      ],
+      "diagram": "speech"
+    }
+  },
+  {
+    "id": 7,
+    "title": "AI-Powered Storytelling / Flutter App",
+    "slug": "ai-powered-storytelling-flutter-app",
+    "summary": "A mobile application concept for children and parents using AI-powered storytelling, video, subtitles, and voice processing.",
+    "description": "Designed a Flutter and Firebase application concept that combines parent/child flows, media upload, subtitles, voice processing, and prompt-based AI generation.",
+    "problem": "Family-oriented storytelling tools need safe flows for parents, understandable content for children, and flexible multimedia generation.",
+    "challenge": "The product concept has to coordinate mobile UX, Firebase-backed storage, uploaded media, prompt orchestration, and speech processing.",
+    "architecture": "Flutter handles the mobile interface, Firebase manages authentication and media state, and AI services provide story generation, subtitle handling, and voice processing.",
+    "results": "The app concept defines a practical architecture for AI-assisted multimedia storytelling with clear user roles and extensible content workflows.",
+    "tags": [
+      "Flutter",
+      "Firebase",
+      "AI Product",
+      "Speech Processing",
+      "Mobile"
+    ],
+    "metrics": [
+      {
+        "label": "Roles",
+        "value": "Parent / Child",
+        "context": "Separated UX"
+      },
+      {
+        "label": "Media",
+        "value": "Video + Voice",
+        "context": "Upload workflows"
+      },
+      {
+        "label": "AI",
+        "value": "Prompts",
+        "context": "Generated content"
+      }
+    ],
+    "contributors": [],
+    "imageUrl": "/api/uploads/projects/d6428e57-2a66-41bb-857b-5fe312bb040b.jpg",
+    "githubUrl": null,
+    "demoUrl": null,
+    "featured": false,
+    "sortOrder": 6,
+    "createdAt": "2026-09-05T07:48:24.832Z",
+    "updatedAt": "2026-09-05T08:37:57.022Z",
+    "galleryImages": [
+      {
+        "id": 1,
+        "url": "/api/uploads/projects/64a5de54-5a2b-43ab-bc2b-b4d90951789f.jpg",
+        "alt": "AI-Powered Storytelling / Flutter App screenshot 1",
+        "sortOrder": 0,
+        "createdAt": "2026-09-05T08:37:57.022Z"
+      },
+      {
+        "id": 2,
+        "url": "/api/uploads/projects/b696c8ad-fc69-474f-b9d2-5dbb7923cf04.jpg",
+        "alt": "AI-Powered Storytelling / Flutter App screenshot 2",
+        "sortOrder": 1,
+        "createdAt": "2026-09-05T08:37:57.022Z"
+      }
+    ],
+    "caseStudy": {
+      "dataset": "User-provided video, subtitle selections, uploaded voice samples, and prompt inputs for story generation workflows.",
+      "technicalDecisions": [
+        "Separate parent and child UX flows.",
+        "Use Firebase for authentication, storage, and app state.",
+        "Keep AI generation behind structured prompt orchestration."
+      ],
+      "implementationDetails": [
+        "Flutter owns the cross-platform mobile interface.",
+        "Media upload flows collect video, subtitles, and voice inputs.",
+        "AI services generate story content and assist with speech-related features."
+      ],
+      "lessonsLearned": [
+        "AI product design needs role-aware guardrails.",
+        "Media workflows require clear progress and failure states.",
+        "Prompt systems benefit from structured user inputs."
+      ],
+      "futureImprovements": [
+        "Add moderation and parent approval flows.",
+        "Introduce offline drafts and background upload retries.",
+        "Evaluate generated content quality with age-aware rubrics."
+      ],
+      "diagram": "mobile"
+    }
+  },
+  {
+    "id": 2,
+    "title": "VCAMP Website & Content Platform",
+    "slug": "vcamp-website-content-platform",
+    "summary": "A team-built web platform for the ITU VCAMP project team, combining a public website, content APIs, project pages, team profiles, blog posts, sponsors, and certificate verification workflows.",
+    "description": "Contributed across frontend and backend development in a 4-5 person team building the VCAMP website and content platform. The system presents team projects, members, sponsors, blog content, organization info, and certificate verification through a React frontend backed by a Django REST API.",
+    "problem": "The team needed a maintainable website where project, team, sponsor, blog, and certificate content could be managed from an admin interface instead of being hard-coded into static pages.",
+    "challenge": "The main challenge was connecting a rich public frontend to structured backend content models while supporting project detail pages, media, documents, team relations, blog content, sponsors, and certificate verification in a consistent user experience.",
+    "architecture": "The frontend is a Vite and React single-page application with routed pages for home, projects, team, blog, contact, sponsorship, search, and certificate verification. The backend uses Django, Django REST Framework, relational content models, Django admin, rich-text blog editing, media/document uploads, and read-only public API endpoints consumed by the frontend.",
+    "results": "The platform supports admin-managed content, project detail pages with specifications, timeline, gallery, documents, tests, team and sponsor relations, blog rendering, organization info, and certificate verification with badge-style JSON responses. The project was developed collaboratively by a 4-5 person team with frontend and backend contributions.",
+    "tags": [
+      "React",
+      "Vite",
+      "TypeScript",
+      "Django",
+      "Django REST Framework",
+      "Content Platform",
+      "Team Project",
+      "Certificate Verification"
+    ],
+    "metrics": [
+      {
+        "label": "Team",
+        "value": "4-5",
+        "context": "Collaborative development team"
+      },
+      {
+        "label": "Role",
+        "value": "Full-stack",
+        "context": "Frontend and backend contribution"
+      },
+      {
+        "label": "Modules",
+        "value": "8",
+        "context": "Projects, team, blog, sponsors, info, courses, certificates, admin"
+      },
+      {
+        "label": "API",
+        "value": "REST",
+        "context": "Structured content consumed by frontend"
+      }
+    ],
+    "contributors": [],
+    "imageUrl": "/api/uploads/projects/76671b74-441d-4e11-b3d3-5accc450423a.jpg",
+    "githubUrl": null,
+    "demoUrl": "https://vcamp.tech",
+    "featured": false,
+    "sortOrder": 10,
+    "createdAt": "2026-09-05T07:48:24.746Z",
+    "updatedAt": "2026-09-05T08:34:52.668Z",
+    "galleryImages": [],
+    "caseStudy": {
+      "dataset": "Organization profile content, team members, sponsors, project pages, project media, technical documents, blog posts, courses, and certificate records managed through the website backend.",
+      "technicalDecisions": [
+        "Use Django admin as the content management surface for non-developer updates.",
+        "Expose read-only REST API endpoints for public website content.",
+        "Model project detail pages as structured related data rather than one large static page.",
+        "Keep certificate verification as a dedicated workflow with code-based lookups and badge-style JSON responses."
+      ],
+      "implementationDetails": [
+        "React and Vite power the routed public frontend for home, projects, team, blog, sponsorship, search, and certificate pages.",
+        "Django REST Framework serializes nested project data including specifications, timeline, media, documents, tests, team, and sponsors.",
+        "The frontend maps raw API payloads into page-specific view models for project summaries, detailed project pages, blog content, and certificate verification.",
+        "The backend includes admin-managed rich text content, media uploads, document attachments, and organization info records."
+      ],
+      "lessonsLearned": [
+        "Team websites become easier to maintain when project and member data are modeled explicitly.",
+        "Frontend experience depends heavily on shaping backend API responses into stable view models.",
+        "A team project should describe individual contribution clearly without implying solo ownership."
+      ],
+      "futureImprovements": [
+        "Move public configuration and secrets fully into environment-managed settings.",
+        "Add production-oriented security hardening before publishing source code.",
+        "Expand automated tests around API serializers and certificate verification flows."
+      ],
+      "diagram": "web-platform"
+    }
+  }
+]

@@ -1,12 +1,12 @@
 "use client";
 
-import { Loader2, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { submitContact } from "@/lib/api";
 import { type Locale } from "@/lib/locale";
+import { defaultProfile } from "@/lib/site";
 import { getUiCopy } from "@/lib/ui-copy";
 
 const initialState = {
@@ -19,11 +19,10 @@ const initialState = {
 export function ContactForm({ locale = "en" }: { locale?: Locale }) {
   const copy = getUiCopy(locale).contactForm;
   const [form, setForm] = useState(initialState);
-  const [formStartedAt] = useState(() => Date.now());
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!form.name.trim()) {
@@ -44,22 +43,11 @@ export function ContactForm({ locale = "en" }: { locale?: Locale }) {
       return;
     }
 
-    setStatus("loading");
-    setFeedback("");
-
-    try {
-      const response = await submitContact({
-        ...form,
-        companyWebsite: "",
-        formStartedAt
-      });
-      setStatus("success");
-      setFeedback(response.message);
-      setForm(initialState);
-    } catch (error) {
-      setStatus("error");
-      setFeedback(error instanceof Error ? error.message : copy.sendError);
-    }
+    const body = `${form.message.trim()}\n\n— ${form.name.trim()} <${form.email.trim()}>`;
+    const params = new URLSearchParams({ subject: form.subject.trim(), body });
+    window.location.href = `mailto:${defaultProfile.email}?${params.toString().replace(/\+/g, "%20")}`;
+    setStatus("success");
+    setFeedback(copy.mailClientOpened);
   }
 
   return (
@@ -86,15 +74,6 @@ export function ContactForm({ locale = "en" }: { locale?: Locale }) {
           />
         </label>
       </div>
-      <input
-        type="text"
-        name="companyWebsite"
-        defaultValue=""
-        tabIndex={-1}
-        autoComplete="off"
-        className="hidden"
-        aria-hidden="true"
-      />
       <label className="mt-4 block space-y-2 text-sm">
         <span className="text-muted-foreground">{copy.subject}</span>
         <Input
@@ -124,8 +103,8 @@ export function ContactForm({ locale = "en" }: { locale?: Locale }) {
         >
           {feedback || copy.idleText}
         </p>
-        <Button type="submit" disabled={status === "loading"}>
-          {status === "loading" ? <Loader2 className="animate-spin" size={17} /> : <Send size={17} />}
+        <Button type="submit">
+          <Send size={17} />
           {copy.send}
         </Button>
       </div>

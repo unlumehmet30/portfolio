@@ -7,8 +7,6 @@ import type { Post } from "@/types/content";
 
 const copy = getUiCopy("en").notes;
 
-export const revalidate = 60;
-
 export const metadata: Metadata = {
   title: copy.metadataTitle,
   description: copy.metadataDescription

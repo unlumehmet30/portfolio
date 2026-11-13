@@ -1,0 +1,110 @@
+{
+  "summary": "3rd-year Electronics and Communication Engineering student at Istanbul Technical University building ML/AI systems: real-time UAV perception (YOLOv8, RAFT/EKF visual odometry) as Team Captain for TEKNOFEST Havacılıkta Yapay Zeka, and two-stage LightGBM forecasting of intermittent demand for a 20K+ SKU spare-parts catalogue. Focused on real-time inference, model evaluation, and performance optimization, with monitoring and production-readiness experience.",
+  "experience": [
+    {
+      "role": "Full-Stack / AI Engineer",
+      "organization": "Vcamp",
+      "period": "Dec 2025 - Present",
+      "highlights": [
+        "Served as Team Captain for the TEKNOFEST Havacılıkta Yapay Zeka (AI in Aviation) Competition, defining the system architecture and coordinating the object-detection, position-estimation, and reference-object-matching workstreams.",
+        "Designed a hybrid visual odometry pipeline combining ORB/optical flow and RAFT-based motion estimation with confidence-aware arbitration and iterative EKF fusion, achieving approximately 7.5 FPS on custom drone footage.",
+        "Built an RGB/thermal aerial reference-object matching pipeline and fine-tuned YOLOv8 over seven training rounds to reach 0.749 mAP50 at approximately 36 ms per frame inference.",
+        "Led the four-class UAV object-detection subsystem, including dataset architecture, training strategy, and validation criteria, on a dataset containing more than 35K images.",
+        "Designed the competition's unified real-time client, integrating the three subsystems behind a modular inference pipeline with a competition-compliant JSON submission format."
+      ]
+    },
+    {
+      "role": "AI Specialist Assistant",
+      "organization": "Ravelos",
+      "period": "Dec 2025 - Oct 2026",
+      "highlights": [
+        "Built an intermittent-demand forecasting system for a 20K+ SKU spare-parts catalogue with approximately 1.4M transaction lines and 94% zero cells at daily grain.",
+        "Improved forecast accuracy from 14% to approximately 55% across 26 benchmarked variants, reducing WAPE to 0.543 from a 0.628 last-year baseline.",
+        "Designed a two-stage LightGBM hurdle architecture for demand occurrence and non-zero quantity, with SBC-adaptive thresholds and leakage-safe recursive multi-step inference.",
+        "Engineered approximately 25 features, including Croston, ADI/CV², rolling and lag windows, and zero-run streaks; used Numba JIT, cutoff-masked feature generation, and fold-local SBC labels.",
+        "Built evaluation and monitoring infrastructure with monthly vintage fact tables, FastAPI, Grafana dashboards, restatement detection, and champion/challenger shadow evaluation.",
+        "Optimized the multi-model pipeline with joblib process parallelism, float32 downcasting, vectorized rank/correlation computation, and O(1) lookup maps replacing O(P) scans, with parity tests preserving output."
+      ]
+    },
+    {
+      "role": "AI Systems & Performance Engineering",
+      "organization": "TUARIQ",
+      "period": "Sep 2026 - Present",
+      "highlights": [
+        "Audited production readiness across backups, migrations, deployment, health checks, testing, dependency consistency, and the repository's handling of secrets and large artifacts.",
+        "Developing a phased, test-gated improvement plan covering reliable backups, migration recovery, deployment rollback, meaningful readiness checks, CI testing, and observability.",
+        "Analyzed synchronous API workflows that block a single-worker API for 4–65 seconds per file; scoped worker/queue-based execution and measurement as performance priorities.",
+        "Documented repository and service refactoring priorities, keeping behavior-changing work separate from hygiene and structural improvements."
+      ]
+    },
+    {
+      "role": "Data Analytics Intern",
+      "organization": "Sompo Sigorta",
+      "period": "Jul 2026 - Aug 2026",
+      "highlights": [
+        "Built an end-to-end cross-sell propensity pipeline in KNIME with period-aware data-quality screening, rolling quantile binning against the previous month's breakpoints, and target-preserving category consolidation.",
+        "Benchmarked decision tree, GBM, and WoE-based logistic regression under forward/backward feature selection and Gini elimination, evaluated across separate time windows.",
+        "Developed a loss-adjuster amount regression under strict leakage control using time-ordered splits and train-only imputation; handled a heavily right-skewed target via log transformation, reducing skewness from 5.45 to 0.26, and evaluated Tweedie, Gamma, Poisson, and two-stage hurdle architectures.",
+        "Componentized the pipeline into a single parameter-driven run generalizable to new datasets and authored internal reports on workflow automation tooling, including n8n and KNIME Business Hub, covering KVKK, access control, and deployment."
+      ]
+    }
+  ],
+  "projects": [
+    "Bilirkişi — Auditable AI Analytics Platform: Designed a two-plane analytics architecture that separates LLM-assisted reasoning from deterministic execution, keeping numerical calculations, validation, and decisions reproducible. Implemented provenance controls, including data-quality gates, typed contracts, deterministic command execution, structured fact references, and hash-based audit evidence for analytical results.",
+    "SketchMind — Multimodal AI, Mobile, and Embedded Companion System: Built a Flutter application integrating AI-assisted storytelling, speech interfaces, Firebase services, and a server-side proxy that keeps API credentials out of the client. Designed real-time mobile-to-ESP32 companion communication through mDNS discovery and WebSockets, supported by firmware, a local simulator, and automated tests. Additional projects and technical work: www.unlumehmet.com"
+  ],
+  "education": [
+    {
+      "degree": "B.Sc. in Electronics and Communication Engineering (GPA: 3.29/4.00)",
+      "school": "Istanbul Technical University (ITU)",
+      "period": "Expected Graduation: 2028"
+    }
+  ],
+  "skills": [
+    "Machine Learning",
+    "Deep Learning",
+    "Computer Vision",
+    "Time-Series Forecasting",
+    "Intermittent Demand Forecasting",
+    "Natural Language Processing",
+    "MLOps",
+    "Real-Time Inference",
+    "Performance Engineering",
+    "Model Evaluation",
+    "Production Readiness",
+    "Monitoring"
+  ],
+  "tools": [
+    "Python",
+    "C",
+    "C#",
+    "Dart",
+    "SQL",
+    "PyTorch",
+    "TensorFlow",
+    "Scikit-learn",
+    "LightGBM",
+    "NumPy",
+    "Pandas",
+    "FastAPI",
+    "OpenCV",
+    "Numba",
+    "PostgreSQL",
+    "Grafana",
+    "Flutter",
+    "Firebase",
+    "Git",
+    "Linux",
+    "KNIME"
+  ],
+  "researchInterests": [],
+  "certifications": [
+    "Deep Learning Algorithm with PyTorch - BTK Akademi, June 2025",
+    "Natural Language Processing with Deep Learning - BTK Akademi, July 2025"
+  ],
+  "contact": {
+    "email": "unlu.mehmett1@gmail.com",
+    "githubUrl": "https://github.com/unlumehmet30",
+    "linkedinUrl": "https://www.linkedin.com/in/unlumehmett1"
+  }
+}

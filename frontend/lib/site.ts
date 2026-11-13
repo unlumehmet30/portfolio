@@ -1,7 +1,7 @@
 import type { Profile } from "@/types/content";
 import { localizePath, type Locale } from "@/lib/locale";
 
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://unlumehmet.com";
 
 export const defaultProfile: Profile = {
   name: "Mehmet Ünlü",

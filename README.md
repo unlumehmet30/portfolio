@@ -2,6 +2,30 @@
 
 Professional portfolio for Mehmet Ünlü, built as a split frontend/backend monorepo.
 
+## Static Site (current deployment)
+
+The live site at `https://unlumehmet.com` is a fully static Next.js export hosted on
+GitHub Pages. The backend, admin panel, and DigitalOcean Droplet are no longer used.
+
+- Content lives in `frontend/content/*.json` (profile, projects, posts, resume).
+- Uploaded images and files live in `frontend/public/api/uploads/`, so existing
+  `/api/uploads/...` URLs keep working.
+- Edit the JSON or add files, then push to `main`; `.github/workflows/deploy-pages.yml`
+  builds `frontend/out` and deploys it.
+- The contact form opens the visitor's email app via `mailto:` instead of storing messages.
+- `frontend/scripts/export-content.mjs` re-snapshots content from a running backend
+  (`node frontend/scripts/export-content.mjs https://host`), if the backend is ever revived.
+
+Local preview:
+
+```bash
+npm install
+npm run build --workspace frontend
+npx serve frontend/out
+```
+
+The sections below describe the original frontend/backend setup.
+
 ## Architecture
 
 ```txt

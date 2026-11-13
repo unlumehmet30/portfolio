@@ -116,7 +116,7 @@ type UiCopy = {
     nameRequired: string;
     invalidEmail: string;
     minMessage: string;
-    sendError: string;
+    mailClientOpened: string;
     idleText: string;
     send: string;
   };
@@ -323,8 +323,8 @@ const uiCopy: Record<Locale, UiCopy> = {
       nameRequired: "Name is required.",
       invalidEmail: "Please enter a valid email address.",
       minMessage: "Message must be at least 10 characters.",
-      sendError: "Could not send your message.",
-      idleText: "I usually reply from email after seeing the message here.",
+      mailClientOpened: "Your email app should open with the message ready to send.",
+      idleText: "Sending opens your email app with the message filled in.",
       send: "Send message"
     },
     resume: {
@@ -530,8 +530,8 @@ const uiCopy: Record<Locale, UiCopy> = {
       nameRequired: "İsim zorunludur.",
       invalidEmail: "Geçerli bir e-posta adresi gir.",
       minMessage: "Mesaj en az 10 karakter olmalı.",
-      sendError: "Mesaj gönderilemedi.",
-      idleText: "Mesajı gördükten sonra genelde e-posta ile dönüş yapıyorum.",
+      mailClientOpened: "E-posta uygulaman mesaj hazır şekilde açılmış olmalı.",
+      idleText: "Gönder'e basınca e-posta uygulaman mesaj doldurulmuş şekilde açılır.",
       send: "Mesaj gönder"
     },
     resume: {

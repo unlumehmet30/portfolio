@@ -27,20 +27,6 @@ function getDownloadName(file: PostFile) {
   return file.title.toLowerCase().endsWith(extension) ? file.title : `${file.title}${extension}`;
 }
 
-function getDownloadUrl(file: PostFile) {
-  if (!file.url.startsWith("/api/uploads/post-files/")) {
-    return file.url;
-  }
-
-  const filename = file.url.split("/").pop();
-
-  if (!filename) {
-    return file.url;
-  }
-
-  return `/api/downloads/post-files/${filename}?name=${encodeURIComponent(file.title)}`;
-}
-
 export function NoteFilePreview({ files, locale = "en" }: { files: PostFile[]; locale?: Locale }) {
   if (!files.length) {
     return null;
@@ -86,7 +72,7 @@ export function NoteFilePreview({ files, locale = "en" }: { files: PostFile[]; l
               </a>
               <a
                 className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
-                href={getDownloadUrl(file)}
+                href={file.url}
                 download={getDownloadName(file)}
               >
                 <Download size={16} aria-hidden="true" />

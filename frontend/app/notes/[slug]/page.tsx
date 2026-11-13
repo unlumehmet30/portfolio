@@ -13,8 +13,6 @@ import type { Post } from "@/types/content";
 
 const copy = getUiCopy("en").notes;
 
-export const revalidate = 60;
-
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
